@@ -1,7 +1,22 @@
-from django.views.generic.edit import CreateView
+from django.views.generic import  CreateView, ListView, DetailView
 from models import Hostings
+from .forms import HostingsForm
 
-class HostingsCreateView(CreateView):
+class HostingCreateView(CreateView):
     model = Hostings
-    fields = '__all__'
+    form_class = HostingsForm
     template_name = 'hostings_create.html'
+
+
+class HostingListView(ListView):
+    model = Hostings
+    template_name = "hosting_list.html"
+
+class HostingMapView(ListView):
+    model = Hostings
+    template_name = "hosting_map.html"
+
+
+class HostingDetailView(DetailView):
+    model = Hostings
+    template_name = "hosting_detail.html"

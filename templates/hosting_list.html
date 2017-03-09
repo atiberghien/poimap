@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Listes des hébergeurs{% endblock %}
+
+{% block content %}
+
+<h1 class="text-center">Listes des hébergeurs</h1>
+<ul>
+{% for hosting in object_list %}
+<li>
+    <a href="{% url 'hosting_detail' hosting.id %}">{{hosting.name}}</a>
+</li>
+{%endfor%}
+</ul>
+
+{% endblock %}
