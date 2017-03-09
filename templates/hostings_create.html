@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Hébergeur{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+    <fieldset>
+        <legend class="text-center">Création d'un Adhérent</legend>
+            <div class="raw">
+                <div class="col-md-6 col-md-offset-3">
+                    <form class="" action="#" method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <input type="submit" name="name" value="Créer">
+                    </form>
+                </div>
+            </div>
+    </fieldset>
+</div>
+
+{% endblock %}

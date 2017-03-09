@@ -108,6 +108,7 @@ class Sleeping(models.Model):
     sleeping_type = models.ForeignKey(SleepingType)
     name = models.CharField(max_length=30)      # nom ou numero du couchage
     places = models.FloatField(null=True, blank=True)
+    comments = models.TextField()       # lits kitchnette micro ondes bouilloire cafetiere ...
     wc_where = models.BooleanField(default=True)     # true = dans la chambre
     SANITATION_CHOICES = (
     ('1', 'Douche'),
@@ -120,7 +121,6 @@ class Sleeping(models.Model):
         default=1,
     )
     sanitation_where = models.BooleanField(default=True)     # true = dans la chambre
-    comments = models.TextField()       # kitchnette micro ondes bouilloire cafetiere ...
     RESPONSES_CHOICES = (
     ('1', 'Oui'),
     ('2', 'Non'),

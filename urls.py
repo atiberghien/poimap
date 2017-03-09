@@ -1,10 +1,11 @@
 from django.conf.urls import url
+from django.conf.urls.static import static
+from django.conf import settings
 
 from . import views
+from views import *
 
 urlpatterns = [
-    # url(r'^articles/2003/$', views.special_case_2003),
-    # url(r'^articles/([0-9]{4})/$', views.year_archive),
-    # url(r'^articles/([0-9]{4})/([0-9]{2})/$', views.month_archive),
-    # url(r'^articles/([0-9]{4})/([0-9]{2})/([0-9]+)/$', views.article_detail),
-]
+    url(r'^create/$', HostingsCreateView.as_view(), name='hostings_create'),
+
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
