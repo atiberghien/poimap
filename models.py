@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
 from django.db import models
-from django.contrib.gis.db import models
+from django.contrib.gis.db import models as gismodels
 from django.contrib.gis.db.models import PointField
 from filer.models import File
 from filer.fields.image import FilerImageField
@@ -20,7 +20,7 @@ class PaymentType(models.Model):
         return self.label
 
 
-class Hostings(models.Model):
+class Hostings(gismodels.Model):
     RESPONSES_CHOICES = (
     ('1', 'Oui'),
     ('2', 'Non'),
@@ -36,7 +36,8 @@ class Hostings(models.Model):
     fax = models.CharField(max_length=15, blank=True)
     email = models.CharField(max_length=150, blank=True)
     web = models.CharField(max_length=150, blank=True)
-    geo_coordinates = models.PointField(null=True, blank=True)
+    geom = gismodels.PointField(null=True, blank=True)
+    objects = gismodels.GeoManager()
     description = models.TextField(blank=True)
     media = FilerImageField(null=True, blank=True,)
     food = models.BooleanField(default=False) # restauration

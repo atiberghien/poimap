@@ -1,9 +1,25 @@
 {% extends "base.html" %}
+{% load leaflet_tags %}
 
 {% block title %}Carte des hébergeurs{% endblock %}
 
 {% block content %}
 
 <h1 class="text-center">Carte des hébergeurs</h1>
+
+{% leaflet_map "main" callback="main_map_init" %}
+
+<script type="text/javascript">
+
+    function main_map_init (map, options) {
+
+        var layer = L.geoJson();
+        map.addLayer(layer);
+        $.getJSON("{% url 'data' %}", function (data) {
+            layer.addData(data);
+        });
+}
+</script>
+
 
 {% endblock %}

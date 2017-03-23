@@ -7,7 +7,6 @@ class HostingCreateView(CreateView):
     form_class = HostingsForm
     template_name = 'hostings_create.html'
 
-
 class HostingListView(ListView):
     model = Hostings
     template_name = "hosting_list.html"
@@ -15,7 +14,6 @@ class HostingListView(ListView):
 class HostingMapView(ListView):
     model = Hostings
     template_name = "hosting_map.html"
-
 
 class HostingDetailView(DetailView):
     model = Hostings
