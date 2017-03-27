@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Votre itinéraire{% endblock %}
+
+{% block content %}
+
+<h1 class="text-center">Préparer son itinéraire</h1>
+
+
+    <form class="" action="index.html" method="post">
+        <div class="">
+            <label for="">Point de départ</label>
+            <select class="" name="">
+                {% for base in bases %}
+                <option value="">{{ base.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="">
+            <label for="">Sens de l'itinéraire</label>
+            Nord Sud <input type="radio" name="sens" value="NS" checked >
+            Sud Nord <input type="radio" name="sens" value="SN" >
+        </div>
+        <div class="">
+            <label for="">Jours de marche</label>
+            <input type="text" name="" value="">
+        </div>
+        <div class="">
+            <label for="">Kms journaliers</label>
+            <input type="text" name="" value="">
+        </div>
+        <div class="">
+            <label for="">Point d'arrivée</label>
+            <select class="" name="">
+                {% for base in bases %}
+                <option value="">{{ base.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </form>
+
+
+{% endblock %}
