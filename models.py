@@ -1,5 +1,4 @@
 from django.db import models
-from filer.models import File
 from django.contrib.gis.db import models as gismodels
 from filer.fields.image import FilerImageField
 
