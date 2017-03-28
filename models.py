@@ -1,6 +1,11 @@
 from django.db import models
 from django.contrib.gis.db import models as gismodels
 from filer.fields.image import FilerImageField
+class POIType(models.Model):  # POI = Point Of Interest
+    label = models.CharField(max_length=30)         # hotel gite chambre_hote camping autres
+
+    def __unicode__(self):
+        return self.label
 
 
 # Create your models here.
