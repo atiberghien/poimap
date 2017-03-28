@@ -6,12 +6,7 @@ from django.contrib.gis.db.models import PointField
 from filer.models import File
 from filer.fields.image import FilerImageField
 
-# Create your models here.
-class HostingType(models.Model):
-    label = models.CharField(max_length=30)         # hotel gite chambre_hote camping autres
-
-    def __unicode__(self):
-        return self.label
+from itinerary.models import POIType
 
 class PaymentType(models.Model):
     label = models.CharField(max_length=30)         # hotel gite chambre_hote camping autres
@@ -21,12 +16,14 @@ class PaymentType(models.Model):
 
 
 class Hostings(gismodels.Model):
+    
     RESPONSES_CHOICES = (
     ('1', 'Oui'),
     ('2', 'Non'),
     ('3', 'A la demande'),
     )
-    hosting_type = models.ForeignKey(HostingType)
+
+    hosting_type = models.ForeignKey(POIType)
     accepted_payments = models.ManyToManyField(PaymentType)
     name = models.CharField(max_length=100)
     address = models.CharField(max_length=250)

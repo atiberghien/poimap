@@ -1,12 +1,14 @@
 from django import forms
-from hostings.models import Hostings, HostingType, PaymentType
+from hostings.models import Hostings, PaymentType
+from itinerary.models import POIType
+
 
 class HostingsForm(forms.ModelForm):
     class Meta:
         model = Hostings
         exclude = ['geo_coordinates', 'media']
 
-    hosting_type = forms.ModelChoiceField(queryset=HostingType.objects.all(), label=u'Hosting type')
+    hosting_type = forms.ModelChoiceField(queryset=POIType.objects.all(), label=u'Hosting type')
     name = forms.CharField(max_length=100, label=u'Name')
     address = forms.CharField(max_length=250, label=u'Address')
     zipcode = forms.CharField(max_length=50, label=u'Zipcode')
