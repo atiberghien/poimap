@@ -4,7 +4,25 @@ from leaflet.admin import LeafletGeoAdmin
 
 
 class POIAddressAdmin(LeafletGeoAdmin):
-    pass
+    fieldsets = (
+        (None, {
+            'classes': ('address',),
+            'fields': ('address',
+                      ('zipcode', "city", 'country'),)
+        }),
+        (None, {
+            'classes': ('location',),
+            'fields': ('geom', ),
+        }),
+    )
+
+    class Media:
+        css = {
+            "all" : ('itinerary/css/itinerary_form.css',),
+        }
+        js = (
+            'itinerary/js/poi_form.js',
+        )
 
 
 admin.site.register(POIAddress, POIAddressAdmin)
