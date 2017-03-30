@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.gis.db import models as gismodels
 from filer.fields.image import FilerImageField
 from django_countries.fields import CountryField
+from polymorphic.models import PolymorphicModel
 
 
 class POIType(models.Model):  # POI = Point Of Interest
@@ -11,6 +12,10 @@ class POIType(models.Model):  # POI = Point Of Interest
         return self.label
 
 
+class POI(PolymorphicModel):
+    name = models.CharField(max_length=50)         # nom du point de depart - Il pourrait aussi etre un hebergement
+    description = models.TextField(blank=True)
+    type = models.ForeignKey(POIType)
 
 
 class POIAddress(gismodels.Model):
@@ -18,6 +23,7 @@ class POIAddress(gismodels.Model):
     zipcode = models.CharField(max_length=10)
     city = models.CharField(max_length=300)
     country = CountryField()
+    poi = models.ForeignKey(POI)
     geom = gismodels.PointField()
 
 # Create your models here.
