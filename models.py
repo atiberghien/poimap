@@ -17,6 +17,10 @@ class POI(PolymorphicModel):
     description = models.TextField(blank=True)
     type = models.ForeignKey(POIType)
 
+    @property
+    def address(self):
+        return self.poiaddress_set.first()
+
 
 class POIAddress(gismodels.Model):
     address = models.CharField(max_length=250)

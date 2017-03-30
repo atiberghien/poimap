@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load leaflet_tags static %}
+
+{% block title %}Carte des hébergeurs{% endblock %}
+
+{% block content %}
+    <h1 class="text-center">Carte des hébergeurs</h1>
+    <div id='map'>
+        {% leaflet_map "main" callback="main_map_init" %}
+    </div>
+    <script src="{% static 'bower_components/leaflet-gpx/gpx.js' %}" charset="utf-8"></script>
+    <script type="text/javascript">
+    function main_map_init (map, options) {
+
+        var layer = L.geoJson();
+        map.addLayer(layer);
+
+        var gpx = '{% static 'urbain_v.gpx' %}'; // URL to your GPX file or the GPX itself
+        new L.GPX(gpx, {
+            async: true,
+            marker_options: {
+            startIconUrl: "{% static 'bower_components/leaflet-gpx/pin-icon-start.png' %}",
+            endIconUrl: "{% static 'bower_components/leaflet-gpx/pin-icon-end.png' %}",
+            shadowUrl: "{% static 'bower_components/leaflet-gpx/pin-shadow.png' %}",
+          }
+        }).on('loaded', function(e) {
+          map.fitBounds(e.target.getBounds());
+        }).addTo(map);
+
+        {% for poi in object_list %}
+        L.marker([{{poi.address.geom.coords.1|stringformat:"f"}}, {{poi.address.geom.coords.0|stringformat:"f"}}]).addTo(map);
+        {% endfor %}
+
+
+    }</script>
+{% endblock %}
