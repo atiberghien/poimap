@@ -4,19 +4,21 @@ from filer.fields.image import FilerImageField
 from django_countries.fields import CountryField
 
 
-class POIAddress(gismodels.Model):
-    address = models.CharField(max_length=250)
-    zipcode = models.CharField(max_length=10)
-    city = models.CharField(max_length=300)
-    country = CountryField()
-    geom = gismodels.PointField()
-
 class POIType(models.Model):  # POI = Point Of Interest
     label = models.CharField(max_length=30)         # hotel gite chambre_hote camping autres
 
     def __unicode__(self):
         return self.label
 
+
+
+
+class POIAddress(gismodels.Model):
+    address = models.CharField(max_length=250)
+    zipcode = models.CharField(max_length=10)
+    city = models.CharField(max_length=300)
+    country = CountryField()
+    geom = gismodels.PointField()
 
 # Create your models here.
 class Base(models.Model):
