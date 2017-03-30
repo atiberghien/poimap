@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.gis import admin
 from models import Hostings, PaymentType, OpeningDate, Contact, SleepingType, Sleeping
+from itinerary.admin import POIAddressInlineAdmin
 
 from leaflet.admin import LeafletGeoAdmin
 
@@ -14,9 +15,10 @@ class ContactInlineAdmin(admin.TabularInline):
     model = Contact
     extra = 1
 
+
 class HostingsAdmin(LeafletGeoAdmin):
-    list_display = ['name','zipcode','city']
-    inlines = (SleepingInlineAdmin, ContactInlineAdmin)
+    list_display = ['name',]
+    inlines = (POIAddressInlineAdmin, SleepingInlineAdmin, ContactInlineAdmin)
 
 
 admin.site.register(Hostings, HostingsAdmin)

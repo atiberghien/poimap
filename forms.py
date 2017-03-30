@@ -8,17 +8,17 @@ class HostingsForm(forms.ModelForm):
         model = Hostings
         exclude = ['geo_coordinates', 'media']
 
-    hosting_type = forms.ModelChoiceField(queryset=POIType.objects.all(), label=u'Hosting type')
+    # hosting_type = forms.ModelChoiceField(queryset=POIType.objects.all(), label=u'Hosting type')
     name = forms.CharField(max_length=100, label=u'Name')
-    address = forms.CharField(max_length=250, label=u'Address')
-    zipcode = forms.CharField(max_length=50, label=u'Zipcode')
-    city = forms.CharField(max_length=300, label=u'City')
+    # address = forms.CharField(max_length=250, label=u'Address')
+    # zipcode = forms.CharField(max_length=50, label=u'Zipcode')
+    # city = forms.CharField(max_length=300, label=u'City')
     phone = forms.CharField(max_length=15, required=False, label=u'Phone')
     fax = forms.CharField(max_length=15, required=False, label=u'Fax')
     email = forms.CharField(max_length=150, required=False, label=u'Email')
     web = forms.CharField(max_length=150, required=False, label=u'Web')
     # geo_coordinates = forms.PointField(required=False, label=u'Geo coordinates')
-    description = forms.CharField(required=False, label=u'Description')
+    # description = forms.CharField(required=False, label=u'Description')
     # media = forms.AdminImageFormField(required=False, label=u'Media')
     food = forms.BooleanField(initial=False, required=False, label=u'Food')
     picnic = forms.TypedChoiceField(initial=1, label=u'Picnic')

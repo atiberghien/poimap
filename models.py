@@ -6,7 +6,7 @@ from django.contrib.gis.db.models import PointField
 from filer.models import File
 from filer.fields.image import FilerImageField
 
-from itinerary.models import POIType
+from itinerary.models import POIType, POI
 
 class PaymentType(models.Model):
     label = models.CharField(max_length=30)         # hotel gite chambre_hote camping autres
@@ -15,27 +15,28 @@ class PaymentType(models.Model):
         return self.label
 
 
-class Hostings(gismodels.Model):
-    
+class Hostings(POI):
+# class Hostings(gismodels.Model):
+
     RESPONSES_CHOICES = (
     ('1', 'Oui'),
     ('2', 'Non'),
     ('3', 'A la demande'),
     )
 
-    hosting_type = models.ForeignKey(POIType)
+    # hosting_type = models.ForeignKey(POIType)
     accepted_payments = models.ManyToManyField(PaymentType)
-    name = models.CharField(max_length=100)
-    address = models.CharField(max_length=250)
-    zipcode = models.CharField(max_length=50)
-    city = models.CharField(max_length=300)
+    # name = models.CharField(max_length=100)
+    # address = models.CharField(max_length=250)
+    # zipcode = models.CharField(max_length=50)
+    # city = models.CharField(max_length=300)
     phone = models.CharField(max_length=15, blank=True)
     fax = models.CharField(max_length=15, blank=True)
     email = models.CharField(max_length=150, blank=True)
     web = models.CharField(max_length=150, blank=True)
-    geom = gismodels.PointField(null=True, blank=True)
-    objects = gismodels.GeoManager()
-    description = models.TextField(blank=True)
+    # geom = gismodels.PointField(null=True, blank=True)
+    # objects = gismodels.GeoManager()
+    # description = models.TextField(blank=True)
     media = FilerImageField(null=True, blank=True,)
     food = models.BooleanField(default=False) # restauration
     picnic = models.CharField(
@@ -63,7 +64,7 @@ class Hostings(gismodels.Model):
     max_price = models.FloatField(null=True, blank=True)
 
     def __unicode__(self):
-        return '%s, %s, %s' % (self.name, self.zipcode, self.city)
+        return '%s' % (self.name)
 
 
 class OpeningDate(models.Model):
