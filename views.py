@@ -11,10 +11,6 @@ class HostingListView(ListView):
     model = Hostings
     template_name = "hosting_list.html"
 
-class HostingMapView(ListView):
-    model = Hostings
-    template_name = "hosting_map.html"
-
 class HostingDetailView(DetailView):
     model = Hostings
     template_name = "hosting_detail.html"
