@@ -1,36 +1,122 @@
-{% extends "base.html" %}
-{% load leaflet_tags static %}
-
-{% block title %}Carte des hébergeurs{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% load leaflet_tags static %} {% block title %}Carte des hébergeurs{% endblock %} {% block main %}
+<div class="container-fluid">
     <h1 class="text-center">Carte des hébergeurs</h1>
-    <div id='map'>
-        {% leaflet_map "main" callback="main_map_init" %}
+    <div class="row">
+        <div class="col-md-8">
+            <div id='map'>
+                {% leaflet_map "main" callback="main_map_init" %}
+            </div>
+        </div>
+        <div class="col-md-4">
+            <table>
+                <tr>
+                    <td>Départ</td>
+                    <td id="start">
+                        <input type="hidden" name="start"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Arrivé</td>
+                    <td id="end">
+                        <input type="hidden" name="end"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Distance totale</td>
+                    <td id="distance"></td>
+                </tr>
+                <tr>
+                    <td>Jours de marche</td>
+                    <td>
+                        <input id="steps" type="number" name="steps" value="">
+                    </td>
+                </tr>
+                <tr>
+                    <td>Kms journaliers</td>
+                    <td id="end">
+                        <input type="number" name="kmPerDay" value="">
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2"><button id="ok" type="button" name="button">OK</button></td>
+                </tr>
+            </table>
+        </div>
     </div>
-    <script src="{% static 'bower_components/leaflet-gpx/gpx.js' %}" charset="utf-8"></script>
-    <script type="text/javascript">
-    function main_map_init (map, options) {
+</div>
+<script src="{% static 'bower_components/turfjs/turf.min.js' %}" charset="utf-8"></script>
+<script src="{% static 'bower_components/togeojson/togeojson.js' %}" charset="utf-8"></script>
+<script type="text/javascript">
+    function main_map_init(map, options) {
+        var startPoint = null;
+        var endPoint = null;
+        var customPath = null;
 
-        var layer = L.geoJson();
-        map.addLayer(layer);
+        var gpxFile = '{% static 'urbain_v.gpx' %}'; // URL to your GPX file or the GPX itself
 
-        var gpx = '{% static 'urbain_v.gpx' %}'; // URL to your GPX file or the GPX itself
-        new L.GPX(gpx, {
-            async: true,
-            marker_options: {
-            startIconUrl: "{% static 'bower_components/leaflet-gpx/pin-icon-start.png' %}",
-            endIconUrl: "{% static 'bower_components/leaflet-gpx/pin-icon-end.png' %}",
-            shadowUrl: "{% static 'bower_components/leaflet-gpx/pin-shadow.png' %}",
-          }
-        }).on('loaded', function(e) {
-          map.fitBounds(e.target.getBounds());
-        }).addTo(map);
+        $.ajax(gpxFile).done(function(gpx) {
+            var geojson = toGeoJSON.gpx((new DOMParser()).parseFromString(gpx, 'text/xml'), null, 4);
+            var path = L.geoJSON(geojson).addTo(map);
+            map.fitBounds(path.getBounds());
+            path.on("click", function(me) {
+                $.ajax({
+                   dataType: "json",
+                   url: "https://maps.googleapis.com/maps/api/geocode/json",
+                   data: {
+                       latlng : me.latlng.lat+","+me.latlng.lng,
+                       language : 'fr',
+                       location_type : 'GEOMETRIC_CENTER',
+                       key : "AIzaSyAThNRSpWOhnA2EGSeshFqLolrTPQx1hjo"
+                   },
+                   success: function(data){
+                       if(data.status == "OK"){
+                           if(data.results.length > 0) {
+                               var poiResult = data.results[0]
+                               if(startPoint == null) {
+                                   startPoint = L.marker([me.latlng.lat, me.latlng.lng]).addTo(map);
+                                   $("#start").text(poiResult.formatted_address);
+                               }
+                               else if(endPoint == null){
+                                   endPoint = L.marker([me.latlng.lat, me.latlng.lng]).addTo(map);
+                                   $("#end").text(poiResult.formatted_address);
+
+                                   var sliced = turf.lineSlice(
+                                           startPoint.toGeoJSON(),
+                                           endPoint.toGeoJSON(),
+                                           path.toGeoJSON().features[0]);
+
+                                   customPath = L.geoJSON(sliced, {
+                                        style: {
+                                            color : "#FF0000"
+                                        }
+                                    }).addTo(map);
+                                    map.fitBounds(customPath.getBounds());
+
+                                   var length = turf.lineDistance(sliced, 'kilometers');
+                                   $("#distance").text(length.toFixed(2));
+                               }
+                           }
+                       }
+                   }
+               });
+            });
+            $("#ok").click(function(){
+                var p = customPath == null ? path : customPath
+                var geop = p.toGeoJSON().features[0]
+                var steps = parseInt($("#steps").val())
+                var length = turf.lineDistance(geop, 'kilometers');
+                step_length = length/steps;
+                for (var i = 1; i <= steps; i++) {
+                    var along = turf.along(geop, step_length * i, 'kilometers');
+                    L.geoJSON(along).addTo(map);
+                }
+            })
+        });
 
         {% for poi in object_list %}
-        L.marker([{{poi.address.geom.coords.1|stringformat:"f"}}, {{poi.address.geom.coords.0|stringformat:"f"}}]).addTo(map);
+        L.marker([{{poi.address.geom.coords.1|stringformat:"f"}},
+                  {{poi.address.geom.coords.0|stringformat:"f"}}]).addTo(map);
         {% endfor %}
-
-
-    }</script>
+    }
+</script>
 {% endblock %}
