@@ -8,17 +8,19 @@
             </div>
         </div>
         <div class="col-md-4">
-            <table>
+            <table class="table">
                 <tr>
                     <td>Départ</td>
                     <td id="start">
-                        <input type="hidden" name="start"/>
+                        <span class="geo-text"></span>
+                        <input class="geo-info" type="hidden" name="start"/>
                     </td>
                 </tr>
                 <tr>
                     <td>Arrivé</td>
                     <td id="end">
-                        <input type="hidden" name="end"/>
+                        <span class="geo-text"></span>
+                        <input class="geo-info" type="hidden" name="end"/>
                     </td>
                 </tr>
                 <tr>
@@ -33,20 +35,76 @@
                 </tr>
                 <tr>
                     <td>Kms journaliers</td>
-                    <td id="end">
+                    <td>
                         <input type="number" name="kmPerDay" value="">
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="2"><button id="ok" type="button" name="button">OK</button></td>
+                    <td colspan="2">
+                        <button class="btn btn-primary btn-lg" id="ok" type="button" name="button">OK</button>
+                    </td>
                 </tr>
             </table>
         </div>
     </div>
 </div>
+<link rel="stylesheet" href="{% static 'bower_components/Leaflet.awesome-markers/dist/leaflet.awesome-markers.css' %}">
 <script src="{% static 'bower_components/turfjs/turf.min.js' %}" charset="utf-8"></script>
 <script src="{% static 'bower_components/togeojson/togeojson.js' %}" charset="utf-8"></script>
+<script src="{% static 'bower_components/leaflet-knn/leaflet-knn.min.js' %}" charset="utf-8"></script>
+<script src="{% static 'bower_components/Leaflet.awesome-markers/dist/leaflet.awesome-markers.min.js' %}" charset="utf-8"></script>
 <script type="text/javascript">
+    var startIcon = L.AwesomeMarkers.icon({
+        icon: 'flag',
+        markerColor: 'green'
+    });
+    var endIcon = L.AwesomeMarkers.icon({
+          icon: 'flag',
+          markerColor: 'red'
+    });
+
+    function fetchGeoInfo(point, labelId) {
+        $.ajax({
+            dataType: "json",
+            url: "https://maps.googleapis.com/maps/api/geocode/json",
+            data: {
+                latlng : point.getLatLng().lat+","+point.getLatLng().lng,
+                language : 'fr',
+                location_type : 'GEOMETRIC_CENTER',
+                key : "AIzaSyAThNRSpWOhnA2EGSeshFqLolrTPQx1hjo"
+            },
+            success: function(data){
+                if(data.status == "OK"){
+                    if(data.results.length > 0) {
+                        var poiResult = data.results[0];
+                        $(labelId+" span.geo-text").text(poiResult.formatted_address);
+                        $(labelId+" input").val(poiResult.formatted_address).change();
+                    }
+                }
+            }
+        });
+    }
+
+    function applyDragEventListener(map, path, point, markerOptions) {
+        var tempPoint = null
+        point.on('drag', function(e) {
+            if(tempPoint) {
+                map.removeLayer(tempPoint);
+            }
+            var nearest = leafletKnn(path).nearest(e.target.getLatLng(),1)[0];
+            tempPoint = L.marker([nearest.lat, nearest.lon], markerOptions).addTo(map);
+        });
+        point.on('dragstart', function(e) {
+            $(e.target._icon).hide();
+        });
+        point.on('dragend', function(e) {
+            point = tempPoint;
+            map.removeLayer(e.target);
+            applyDragEventListener(map, path, point, markerOptions);
+            fetchGeoInfo(point, markerOptions.labelId)
+        });
+    }
+
     function main_map_init(map, options) {
         var startPoint = null;
         var endPoint = null;
@@ -58,48 +116,45 @@
             var geojson = toGeoJSON.gpx((new DOMParser()).parseFromString(gpx, 'text/xml'), null, 4);
             var path = L.geoJSON(geojson).addTo(map);
             map.fitBounds(path.getBounds());
-            path.on("click", function(me) {
-                $.ajax({
-                   dataType: "json",
-                   url: "https://maps.googleapis.com/maps/api/geocode/json",
-                   data: {
-                       latlng : me.latlng.lat+","+me.latlng.lng,
-                       language : 'fr',
-                       location_type : 'GEOMETRIC_CENTER',
-                       key : "AIzaSyAThNRSpWOhnA2EGSeshFqLolrTPQx1hjo"
-                   },
-                   success: function(data){
-                       if(data.status == "OK"){
-                           if(data.results.length > 0) {
-                               var poiResult = data.results[0]
-                               if(startPoint == null) {
-                                   startPoint = L.marker([me.latlng.lat, me.latlng.lng]).addTo(map);
-                                   $("#start").text(poiResult.formatted_address);
-                               }
-                               else if(endPoint == null){
-                                   endPoint = L.marker([me.latlng.lat, me.latlng.lng]).addTo(map);
-                                   $("#end").text(poiResult.formatted_address);
 
-                                   var sliced = turf.lineSlice(
-                                           startPoint.toGeoJSON(),
-                                           endPoint.toGeoJSON(),
-                                           path.toGeoJSON().features[0]);
+            var coords = geojson.features[0].geometry.coordinates
 
-                                   customPath = L.geoJSON(sliced, {
-                                        style: {
-                                            color : "#FF0000"
-                                        }
-                                    }).addTo(map);
-                                    map.fitBounds(customPath.getBounds());
+            var startPointOptions = {
+                draggable: true,
+                icon : startIcon,
+                labelId : "#start"
+            }
 
-                                   var length = turf.lineDistance(sliced, 'kilometers');
-                                   $("#distance").text(length.toFixed(2));
-                               }
-                           }
-                       }
-                   }
-               });
-            });
+            var endPointOptions = {
+                draggable: true,
+                icon :endIcon,
+                labelId : "#end"
+            }
+
+            startPoint = L.marker([coords[0][1], coords[0][0]], startPointOptions).addTo(map);
+            endPoint = L.marker([coords[coords.length-1][1], coords[coords.length-1][0]], endPointOptions).addTo(map);
+
+            applyDragEventListener(map, path, startPoint, startPointOptions);
+            applyDragEventListener(map, path, endPoint, endPointOptions);
+
+            function computePath(){
+                if(startPoint && endPoint){
+                    var sliced = turf.lineSlice(
+                        startPoint.toGeoJSON(),
+                        endPoint.toGeoJSON(),
+                        path.toGeoJSON().features[0]);
+
+                        var length = turf.lineDistance(sliced, 'kilometers');
+                        $("#distance").text(length.toFixed(2));
+                }
+            }
+
+            $(".geo-info").change(computePath);
+
+            fetchGeoInfo(startPoint, "#start");
+            fetchGeoInfo(endPoint, "#end");
+            computePath();
+
             $("#ok").click(function(){
                 var p = customPath == null ? path : customPath
                 var geop = p.toGeoJSON().features[0]
