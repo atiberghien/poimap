@@ -30,13 +30,13 @@
                 <tr>
                     <td>Jours de marche</td>
                     <td>
-                        <input id="steps" type="number" name="steps" value="">
+                        <input id="steps" type="text" name="steps" value="1" >
                     </td>
                 </tr>
                 <tr>
                     <td>Kms journaliers</td>
                     <td>
-                        <input type="number" name="kmPerDay" value="">
+                        <input id="kmPerDay" type="number" name="kmPerDay" value="">
                     </td>
                 </tr>
                 <tr>
@@ -54,6 +54,16 @@
 <script src="{% static 'bower_components/leaflet-knn/leaflet-knn.min.js' %}" charset="utf-8"></script>
 <script src="{% static 'bower_components/Leaflet.awesome-markers/dist/leaflet.awesome-markers.min.js' %}" charset="utf-8"></script>
 <script type="text/javascript">
+    var originalPath = null
+    var path = null;
+    var startPoint = null;
+    var endPoint = null;
+    var checkpoints = [];
+
+    var _lastParamId = null
+
+    var gpxFile = '{% static 'urbain_v.gpx' %}'; // URL to your GPX file or the GPX itself
+
     var startIcon = L.AwesomeMarkers.icon({
         icon: 'flag',
         prefix : 'fa',
@@ -65,12 +75,12 @@
           markerColor: 'red'
     });
 
-    function fetchGeoInfo(point, labelId) {
+    L.Marker.prototype.fetchGeoInfo = function(labelId) {
         $.ajax({
             dataType: "json",
             url: "https://maps.googleapis.com/maps/api/geocode/json",
             data: {
-                latlng : point.getLatLng().lat+","+point.getLatLng().lng,
+                latlng : this.getLatLng().lat+","+this.getLatLng().lng,
                 language : 'fr',
                 location_type : 'GEOMETRIC_CENTER',
                 key : "AIzaSyAThNRSpWOhnA2EGSeshFqLolrTPQx1hjo"
@@ -80,44 +90,32 @@
                     if(data.results.length > 0) {
                         var poiResult = data.results[0];
                         $(labelId+" span.geo-text").text(poiResult.formatted_address);
-                        $(labelId+" input").val(poiResult.formatted_address).change();
+                        $(labelId+" input").val(poiResult.formatted_address);
                     }
                 }
             }
         });
     }
 
-    function applyDragEventListener(map, path, point, markerOptions) {
-        var tempPoint = null
-        point.on('drag', function(e) {
-            if(tempPoint) {
-                map.removeLayer(tempPoint);
-            }
-            var nearest = leafletKnn(path).nearest(e.target.getLatLng(),1)[0];
-            tempPoint = L.marker([nearest.lat, nearest.lon], markerOptions).addTo(map);
+    L.Marker.prototype.applyDragEventListener = function (currentPath, markerOptions) {
+        this.on('drag', function(e) {
+            var nearest = leafletKnn(currentPath).nearest(e.target.getLatLng(),1)[0];
+            this.setLatLng([nearest.lat, nearest.lon]);
         });
-        point.on('dragstart', function(e) {
-            $(e.target._icon).hide();
-        });
-        point.on('dragend', function(e) {
-            point = tempPoint;
-            map.removeLayer(e.target);
-            applyDragEventListener(map, path, point, markerOptions);
-            fetchGeoInfo(point, markerOptions.labelId)
+        // this.on('dragstart', function(e) {
+        // });
+        this.on('dragend', function(e) {
+            this.fetchGeoInfo(markerOptions.labelId)
         });
     }
 
     function main_map_init(map, options) {
-        var startPoint = null;
-        var endPoint = null;
-        var customPath = null;
-
-        var gpxFile = '{% static 'urbain_v.gpx' %}'; // URL to your GPX file or the GPX itself
-
         $.ajax(gpxFile).done(function(gpx) {
             var geojson = toGeoJSON.gpx((new DOMParser()).parseFromString(gpx, 'text/xml'), null, 4);
-            var path = L.geoJSON(geojson).addTo(map);
-            map.fitBounds(path.getBounds());
+            originalPath = path = L.geoJSON(geojson).addTo(map);
+            map.fitBounds(originalPath.getBounds());
+            map.options.minZoom = map.getZoom();
+            map.dragging.disable();
 
             var coords = geojson.features[0].geometry.coordinates
 
@@ -136,37 +134,72 @@
             startPoint = L.marker([coords[0][1], coords[0][0]], startPointOptions).addTo(map);
             endPoint = L.marker([coords[coords.length-1][1], coords[coords.length-1][0]], endPointOptions).addTo(map);
 
-            applyDragEventListener(map, path, startPoint, startPointOptions);
-            applyDragEventListener(map, path, endPoint, endPointOptions);
+            startPoint.applyDragEventListener(originalPath, startPointOptions);
+            endPoint.applyDragEventListener(originalPath, endPointOptions);
+
+            startPoint.fetchGeoInfo(startPointOptions.labelId)
+            endPoint.fetchGeoInfo(endPointOptions.labelId)
 
             function computePath(){
                 if(startPoint && endPoint){
-                    var sliced = turf.lineSlice(
-                        startPoint.toGeoJSON(),
-                        endPoint.toGeoJSON(),
-                        path.toGeoJSON().features[0]);
+                    var sliced = turf.lineSlice (startPoint.toGeoJSON(), endPoint.toGeoJSON(), originalPath.toGeoJSON().features[0]);
+                    if(path != originalPath) {
+                        map.removeLayer(path)
+                    }
+                    path = L.geoJSON(sliced, { color : 'red'}).addTo(map);
+                    map.fitBounds(path.getBounds());
+                    var length = turf.lineDistance(sliced, 'kilometers');
+                    $("#distance").text(length.toFixed(2));
 
-                        var length = turf.lineDistance(sliced, 'kilometers');
-                        $("#distance").text(length.toFixed(2));
+                    $(_lastParamId).keyup()
+                }
+            }
+            startPoint.on('dragend', computePath);
+            endPoint.on('dragend', computePath);
+
+            function updateCheckPoints(steps, stepLength) {
+                for (var i = 0; i < checkpoints.length; i++) {
+                    map.removeLayer(checkpoints[i])
+                }
+                checkpoints = []
+                var geop = path.toGeoJSON().features[0]
+                for (var i = 1; i <= steps-1; i++) {
+                    var along = turf.along(geop, stepLength * i, 'kilometers');
+                    L.geoJSON(along, {
+                        pointToLayer: function (feature, latlng) {
+                            var checkpoint = L.marker(latlng, {
+                                icon : L.AwesomeMarkers.icon({
+                                    icon: 'star',
+                                    prefix : 'fa',
+                                })
+                            });
+                            checkpoints.push(checkpoint);
+                            return checkpoint
+                        }
+                    }).addTo(map);
                 }
             }
 
-            $(".geo-info").change(computePath);
-
-            fetchGeoInfo(startPoint, "#start");
-            fetchGeoInfo(endPoint, "#end");
-            computePath();
-
-            $("#ok").click(function(){
-                var p = customPath == null ? path : customPath
-                var geop = p.toGeoJSON().features[0]
-                var steps = parseInt($("#steps").val())
+            $("#steps").on("keyup", function(){
+                var geop = path.toGeoJSON().features[0]
                 var length = turf.lineDistance(geop, 'kilometers');
-                step_length = length/steps;
-                for (var i = 1; i <= steps; i++) {
-                    var along = turf.along(geop, step_length * i, 'kilometers');
-                    L.geoJSON(along).addTo(map);
-                }
+
+                var steps = parseInt($(this).val())
+                var stepLength = length/steps;
+                updateCheckPoints(steps, stepLength);
+                _lastParamId = "#steps";
+                $("#kmPerDay").val(stepLength.toFixed(2));
+            })
+            $("#kmPerDay").on("keyup", function(){
+                var geop = path.toGeoJSON().features[0]
+                var length = turf.lineDistance(geop, 'kilometers');
+
+                var stepLength = parseFloat($(this).val());
+                var steps = Math.round(length / stepLength);
+
+                updateCheckPoints(steps, stepLength);
+                _lastParamId = "#kmPerDay";
+                $("#steps").val(steps);
             })
         });
 
