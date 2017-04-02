@@ -111,11 +111,11 @@
 
     function main_map_init(map, options) {
         $.ajax(gpxFile).done(function(gpx) {
+            var isOriginalDisplay = true;
+            var isCustomDisplay = false;
+
             var geojson = toGeoJSON.gpx((new DOMParser()).parseFromString(gpx, 'text/xml'), null, 4);
-            originalPath = path = L.geoJSON(geojson).addTo(map);
-            map.fitBounds(originalPath.getBounds());
-            map.options.minZoom = map.getZoom();
-            map.dragging.disable();
+            originalPath = path = L.geoJSON(geojson)
 
             var coords = geojson.features[0].geometry.coordinates
 
@@ -143,17 +143,31 @@
             function computePath(){
                 if(startPoint && endPoint){
                     var sliced = turf.lineSlice (startPoint.toGeoJSON(), endPoint.toGeoJSON(), originalPath.toGeoJSON().features[0]);
-                    if(path != originalPath) {
-                        map.removeLayer(path)
+                    if(isOriginalDisplay) {
+                        originalPath.addTo(map);
+                        map.fitBounds(originalPath.getBounds());
+                        map.options.minZoom = map.getZoom();
+                        map.dragging.disable();
+                        isOriginalDisplay = false;
                     }
-                    path = L.geoJSON(sliced, { color : 'red'}).addTo(map);
-                    map.fitBounds(path.getBounds());
+                    else {
+                        if(!isCustomDisplay){
+                            isCustomDisplay = true;
+                        }
+                        else {
+                            map.removeLayer(path)
+                        }
+                        path = L.geoJSON(sliced, { color : 'red'}).addTo(map);
+                        map.fitBounds(path.getBounds());
+                    }
                     var length = turf.lineDistance(sliced, 'kilometers');
                     $("#distance").text(length.toFixed(2));
 
                     $(_lastParamId).keyup()
                 }
             }
+            
+            computePath();
             startPoint.on('dragend', computePath);
             endPoint.on('dragend', computePath);
 
