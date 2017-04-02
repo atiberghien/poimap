@@ -56,10 +56,12 @@
 <script type="text/javascript">
     var startIcon = L.AwesomeMarkers.icon({
         icon: 'flag',
+        prefix : 'fa',
         markerColor: 'green'
     });
     var endIcon = L.AwesomeMarkers.icon({
           icon: 'flag',
+          prefix : 'fa',
           markerColor: 'red'
     });
 
@@ -170,7 +172,12 @@
 
         {% for poi in object_list %}
         L.marker([{{poi.address.geom.coords.1|stringformat:"f"}},
-                  {{poi.address.geom.coords.0|stringformat:"f"}}]).addTo(map);
+                  {{poi.address.geom.coords.0|stringformat:"f"}}], {
+                      icon : L.AwesomeMarkers.icon({
+                            icon: '{{poi.type.icon}}',
+                            prefix : 'fa',
+                      })
+                  }).addTo(map);
         {% endfor %}
     }
 </script>

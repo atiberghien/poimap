@@ -1,12 +1,22 @@
 from django.db import models
+from django.conf import settings
 from django.contrib.gis.db import models as gismodels
 from filer.fields.image import FilerImageField
 from django_countries.fields import CountryField
 from polymorphic.models import PolymorphicModel
 
+DEFAULT_POI_ICON_CHOICES = (
+    ("flag", "Drapeau"),
+    ("cutlery", "Restaurant"),
+    ("bed", "Hotel"),
+    ("shopping-basket", "Magasin"),
+)
+
+icon_choices = getattr(settings, "POI_ICON_CHOICES", DEFAULT_POI_ICON_CHOICES)
 
 class POIType(models.Model):  # POI = Point Of Interest
-    label = models.CharField(max_length=30)         # hotel gite chambre_hote camping autres
+    label = models.CharField(max_length=30) # hotel gite chambre_hote camping autres
+    icon = models.CharField(max_length=30, choices=icon_choices, default="flag")
 
     def __unicode__(self):
         return self.label
