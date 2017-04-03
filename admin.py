@@ -1,7 +1,10 @@
 from django.contrib.gis import admin
 from leaflet.admin import LeafletGeoAdmin, LeafletGeoAdminMixin
 
-from models import Base, POIType, POIAddress, POI
+from models import POIType, POIAddress, POI
+
+
+
 
 class POIAddressInlineAdmin(LeafletGeoAdminMixin, admin.StackedInline):
     model = POIAddress
@@ -52,6 +55,11 @@ class POIAddressAdmin(LeafletGeoAdmin):
             'itinerary/js/poi_form.js',
         )
 
-admin.site.register(POIAddress, POIAddressAdmin)
+class POIAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'type')
+    list_editable = ('name', 'type')
+    list_filter = ('type',)
+    search_fields = ('name',)
+
+admin.site.register(POI, POIAdmin)
 admin.site.register(POIType)
-admin.site.register(Base)
