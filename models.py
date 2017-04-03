@@ -25,8 +25,8 @@ class POIType(models.Model):  # POI = Point Of Interest
 
 
 class POI(PolymorphicModel):
-    description = models.TextField(blank=True)
     name = models.CharField(max_length=500)         # nom du point de depart - Il pourrait aussi etre un hebergement
+    description = models.TextField(blank=True, null=True)
     type = models.ForeignKey(POIType)
 
     @property
