@@ -35,9 +35,9 @@ class POI(PolymorphicModel):
 
 
 class POIAddress(gismodels.Model):
-    address = models.CharField(max_length=250)
-    zipcode = models.CharField(max_length=10)
-    city = models.CharField(max_length=300)
+    address = models.CharField(max_length=250, blank=True, null=True)
+    zipcode = models.CharField(max_length=10, blank=True, null=True)
+    city = models.CharField(max_length=300, blank=True, null=True)
     country = CountryField()
     poi = models.ForeignKey(POI)
     geom = gismodels.PointField()
