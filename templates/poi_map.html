@@ -1,6 +1,10 @@
 {% extends "base.html" %} {% load leaflet_tags static %} {% block title %}Carte des hébergeurs{% endblock %} {% block main %}
 <div class="container-fluid">
-    <h1 class="text-center">Carte des hébergeurs</h1>
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="text-center">Carte des hébergeurs</h1>
+        </div>
+    </div>
     <div class="row">
         <div class="col-md-8">
             <div id='map'>
@@ -8,43 +12,48 @@
             </div>
         </div>
         <div class="col-md-4">
-            <table class="table">
-                <tr>
-                    <td>Départ</td>
-                    <td id="start">
-                        <span class="geo-text"></span>
-                        <input class="geo-info" type="hidden" name="start"/>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Arrivé</td>
-                    <td id="end">
-                        <span class="geo-text"></span>
-                        <input class="geo-info" type="hidden" name="end"/>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Distance totale</td>
-                    <td id="distance"></td>
-                </tr>
-                <tr>
-                    <td>Jours de marche</td>
-                    <td>
-                        <input id="steps" type="text" name="steps" value="1" >
-                    </td>
-                </tr>
-                <tr>
-                    <td>Kms journaliers</td>
-                    <td>
-                        <input id="kmPerDay" type="number" name="kmPerDay" value="">
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2">
-                        <button class="btn btn-primary btn-lg" id="ok" type="button" name="button">OK</button>
-                    </td>
-                </tr>
-            </table>
+            <div class="row">
+                <div class="col-md-12">
+                    <table class="table">
+                        <tr>
+                            <td>Départ</td>
+                            <td id="start">
+                                <span class="geo-text"></span>
+                                <input class="geo-info" type="hidden" name="start"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Arrivé</td>
+                            <td id="end">
+                                <span class="geo-text"></span>
+                                <input class="geo-info" type="hidden" name="end"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Distance totale</td>
+                            <td id="distance"></td>
+                        </tr>
+                        <tr>
+                            <td>Jours de marche</td>
+                            <td>
+                                <input id="steps" type="text" name="steps" value="1" >
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Kms journaliers</td>
+                            <td>
+                                <input id="kmPerDay" type="number" name="kmPerDay" value="">
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <h2 id="poi-title"></h2>
+                    <p id="poi-description"></p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -110,6 +119,44 @@
     }
 
     function main_map_init(map, options) {
+        var overlays = {};
+        var allPOI = {}
+
+        function displayPOIInfo(id){
+            var poi = allPOI[id]
+            $("#poi-title").html(poi.properties.name);
+            $("#poi-description").html(poi.properties.description);
+        }
+
+        $.ajax({
+            dataType: "json",
+            url: "/itinerary/rest/poi/typed/list/",
+            success: function(data){
+                $.each(data, function(index, poiType){
+                    if(poiType.poi_set.features.length > 0) {
+                        var poiList = []
+                        $.each(poiType.poi_set.features, function(index, poi){
+                            allPOI[poi.id] = poi
+                            var marker = L.marker([poi.geometry.coordinates[1],
+                                                   poi.geometry.coordinates[0]], {
+                                                      icon : L.AwesomeMarkers.icon({
+                                                            icon: poiType.icon,
+                                                            prefix : 'fa',
+                                                      }),
+                                                      poiID : poi.id});
+                              marker.on("click", function(e){
+                                  displayPOIInfo(e.target.options.poiID);
+                              });
+                              poiList.push(marker);
+                        });
+                        overlays[poiType.label] = L.layerGroup(poiList)
+                        map.addLayer(overlays[poiType.label])
+                    }
+                })
+                L.control.layers(null, overlays, {collapsed : false}).addTo(map);
+            }
+        });
+
         $.ajax(gpxFile).done(function(gpx) {
             var isOriginalDisplay = true;
             var isCustomDisplay = false;
@@ -147,7 +194,6 @@
                         originalPath.addTo(map);
                         map.fitBounds(originalPath.getBounds());
                         map.options.minZoom = map.getZoom();
-                        map.dragging.disable();
                         isOriginalDisplay = false;
                     }
                     else {
@@ -166,7 +212,7 @@
                     $(_lastParamId).keyup()
                 }
             }
-            
+
             computePath();
             startPoint.on('dragend', computePath);
             endPoint.on('dragend', computePath);
@@ -217,15 +263,7 @@
             })
         });
 
-        {% for poi in object_list %}
-        L.marker([{{poi.address.geom.coords.1|stringformat:"f"}},
-                  {{poi.address.geom.coords.0|stringformat:"f"}}], {
-                      icon : L.AwesomeMarkers.icon({
-                            icon: '{{poi.type.icon}}',
-                            prefix : 'fa',
-                      })
-                  }).addTo(map);
-        {% endfor %}
+
     }
 </script>
 {% endblock %}
