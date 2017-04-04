@@ -24,20 +24,13 @@ class POIType(models.Model):  # POI = Point Of Interest
         return self.label
 
 
-class POI(PolymorphicModel):
+class POI(PolymorphicModel, gismodels.Model):
     name = models.CharField(max_length=500)         # nom du point de depart - Il pourrait aussi etre un hebergement
     description = models.TextField(blank=True, null=True)
     type = models.ForeignKey(POIType)
 
-    @property
-    def address(self):
-        return self.poiaddress_set.first()
-
-
-class POIAddress(gismodels.Model):
     address = models.CharField(max_length=250, blank=True, null=True)
     zipcode = models.CharField(max_length=10, blank=True, null=True)
     city = models.CharField(max_length=300, blank=True, null=True)
-    country = CountryField()
-    poi = models.ForeignKey(POI)
+    country = CountryField(default="FR")
     geom = gismodels.PointField()

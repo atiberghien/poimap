@@ -9,11 +9,7 @@ class POITypeSerializer(ModelSerializer):
 
 
 class POISerializer(GeoFeatureModelSerializer):
-    geom = GeometrySerializerMethodField()
     type = POITypeSerializer()
-
-    def get_geom(self, obj):
-        return obj.poiaddress_set.first().geom
 
     class Meta:
         model = POI
