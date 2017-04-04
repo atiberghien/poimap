@@ -41,13 +41,3 @@ class POIAddress(gismodels.Model):
     country = CountryField()
     poi = models.ForeignKey(POI)
     geom = gismodels.PointField()
-
-# Create your models here.
-class Base(models.Model):
-    name = models.CharField(max_length=50)         # nom du point de depart - Il pourrait aussi etre un hebergement
-    geo_coordinates = gismodels.PointField(null=True, blank=True)      # coordonnees du point de depart
-    description = models.TextField(blank=True)
-    media = FilerImageField(null=True, blank=True,)
-
-    def __unicode__(self):
-        return self.name
