@@ -6,8 +6,8 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 # def populate_poi(apps, schema_editor):
-#     POI = apps.get_model("itinerary", "POI")
-#     POIType = apps.get_model("itinerary", "POIType")
+#     POI = apps.get_model("poimap", "POI")
+#     POIType = apps.get_model("poimap", "POIType")
 #
 #     POI.objects.get_or_create(name="Test",
 #                               description="Test desc.",
@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('contenttypes', '0002_remove_content_type_name'),
-        ('itinerary', '0004_poiaddress'),
+        ('poimap', '0004_poiaddress'),
     ]
 
     operations = [
@@ -30,8 +30,8 @@ class Migration(migrations.Migration):
             name='POI',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('polymorphic_ctype', models.ForeignKey(editable=False, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='polymorphic_itinerary.poi_set+', to='contenttypes.ContentType')),
-                ('type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='itinerary.POIType')),
+                ('polymorphic_ctype', models.ForeignKey(editable=False, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='polymorphic_poimap.poi_set+', to='contenttypes.ContentType')),
+                ('type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='poimap.POIType')),
             ],
             options={
                 'abstract': False,

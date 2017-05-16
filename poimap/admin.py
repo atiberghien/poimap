@@ -47,10 +47,10 @@ class POIAdmin(LeafletGeoAdmin):
 
     class Media:
         css = {
-            "all": ('itinerary/css/itinerary_form.css',),
+            "all": ('poimap/css/itinerary_form.css',),
         }
         js = (
-            'itinerary/js/poi_form.js',
+            'poimap/js/poi_form.js',
         )
 
 admin.site.register(POI, POIAdmin)

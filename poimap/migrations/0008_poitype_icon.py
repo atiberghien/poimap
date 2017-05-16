@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('itinerary', '0007_poiaddress_poi'),
+        ('poimap', '0007_poiaddress_poi'),
     ]
 
     operations = [

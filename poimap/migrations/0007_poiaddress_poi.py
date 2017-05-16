@@ -9,14 +9,14 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('itinerary', '0006_auto_20170329_1316'),
+        ('poimap', '0006_auto_20170329_1316'),
     ]
 
     operations = [
         migrations.AddField(
             model_name='poiaddress',
             name='poi',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='itinerary.POI'),
+            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='poimap.POI'),
             preserve_default=False,
         ),
     ]

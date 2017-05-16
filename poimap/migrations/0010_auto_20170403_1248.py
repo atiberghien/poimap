@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('itinerary', '0009_auto_20170403_1241'),
+        ('poimap', '0009_auto_20170403_1241'),
     ]
 
     operations = [

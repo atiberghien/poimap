@@ -8,7 +8,7 @@ from django.db import migrations
 def populate_poi_types(apps, schema_editor):
     # We can't import the Person model directly as it may be a newer
     # version than this migration expects. We use the historical version.
-    POIType = apps.get_model("itinerary", "POIType")
+    POIType = apps.get_model("poimap", "POIType")
     poi_types = ["Hôtel", "Restaurant", "Épicerie"]
 
     for poi_type in poi_types:
@@ -18,7 +18,7 @@ def populate_poi_types(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('itinerary', '0002_poitype'),
+        ('poimap', '0002_poitype'),
     ]
 
     operations = [
