@@ -12,6 +12,7 @@ DEFAULT_POI_ICON_CHOICES = (
     ("shopping-basket", "Magasin"),
     ("tint", "Point d'eau"),
     ("certificate", "Site touristique"),
+    ("exclamation", "Avertissement"),
 )
 
 icon_choices = getattr(settings, "POI_ICON_CHOICES", DEFAULT_POI_ICON_CHOICES)
