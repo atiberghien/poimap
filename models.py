@@ -15,6 +15,7 @@ DEFAULT_POI_ICON_CHOICES = (
 )
 
 icon_choices = getattr(settings, "POI_ICON_CHOICES", DEFAULT_POI_ICON_CHOICES)
+poi_child_models = getattr(settings, "POI_CHILD_MODELS", [])
 
 class POIType(models.Model):  # POI = Point Of Interest
     label = models.CharField(max_length=30) # hotel gite chambre_hote camping autres
