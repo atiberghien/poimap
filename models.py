@@ -6,14 +6,13 @@ from django.contrib.gis.db.models import PointField
 from filer.models import File
 from filer.fields.image import FilerImageField
 
-from itinerary.models import POIType, POI
+from itinerary.models import POIType, POI, poi_child_models
 
 class PaymentType(models.Model):
     label = models.CharField(max_length=30)         # hotel gite chambre_hote camping autres
 
     def __unicode__(self):
         return self.label
-
 
 class Hostings(POI):
 # class Hostings(gismodels.Model):
@@ -66,6 +65,8 @@ class Hostings(POI):
     def __unicode__(self):
         return '%s' % (self.name)
 
+# Must be a registry
+poi_child_models.append(Hostings)
 
 class OpeningDate(models.Model):
     hosting = models.ForeignKey(Hostings)
