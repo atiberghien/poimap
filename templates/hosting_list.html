@@ -4,15 +4,21 @@
 {% block title %}Liste des hébergeurs{% endblock %}
 
 {% block content %}
+<div class="col-md-12">
+    <h1 class="text-center">Liste des hébergeurs</h1>
+    {% for hosting in object_list %}
+    <div class="row hosting">
+        <div class="col-md-3">
+            <img src="http://placehold.it/200x200">
+        </div>
+        <div class="col-md-9">
+            <h2><a href="{% url 'hosting_detail' hosting.id %}">{{hosting.name}}</a></h2>
+            <p>{{hosting.description|truncatechars:500}}</p>
+        </div>
+    </div>
+    {%endfor%}
+</div>
 
-<h1 class="text-center">Liste des hébergeurs</h1>
-<ul>
-{% for hosting in object_list %}
-<li>
-    <a href="{% url 'hosting_detail' hosting.id %}">{{hosting.name}}</a>
-</li>
-{%endfor%}
-</ul>
 {% addtoblock "css" %}
 <link rel="stylesheet" href="{% static 'hostings/css/hosting.css' %}" />
 {% endaddtoblock %}
