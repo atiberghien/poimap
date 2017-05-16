@@ -197,7 +197,7 @@ overflow-y: auto;
             }
             $.ajax({
                 dataType: "json",
-                url: "/itinerary/rest/poi/typed/list/",
+                url: "{% url 'typed-poi-rest-list' %}",
                 success: function(data){
                     var overlays = {};
                     $.each(data, function(index, poiType){
