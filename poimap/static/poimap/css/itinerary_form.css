@@ -1,0 +1,22 @@
+.address {
+    width: 50%;
+    float: left;
+}
+
+.location {
+    width: 50%;
+    float: left;
+}
+
+.field-box.field-zipcode, .field-box.field-city, .field-box.field-country {
+    width: 31%;
+}
+
+button.default {
+    margin-top: 20px;
+    padding: 10px 20px!important;
+    height: 36px;
+    background-color: #0bf!important;
+    border: 1px solid #0bf!important;
+    color: #fff!important;
+}

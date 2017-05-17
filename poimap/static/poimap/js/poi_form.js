@@ -20,7 +20,7 @@ $(document).ready(function(){
     var zipcode = $("#id_zipcode");
     var city = $("#id_city");
 
-    var geoButton = $("<button type='button'>Geoloc</button>").click(function(){
+    var geoButton = $("<div class='field-box'><button type='button' class='default'>Géolocalisation à partir de l'adresse</button></div>").click(function(){
         var country = $("#id_country option:selected");
         if(country.val() && zipcode.val() && address.val()){
             var addr = (address.val()+",+"+zipcode.val()+"+"+city.val()).replace(" ","+")
@@ -48,5 +48,17 @@ $(document).ready(function(){
            })
        }
     })
-    $("fieldset.address").append(geoButton);
+    $(".form-row.field-zipcode.field-city.field-country").append(geoButton);
+
+    $('#id_gpx').on('change', function(){
+        file = $(this)[0].files[0];
+        var fr = new FileReader();
+        fr.onload = function(event) {
+            var raw = (new DOMParser()).parseFromString(event.target.result, 'text/xml');
+            var path = L.geoJSON(toGeoJSON.gpx(raw))
+            field.store.save(path);
+            field.load();
+        };
+        fr.readAsText(file);
+    });
 });
