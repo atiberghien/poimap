@@ -1,10 +1,18 @@
 #-*- coding: utf-8 -*-
+from django import forms
 from django.contrib.gis import admin
 from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
 from leaflet.admin import LeafletGeoAdmin
 
 from models import POIType, POI, poi_child_models
+
+class POIAdminForm(forms.ModelForm):
+    gpx = forms.FileField(required=False)
+
+    class Meta:
+        model = POI
+        fields = "__all__"
 
 class POIAdmin(LeafletGeoAdmin):
 
@@ -30,6 +38,8 @@ class POIAdmin(LeafletGeoAdmin):
     list_filter = ('type',)
     search_fields = ('name',)
 
+    form = POIAdminForm
+
     fieldsets = (
         (None, {
             'fields': (('name', 'type'), 'description')
@@ -37,11 +47,11 @@ class POIAdmin(LeafletGeoAdmin):
         (None, {
             'classes': ('address',),
             'fields': ('address',
-                      ('zipcode', "city", 'country'),)
+                      ('zipcode', "city", 'country'),'gpx' )
         }),
         (None, {
             'classes': ('location',),
-            'fields': ('geom', ),
+            'fields': ('geom',),
         }),
     )
 
@@ -51,6 +61,7 @@ class POIAdmin(LeafletGeoAdmin):
         }
         js = (
             'poimap/js/poi_form.js',
+            'bower_components/togeojson/togeojson.js',
         )
 
 admin.site.register(POI, POIAdmin)
