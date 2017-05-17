@@ -35,4 +35,4 @@ class POI(PolymorphicModel, gismodels.Model):
     zipcode = models.CharField(max_length=10, blank=True, null=True)
     city = models.CharField(max_length=300, blank=True, null=True)
     country = CountryField(default="FR")
-    geom = gismodels.PointField()
+    geom = gismodels.GeometryField()
