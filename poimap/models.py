@@ -25,8 +25,7 @@ class POIType(models.Model):  # POI = Point Of Interest
     def __unicode__(self):
         return self.label
 
-
-class POI(PolymorphicModel, gismodels.Model):
+class POI(PolymorphicModel):
     name = models.CharField(max_length=500)         # nom du point de depart - Il pourrait aussi etre un hebergement
     description = models.TextField(blank=True, null=True)
     type = models.ForeignKey(POIType)
@@ -35,4 +34,4 @@ class POI(PolymorphicModel, gismodels.Model):
     zipcode = models.CharField(max_length=10, blank=True, null=True)
     city = models.CharField(max_length=300, blank=True, null=True)
     country = CountryField(default="FR")
-    geom = gismodels.GeometryField()
+    geom = gismodels.GeometryField(geography=True, dim=3)

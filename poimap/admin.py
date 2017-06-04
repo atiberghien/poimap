@@ -4,17 +4,28 @@ from django.contrib.gis import admin
 from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
 from leaflet.admin import LeafletGeoAdmin
-
-from models import POIType, POI, poi_child_models
+from .models import POIType, POI, poi_child_models
+from django.contrib.gis.gdal import OGRGeometry
 
 class POIAdminForm(forms.ModelForm):
     gpx = forms.FileField(required=False)
+
+    def clean_geom(self):
+        """ Tricks to add default Z dimension into geometry """
+        geom = self.cleaned_data["geom"]
+        ogr = OGRGeometry(geom.wkt)
+        ogr.coord_dim = 3
+        return ogr.geos
 
     class Meta:
         model = POI
         fields = "__all__"
 
 class POIAdmin(LeafletGeoAdmin):
+
+    def __init__(self, *args, **kwargs):
+        super(POIAdmin, self).__init__(*args, **kwargs)
+        self.widget.supports_3d = True # for to be 3D friendly
 
     def convert_actions(self, obj):
         links = ""
