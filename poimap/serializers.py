@@ -1,6 +1,19 @@
-from rest_framework.serializers import ModelSerializer, ListField, RelatedField
-from rest_framework_gis.serializers import GeoFeatureModelSerializer, GeometrySerializerMethodField
-from .models import POI, POIType
+from rest_framework.serializers import ModelSerializer, ReadOnlyField, SerializerMethodField
+from rest_framework_gis.serializers import GeoFeatureModelSerializer
+from .models import POI, POIType, Path, Area
+
+
+class AreaSerializer(ModelSerializer):
+    wkt = ReadOnlyField()
+    class Meta:
+        model = Area
+        fields = ('slug', 'name', 'description', 'wkt')
+
+class PathSerializer(GeoFeatureModelSerializer):
+    class Meta:
+        model = Path
+        geo_field = "geom"
+        fields = ('slug', 'name', 'description', 'is_root')
 
 class POITypeSerializer(ModelSerializer):
     class Meta:
