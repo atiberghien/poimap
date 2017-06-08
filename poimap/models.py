@@ -1,7 +1,6 @@
 from django.db import models
 from django.conf import settings
 from django.contrib.gis.db import models as gismodels
-from filer.fields.image import FilerImageField
 from django_countries.fields import CountryField
 from polymorphic.models import PolymorphicModel
 
