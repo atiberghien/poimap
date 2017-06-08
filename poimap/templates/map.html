@@ -128,8 +128,6 @@ overflow-y: auto;
 
     var checkpoints = [];
 
-    var typedPOILayers = {}
-    var typedPOILayerControl = null
 
     function resizeBbox (bbox, factor) {
       var currentXDistance = (bbox[2] - bbox[0]);
@@ -192,6 +190,31 @@ overflow-y: auto;
         });
     }
 
+
+    var typedPOILayers = {}
+    var typedPOILayerControl = null
+    var secondaryPathLayers = {"Chemin secondaire" : L.layerGroup()}
+    var secondaryPathLayerControl = null
+
+    function clearLayersAndControls(){
+        if(typedPOILayerControl) {
+            for (var key in typedPOILayers) {
+                typedPOILayers[key].removeFrom(map);
+            }
+            typedPOILayers = {};
+            typedPOILayerControl.remove();
+            typedPOILayerControl = null;
+        }
+        if(secondaryPathLayerControl){
+            for (var key in secondaryPathLayers) {
+                secondaryPathLayers[key].removeFrom(map);
+            }
+            secondaryPathLayers = {}
+            secondaryPathLayerControl.remove();
+            secondaryPathLayerControl = null;
+        }
+        $(".leaflet-control-layers").remove()
+    }
     function main_map_init(map, options) {
         var wkt = new Wkt.Wkt();
 
@@ -324,6 +347,8 @@ overflow-y: auto;
                 dataType: "json",
                 url: "{% url 'api-poi-list' %}?bbox="+bboxCoords.join(',')
             }).done(function(data){
+
+                clearLayersAndControls();
                 $.each(data.features, function(index, poi){
                     var marker = L.geoJSON(poi, {
                         pointToLayer: function(feature, latlng) {
@@ -344,27 +369,21 @@ overflow-y: auto;
                         typedPOILayers[poi.properties.type.label] = L.layerGroup([marker])
                     }
                 });
-                if(typedPOILayerControl) {
-                    for (var key in typedPOILayers) {
-                        typedPOILayers[key].removeFrom(map);
-                    }
-                    typedPOILayers = {};
-                    typedPOILayerControl.remove();
-                    typedPOILayerControl = null;
-                    $(".leaflet-control-layers").remove()
+                if(Object.size(typedPOILayers)){
+                    typedPOILayerControl = L.control.layers(null, typedPOILayers, {collapsed : false}).addTo(map);
                 }
-                typedPOILayerControl = L.control.layers(null, typedPOILayers, {collapsed : false}).addTo(map);
             }).then(function(){
                 $.ajax({
                     dataType: "json",
                     url: "{% url 'api-subpath-list' area_slug %}?bbox="+bboxCoords.join(',')
                 }).done(function(data){
                     $.each(data.features, function(index, path){
-                        var subpath = L.geoJSON(path).addTo(map);
+                        var subpath = L.geoJSON(path);
+                        secondaryPathLayers["Chemin secondaire"].addLayer(subpath)
                     });
-                });
-                map.eachLayer(function (layer) {
-                    console.log(layer.options);
+                    if(Object.size(secondaryPathLayers)){
+                        secondaryPathLayerControl = L.control.layers(null, secondaryPathLayers, {collapsed : false}).addTo(map);
+                    }
                 });
             });
         }
