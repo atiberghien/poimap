@@ -1,0 +1,377 @@
+{% extends "base.html" %}
+{% load leaflet_tags static sekizai_tags %}
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="text-center">Carte des POI</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-8">
+            <div id='map'>
+                {% leaflet_map "main" callback="main_map_init" settings_overrides=map_settings%}
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="row">
+                <div class="col-md-12">
+                    <table class="table">
+                        <tr>
+                            <td>Départ</td>
+                            <td id="start">
+                                <span class="geo-text"></span>
+                                <input class="geo-info" type="hidden" name="start"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Arrivé</td>
+                            <td id="end">
+                                <span class="geo-text"></span>
+                                <input class="geo-info" type="hidden" name="end"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Distance totale</td>
+                            <td id="distance"></td>
+                        </tr>
+                        <!-- <tr>
+                            <td>Jours de marche</td>
+                            <td>
+                                <input id="steps" type="text" name="steps" value="1" >
+                            </td>
+                        </tr>-->
+                        <tr>
+                            <td>Kms journaliers</td>
+                            <td>
+                                <select id="kmPerDay" name="kmPerDay">
+                                    <option value="10" selected>10 km</option>
+                                    <option value="20">20 km</option>
+                                    <option value="30">30 km</option>
+                                </select>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <h2 id="poi-title"></h2>
+                    <p id="poi-description"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style media="screen">
+
+/* Important part */
+.modal-dialog{
+overflow-y: initial !important
+}
+.modal-body{
+height: 400px;
+overflow-y: auto;
+}
+</style>
+<div class="modal"
+     id="poiModal"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="poiModal"
+     aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="poiModalTitle"></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+          <p id="poiModalDescription"></p>
+      </div>
+    </div>
+  </div>
+</div>
+{% addtoblock "css" %}
+<link rel="stylesheet" href="{% static 'bower_components/Leaflet.awesome-markers/dist/leaflet.awesome-markers.css' %}">
+{% endaddtoblock %}
+
+{% addtoblock "js" %}
+<script src="{% static 'bower_components/turfjs/turf.min.js' %}" charset="utf-8"></script>
+<script src="{% static 'bower_components/togeojson/togeojson.js' %}" charset="utf-8"></script>
+<script src="{% static 'bower_components/leaflet-knn/leaflet-knn.min.js' %}" charset="utf-8"></script>
+<script src="{% static 'bower_components/Leaflet.awesome-markers/dist/leaflet.awesome-markers.min.js' %}" charset="utf-8"></script>
+<script src="{% static 'bower_components/Wicket/wicket.js' %}" charset="utf-8"></script>
+<script src="{% static 'bower_components/Wicket/wicket-leaflet.js' %}" charset="utf-8"></script>
+<script type="text/javascript">
+    var originalPath = null
+    var isOriginalDisplay = true;
+    var isCustomDisplay = false;
+
+    var path = null;
+    var startPoint = null;
+    var endPoint = null;
+    var startIcon = L.AwesomeMarkers.icon({
+        icon: 'flag',
+        prefix : 'fa',
+        markerColor: 'green'
+    });
+    var endIcon = L.AwesomeMarkers.icon({
+        icon: 'flag',
+        prefix : 'fa',
+        markerColor: 'red'
+    });
+
+    // var _lastParamId = null
+
+    var checkpoints = [];
+
+    var typedPOILayers = {}
+    var typedPOILayerControl = null
+
+    function resizeBbox (bbox, factor) {
+      var currentXDistance = (bbox[2] - bbox[0]);
+      var currentYDistance = (bbox[3] - bbox[1]);
+      var newXDistance = currentXDistance * factor;
+      var newYDistance = currentYDistance * factor;
+      var xChange = newXDistance - currentXDistance;
+      var yChange = newYDistance - currentYDistance;
+
+      var lowX = bbox[0] - (xChange / 2);
+      var lowY = bbox[1] - (yChange / 2);
+      var highX = (xChange / 2) + bbox[2];
+      var highY = (yChange / 2) + bbox[3];
+
+      var sized = [lowX, lowY, highX, highY];
+      return sized;
+    }
+
+    Object.size = function(obj) {
+        var size = 0, key;
+        for (key in obj) {
+            if (obj.hasOwnProperty(key)) size++;
+        }
+        return size;
+    };
+
+
+
+    L.Marker.prototype.fetchGeoInfo = function(labelId) {
+        $.ajax({
+            dataType: "json",
+            url: "https://maps.googleapis.com/maps/api/geocode/json",
+            data: {
+                latlng : this.getLatLng().lat+","+this.getLatLng().lng,
+                language : 'fr',
+                location_type : 'GEOMETRIC_CENTER',
+                key : "AIzaSyAThNRSpWOhnA2EGSeshFqLolrTPQx1hjo"
+            },
+            success: function(data){
+                if(data.status == "OK"){
+                    if(data.results.length > 0) {
+                        var poiResult = data.results[0];
+                        $(labelId+" span.geo-text").text(poiResult.formatted_address);
+                        $(labelId+" input").val(poiResult.formatted_address);
+                    }
+                }
+            }
+        });
+    }
+    //
+    L.Marker.prototype.applyDragEventListener = function (currentPath, markerOptions) {
+        this.on('drag', function(e) {
+            var nearest = leafletKnn(currentPath).nearest(e.target.getLatLng(),1)[0];
+            this.setLatLng([nearest.lat, nearest.lon]);
+        });
+        // this.on('dragstart', function(e) {
+        // });
+        this.on('dragend', function(e) {
+            this.fetchGeoInfo(markerOptions.labelId)
+        });
+    }
+
+    function main_map_init(map, options) {
+        var wkt = new Wkt.Wkt();
+
+        $.ajax({
+            url: "{% url 'api-area' area_slug %}",
+            dataType: "json",
+        }).done(function(area){
+            wkt.read(area.wkt);
+            var rect = wkt.toObject(map.defaults).addTo(map)
+            map.fitBounds(rect.getBounds());
+        }).then(function(area){
+            $.ajax({
+                url: "{% url 'api-area-paths' area_slug %}",
+                dataType: "json",
+            }).done(function(paths){
+                $.each(paths.features, function(index, path_){
+                    if(path_.properties.is_root){
+                        originalPath = path = L.geoJSON(path_)
+                        var startPointOptions = {
+                            draggable: true,
+                            icon : startIcon,
+                            labelId : "#start"
+                        }
+
+                        var endPointOptions = {
+                            draggable: true,
+                            icon :endIcon,
+                            labelId : "#end"
+                        }
+                        var coords = path_.geometry.coordinates
+                        startPoint = L.marker([coords[0][1], coords[0][0]], startPointOptions).addTo(map);
+                        endPoint = L.marker([coords[coords.length-1][1], coords[coords.length-1][0]], endPointOptions).addTo(map);
+
+                        startPoint.applyDragEventListener(originalPath, startPointOptions);
+                        endPoint.applyDragEventListener(originalPath, endPointOptions);
+
+                        startPoint.fetchGeoInfo(startPointOptions.labelId)
+                        endPoint.fetchGeoInfo(endPointOptions.labelId)
+
+                        function computePath(){
+                            if(startPoint && endPoint){
+                                var sliced = turf.lineSlice(startPoint.toGeoJSON(), endPoint.toGeoJSON(), originalPath.toGeoJSON().features[0]);
+
+                                if(isOriginalDisplay) {
+                                    originalPath.addTo(map);
+                                    map.fitBounds(originalPath.getBounds());
+                                    map.options.minZoom = map.getZoom();
+                                    isOriginalDisplay = false;
+                                }
+                                else {
+                                    if(!isCustomDisplay){
+                                        isCustomDisplay = true;
+                                    }
+                                    else {
+                                        map.removeLayer(path)
+                                    }
+                                    path = L.geoJSON(sliced, { color : 'red'}).addTo(map);
+                                    map.fitBounds(path.getBounds());
+                                }
+                                var length = turf.lineDistance(sliced, 'kilometers');
+                                $("#distance").text(length.toFixed(2));
+
+                                $("#kmPerDay").change()
+                                fetchPOI();
+                            }
+                        }
+
+                        computePath();
+                        startPoint.on('dragend', computePath);
+                        endPoint.on('dragend', computePath);
+
+                        function updateCheckPoints(steps, stepLength) {
+                            for (var i = 0; i < checkpoints.length; i++) {
+                                map.removeLayer(checkpoints[i])
+                            }
+                            checkpoints = []
+                            var geop = path.toGeoJSON().features[0]
+                            for (var i = 1; i <= steps-1; i++) {
+                                var along = turf.along(geop, stepLength * i, 'kilometers');
+                                L.geoJSON(along, {
+                                    pointToLayer: function (feature, latlng) {
+                                        var checkpoint = L.marker(latlng, {
+                                            icon : L.AwesomeMarkers.icon({
+                                                icon: 'star',
+                                                prefix : 'fa',
+                                            })
+                                        });
+                                        checkpoints.push(checkpoint);
+                                        return checkpoint
+                                    }
+                                }).addTo(map);
+                            }
+                        }
+
+                        // $("#steps").on("keyup", function(){
+                        //     var geop = path.toGeoJSON().features[0]
+                        //     var length = turf.lineDistance(geop, 'kilometers');
+                        //
+                        //     var steps = parseInt($(this).val())
+                        //     var stepLength = length/steps;
+                        //     updateCheckPoints(steps, stepLength);
+                        //     _lastParamId = "#steps";
+                        //     $("#kmPerDay").val(stepLength.toFixed(2));
+                        // });
+
+                        $("#kmPerDay").on("change", function(){
+                            var geop = path.toGeoJSON().features[0]
+                            var length = turf.lineDistance(geop, 'kilometers');
+
+                            var stepLength = parseFloat($(this).val());
+                            var steps = Math.round(length / stepLength);
+
+                            updateCheckPoints(steps, stepLength);
+                            // _lastParamId = "#kmPerDay";
+                            // $("#steps").val(steps);
+                        });
+                    }
+                });
+            });
+        });
+
+        function fetchPOI() {
+            var bboxCoords = resizeBbox([startPoint.getLatLng().lng,
+                                         startPoint.getLatLng().lat,
+                                         endPoint.getLatLng().lng,
+                                         endPoint.getLatLng().lat],
+                                         1.1);
+            var bbox = turf.bboxPolygon(bboxCoords)
+            $.ajax({
+                dataType: "json",
+                url: "{% url 'api-poi-list' %}?bbox="+bboxCoords.join(',')
+            }).done(function(data){
+                $.each(data.features, function(index, poi){
+                    var marker = L.geoJSON(poi, {
+                        pointToLayer: function(feature, latlng) {
+                            return L.marker(latlng, {icon : L.AwesomeMarkers.icon({
+                                                        icon: poi.properties.type.icon,
+                                                        prefix : 'fa',
+                                                    })
+                            });
+                        },
+                        onEachFeature: function (feature, layer) {
+                            layer.bindPopup('<h4>'+feature.properties.name+'</h4>');
+                        }
+                    })
+                    if(typedPOILayers.hasOwnProperty(poi.properties.type.label)){
+                        typedPOILayers[poi.properties.type.label].addLayer(marker)
+                    }
+                    else {
+                        typedPOILayers[poi.properties.type.label] = L.layerGroup([marker])
+                    }
+                });
+                if(typedPOILayerControl) {
+                    for (var key in typedPOILayers) {
+                        typedPOILayers[key].removeFrom(map);
+                    }
+                    typedPOILayers = {};
+                    typedPOILayerControl.remove();
+                    typedPOILayerControl = null;
+                    $(".leaflet-control-layers").remove()
+                }
+                typedPOILayerControl = L.control.layers(null, typedPOILayers, {collapsed : false}).addTo(map);
+            }).then(function(){
+                $.ajax({
+                    dataType: "json",
+                    url: "{% url 'api-subpath-list' area_slug %}?bbox="+bboxCoords.join(',')
+                }).done(function(data){
+                    $.each(data.features, function(index, path){
+                        var subpath = L.geoJSON(path).addTo(map);
+                    });
+                });
+                map.eachLayer(function (layer) {
+                    console.log(layer.options);
+                });
+            });
+        }
+
+
+
+    }
+</script>
+{% endaddtoblock%}
+{% endblock %}

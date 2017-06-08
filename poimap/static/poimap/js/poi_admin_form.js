@@ -49,16 +49,4 @@ $(document).ready(function(){
        }
     })
     $(".form-row.field-zipcode.field-city.field-country").append(geoButton);
-
-    $('#id_gpx').on('change', function(){
-        file = $(this)[0].files[0];
-        var fr = new FileReader();
-        fr.onload = function(event) {
-            var raw = (new DOMParser()).parseFromString(event.target.result, 'text/xml');
-            var path = L.geoJSON(toGeoJSON.gpx(raw))
-            field.store.save(path);
-            field.load();
-        };
-        fr.readAsText(file);
-    });
 });
