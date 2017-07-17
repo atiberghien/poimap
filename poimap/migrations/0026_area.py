@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=500)),
                 ('description', models.TextField(blank=True, null=True)),
-                ('geom', django.contrib.gis.db.models.fields.PolygonField(geography=True, srid=4326)),
+                ('geom', django.contrib.gis.db.models.fields.PolygonField(dim=3, srid=4326)),
             ],
         ),
     ]

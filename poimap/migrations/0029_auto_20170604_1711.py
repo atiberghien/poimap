@@ -16,6 +16,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='poi',
             name='geom',
-            field=django.contrib.gis.db.models.fields.PointField(dim=3, geography=True, srid=4326),
+            field=django.contrib.gis.db.models.fields.PointField(dim=3, srid=4326),
         ),
     ]

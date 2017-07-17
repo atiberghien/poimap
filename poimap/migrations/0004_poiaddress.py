@@ -10,7 +10,7 @@ import django_countries.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('poimap', '0003_auto_20170327_2236'),
+        ('poimap', '0002_poitype'),
     ]
 
     operations = [

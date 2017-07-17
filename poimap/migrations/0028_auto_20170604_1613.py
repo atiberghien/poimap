@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=500)),
                 ('slug', autoslug.fields.AutoSlugField(always_update=True, editable=False, populate_from=b'name')),
                 ('description', models.TextField(blank=True, null=True)),
-                ('geom', django.contrib.gis.db.models.fields.LineStringField(dim=3, geography=True, srid=4326)),
+                ('geom', django.contrib.gis.db.models.fields.LineStringField(dim=3, srid=4326)),
             ],
             options={
                 'abstract': False,
