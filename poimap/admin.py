@@ -1,5 +1,6 @@
 #-*- coding: utf-8 -*-
 from django import forms
+from django.conf import settings
 from django.contrib.gis import admin
 from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
@@ -64,6 +65,22 @@ class POIAdminForm(forms.ModelForm):
         ogr.coord_dim = 3
         return ogr.geos
 
+    class Media:
+        if "grappelli" in settings.INSTALLED_APPS:
+            css = {
+                "all": ('poimap/css/grp_poi_admin_form.css',),
+            }
+            js = (
+                'poimap/js/grp_poi_admin_form.js',
+            )
+        else:
+            css = {
+                "all": ('poimap/css/poi_admin_form.css',),
+            }
+            js = (
+                'poimap/js/poi_admin_form.js',
+            )
+
     class Meta:
         model = POI
         fields = "__all__"
@@ -112,15 +129,6 @@ class POIAdmin(LeafletGeoAdmin):
             'fields': ('geom',),
         }),
     )
-
-    class Media:
-        css = {
-            "all": ('poimap/css/poi_admin_form.css',),
-        }
-        js = (
-            'poimap/js/poi_admin_form.js',
-        )
-
 
 admin.site.register(Area, AreaAdmin)
 admin.site.register(Path, PathAdmin)
