@@ -63,6 +63,13 @@ class POI(PolymorphicModel):
     country = CountryField(default="FR")
     geom = gismodels.PointField(dim=3)
 
+    @property
+    def coords(self):
+        return {
+            "lat" : self.geom.coords[1],
+            "lng" : self.geom.coords[0],
+        }
+
     def __unicode__(self):
         return "%s - %s" % (self.name, self.type.label)
 
