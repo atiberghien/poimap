@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(name='poimap',
       version='0.1',
@@ -7,17 +7,8 @@ setup(name='poimap',
       author='Alban Tiberghien',
       author_email='alban.tiberghien@gmail.com',
       license='MIT',
-      packages=[
-        'poimap',
-        'poimap.migrations',
-        'poimap.templates',
-        'poimap.templates.admin',
-        'poimap.templatetags',
-        'poimap.static',
-        'poimap.static.poimap',
-        'poimap.static.poimap.css',
-        'poimap.static.poimap.js',
-      ],
+      packages=find_packages(),
+      include_package_data=True,
       install_requires=[
            'Django>=1.11.3',
            'django-autoslug>=1.9.3',
