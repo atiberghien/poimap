@@ -1,0 +1,2 @@
+recursive-include poimap/static *
+recursive-include poimap/templates *
