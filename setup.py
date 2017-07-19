@@ -8,7 +8,7 @@ setup(name='poimap',
       author_email='alban.tiberghien@gmail.com',
       license='MIT',
       packages=[
-        'poimap'
+        'poimap',
         'poimap.migrations',
         'poimap.templates',
         'poimap.templates.admin',
