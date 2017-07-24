@@ -21,5 +21,6 @@ setup(name='poimap',
            'django-filer>=1.2.7',
            'easy-thumbnails>=2.4.1',
            'django-leaflet>=0.22.0',
+           'django-fontawesome>=0.3.1',
       ],
       zip_safe=False)

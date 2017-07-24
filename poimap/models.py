@@ -6,6 +6,7 @@ from treebeard.mp_tree import MP_Node
 from polymorphic.models import PolymorphicModel
 
 from autoslug import AutoSlugField
+from fontawesome.fields import IconField
 
 
 class Area(models.Model):
@@ -47,7 +48,8 @@ poi_child_models = getattr(settings, "POI_CHILD_MODELS", [])
 
 class POIType(models.Model):
     label = models.CharField(max_length=30)
-    icon = models.CharField(max_length=30, choices=icon_choices, default="flag")
+    icon = IconField()
+
 
     def __unicode__(self):
         return self.label
