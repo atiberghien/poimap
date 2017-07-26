@@ -32,17 +32,7 @@ class Path(MP_Node):
     def __unicode__(self):
         return self.name
 
-DEFAULT_POI_ICON_CHOICES = (
-    ("flag", "Drapeau"),
-    ("cutlery", "Restaurant"),
-    ("bed", "Hotel"),
-    ("shopping-basket", "Magasin"),
-    ("tint", "Point d'eau"),
-    ("certificate", "Site touristique"),
-    ("exclamation", "Avertissement"),
-)
 
-icon_choices = getattr(settings, "POI_ICON_CHOICES", DEFAULT_POI_ICON_CHOICES)
 poi_child_models = getattr(settings, "POI_CHILD_MODELS", [])
 
 
