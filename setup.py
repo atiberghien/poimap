@@ -10,6 +10,7 @@ setup(name='poimap',
       packages=find_packages(),
       include_package_data=True,
       install_requires=[
+           'psycopg2>=2.7.3'
            'Django>=1.11.3',
            'django-autoslug>=1.9.3',
            'django-countries>=4.6.1',
