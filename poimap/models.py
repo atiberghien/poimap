@@ -35,7 +35,6 @@ class Path(MP_Node):
 
 poi_child_models = getattr(settings, "POI_CHILD_MODELS", [])
 
-
 class POIType(models.Model):
     label = models.CharField(max_length=30)
     icon = IconField()
@@ -45,7 +44,8 @@ class POIType(models.Model):
         return self.label
 
 class POI(PolymorphicModel):
-    name = models.CharField(max_length=500)         # nom du point de depart - Il pourrait aussi etre un hebergement
+    name = models.CharField(max_length=500)
+    slug = AutoSlugField(populate_from="name", always_update=True)
     description = models.TextField(blank=True, null=True)
     type = models.ForeignKey(POIType)
 
