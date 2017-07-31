@@ -13,12 +13,8 @@ class Area(models.Model):
     name = models.CharField(max_length=500)
     slug = AutoSlugField(populate_from="name", always_update=True)
     description = models.TextField(blank=True, null=True)
-    geom = gismodels.PolygonField()
-
-    @property
-    def wkt(self):
-        return self.geom.wkt
-
+    geom = gismodels.GeometryField(dim=3)
+    
     def __unicode__(self):
         return self.name
 
@@ -37,6 +33,7 @@ poi_child_models = getattr(settings, "POI_CHILD_MODELS", [])
 
 class POIType(models.Model):
     label = models.CharField(max_length=30)
+    slug = AutoSlugField(populate_from="label", always_update=True)
     icon = IconField()
 
 

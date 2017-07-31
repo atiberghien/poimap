@@ -1,24 +1,26 @@
-from rest_framework.serializers import ModelSerializer, ReadOnlyField, SerializerMethodField
+from rest_framework.serializers import ModelSerializer
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 from .models import POI, POIType, Path, Area
 
 
-class AreaSerializer(ModelSerializer):
-    wkt = ReadOnlyField()
+class AreaSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = Area
-        fields = ('slug', 'name', 'description', 'wkt')
+        geo_field = "geom"
+        fields = ('slug', 'name', 'description')
+
 
 class PathSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = Path
         geo_field = "geom"
-        fields = ('slug', 'name', 'description', 'is_root')
+        fields = ('id', 'slug', 'name', 'description', 'is_root')
+
 
 class POITypeSerializer(ModelSerializer):
     class Meta:
         model = POIType
-        fields = ('label', 'icon')
+        fields = ('label', 'slug', 'icon')
 
 
 class POISerializer(GeoFeatureModelSerializer):
@@ -27,7 +29,7 @@ class POISerializer(GeoFeatureModelSerializer):
     class Meta:
         model = POI
         geo_field = "geom"
-        fields = ('id', 'name', 'description', 'type', 'coords')
+        fields = ('id', 'name', 'slug', 'description', 'type', 'coords')
 
 class TypedPOISerializer(ModelSerializer):
 
@@ -35,4 +37,4 @@ class TypedPOISerializer(ModelSerializer):
 
     class Meta:
         model = POIType
-        fields = ('label', 'icon', 'poi_set')
+        fields = ('label', 'slug', 'icon', 'poi_set')
