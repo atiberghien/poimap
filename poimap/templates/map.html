@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load leaflet_tags static sekizai_tags %}
+{% load compress %}
 {% block content %}
 <div class="container-fluid">
     <div class="row">
@@ -35,12 +36,6 @@
                             <td>Distance totale</td>
                             <td id="distance"></td>
                         </tr>
-                        <!-- <tr>
-                            <td>Jours de marche</td>
-                            <td>
-                                <input id="steps" type="text" name="steps" value="1" >
-                            </td>
-                        </tr>-->
                         <tr>
                             <td>Kms journaliers</td>
                             <td>
@@ -99,150 +94,46 @@ overflow-y: auto;
 {% endaddtoblock %}
 
 {% addtoblock "js" %}
+{% compress js %}
 <script src="{% static 'bower_components/turfjs/turf.min.js' %}" charset="utf-8"></script>
 <script src="{% static 'bower_components/togeojson/togeojson.js' %}" charset="utf-8"></script>
 <script src="{% static 'bower_components/leaflet-knn/leaflet-knn.min.js' %}" charset="utf-8"></script>
 <script src="{% static 'bower_components/Leaflet.awesome-markers/dist/leaflet.awesome-markers.min.js' %}" charset="utf-8"></script>
 <script src="{% static 'bower_components/Wicket/wicket.js' %}" charset="utf-8"></script>
 <script src="{% static 'bower_components/Wicket/wicket-leaflet.js' %}" charset="utf-8"></script>
+<script src="{% static 'poimap/js/poimap.utils.js' %}" charset="utf-8"></script>
+{% endcompress %}
+{% compress js inline %}
 <script type="text/javascript">
-    var originalPath = null
-    var isOriginalDisplay = true;
-    var isCustomDisplay = false;
-
-    var path = null;
-    var startPoint = null;
-    var endPoint = null;
-    var startIcon = L.AwesomeMarkers.icon({
-        icon: 'flag',
-        prefix : 'fa',
-        markerColor: 'green'
-    });
-    var endIcon = L.AwesomeMarkers.icon({
-        icon: 'flag',
-        prefix : 'fa',
-        markerColor: 'red'
-    });
-
-    // var _lastParamId = null
-
-    var checkpoints = [];
-
-
-    function resizeBbox (bbox, factor) {
-      var currentXDistance = (bbox[2] - bbox[0]);
-      var currentYDistance = (bbox[3] - bbox[1]);
-      var newXDistance = currentXDistance * factor;
-      var newYDistance = currentYDistance * factor;
-      var xChange = newXDistance - currentXDistance;
-      var yChange = newYDistance - currentYDistance;
-
-      var lowX = bbox[0] - (xChange / 2);
-      var lowY = bbox[1] - (yChange / 2);
-      var highX = (xChange / 2) + bbox[2];
-      var highY = (yChange / 2) + bbox[3];
-
-      var sized = [lowX, lowY, highX, highY];
-      return sized;
-    }
-
-    Object.size = function(obj) {
-        var size = 0, key;
-        for (key in obj) {
-            if (obj.hasOwnProperty(key)) size++;
-        }
-        return size;
-    };
-
-
-
-    L.Marker.prototype.fetchGeoInfo = function(labelId) {
-        $.ajax({
-            dataType: "json",
-            url: "https://maps.googleapis.com/maps/api/geocode/json",
-            data: {
-                latlng : this.getLatLng().lat+","+this.getLatLng().lng,
-                language : 'fr',
-                location_type : 'GEOMETRIC_CENTER',
-                key : "AIzaSyAThNRSpWOhnA2EGSeshFqLolrTPQx1hjo"
-            },
-            success: function(data){
-                if(data.status == "OK"){
-                    if(data.results.length > 0) {
-                        var poiResult = data.results[0];
-                        $(labelId+" span.geo-text").text(poiResult.formatted_address);
-                        $(labelId+" input").val(poiResult.formatted_address);
-                    }
-                }
-            }
-        });
-    }
-    //
-    L.Marker.prototype.applyDragEventListener = function (currentPath, markerOptions) {
-        this.on('drag', function(e) {
-            var nearest = leafletKnn(currentPath).nearest(e.target.getLatLng(),1)[0];
-            this.setLatLng([nearest.lat, nearest.lon]);
-        });
-        // this.on('dragstart', function(e) {
-        // });
-        this.on('dragend', function(e) {
-            this.fetchGeoInfo(markerOptions.labelId)
-        });
-    }
-
-
-    var typedPOILayers = {}
-    var typedPOILayerControl = null
-    var secondaryPathLayers = {"Chemin secondaire" : L.layerGroup()}
-    var secondaryPathLayerControl = null
-
-    function clearLayersAndControls(){
-        if(typedPOILayerControl) {
-            for (var key in typedPOILayers) {
-                typedPOILayers[key].removeFrom(map);
-            }
-            typedPOILayers = {};
-            typedPOILayerControl.remove();
-            typedPOILayerControl = null;
-        }
-        if(secondaryPathLayerControl){
-            for (var key in secondaryPathLayers) {
-                secondaryPathLayers[key].removeFrom(map);
-            }
-            secondaryPathLayers = {}
-            secondaryPathLayerControl.remove();
-            secondaryPathLayerControl = null;
-        }
-        $(".leaflet-control-layers").remove()
-    }
     function main_map_init(map, options) {
-        var wkt = new Wkt.Wkt();
+        var originalPath = null
+        var isOriginalDisplay = true;
+        var isCustomDisplay = false;
 
-        $.ajax({
-            url: "{% url 'api-area' area_slug %}",
-            dataType: "json",
-        }).done(function(area){
-            wkt.read(area.wkt);
-            var rect = wkt.toObject(map.defaults).addTo(map)
-            map.fitBounds(rect.getBounds());
-        }).then(function(area){
-            $.ajax({
-                url: "{% url 'api-area-paths' area_slug %}",
-                dataType: "json",
-            }).done(function(paths){
+        var path = null;
+
+        var checkpoints = [];
+
+        {% include "poimap/scripts/global_vars.js" %}
+        {% include "poimap/scripts/fetch_poi.js" %}
+        {% include "poimap/scripts/fetch_area.js" %}
+
+
+        $(document).on("poimap:fetch-data", function(evt, area){
+            $.getJSON("{% url 'api-area-paths' area_slug %}").done(function(paths){
                 $.each(paths.features, function(index, path_){
                     if(path_.properties.is_root){
                         originalPath = path = L.geoJSON(path_)
                         var startPointOptions = {
                             draggable: true,
                             icon : startIcon,
-                            labelId : "#start"
+                            labelId : "#start-"+path_.slug
                         }
 
                         var endPointOptions = {
                             draggable: true,
                             icon :endIcon,
-                            labelId : "#end"
+                            labelId : "#end-"+path_.slug
                         }
                         var coords = path_.geometry.coordinates
                         startPoint = L.marker([coords[0][1], coords[0][0]], startPointOptions).addTo(map);
@@ -309,17 +200,6 @@ overflow-y: auto;
                             }
                         }
 
-                        // $("#steps").on("keyup", function(){
-                        //     var geop = path.toGeoJSON().features[0]
-                        //     var length = turf.lineDistance(geop, 'kilometers');
-                        //
-                        //     var steps = parseInt($(this).val())
-                        //     var stepLength = length/steps;
-                        //     updateCheckPoints(steps, stepLength);
-                        //     _lastParamId = "#steps";
-                        //     $("#kmPerDay").val(stepLength.toFixed(2));
-                        // });
-
                         $("#kmPerDay").on("change", function(){
                             var geop = path.toGeoJSON().features[0]
                             var length = turf.lineDistance(geop, 'kilometers');
@@ -328,69 +208,28 @@ overflow-y: auto;
                             var steps = Math.round(length / stepLength);
 
                             updateCheckPoints(steps, stepLength);
-                            // _lastParamId = "#kmPerDay";
-                            // $("#steps").val(steps);
                         });
                     }
                 });
             });
         });
 
-        function fetchPOI() {
-            var bboxCoords = resizeBbox([startPoint.getLatLng().lng,
-                                         startPoint.getLatLng().lat,
-                                         endPoint.getLatLng().lng,
-                                         endPoint.getLatLng().lat],
-                                         1.1);
-            var bbox = turf.bboxPolygon(bboxCoords)
-            $.ajax({
-                dataType: "json",
-                url: "{% url 'api-poi-list' %}?bbox="+bboxCoords.join(',')
-            }).done(function(data){
-
-                clearLayersAndControls();
-                $.each(data.features, function(index, poi){
-                    var marker = L.geoJSON(poi, {
-                        pointToLayer: function(feature, latlng) {
-                            return L.marker(latlng, {icon : L.AwesomeMarkers.icon({
-                                                        icon: poi.properties.type.icon,
-                                                        prefix : 'fa',
-                                                    })
-                            });
-                        },
-                        onEachFeature: function (feature, layer) {
-                            layer.bindPopup('<h4>'+feature.properties.name+'</h4>');
-                        }
-                    })
-                    if(typedPOILayers.hasOwnProperty(poi.properties.type.label)){
-                        typedPOILayers[poi.properties.type.label].addLayer(marker)
+        $(document).on("poimap:fetch-secondary-data", function(evt, bboxCoords){
+            $.getJSON("{% url 'api-subpath-list' area_slug %}?bbox="+bboxCoords.join(',')).done(function(data){
+                $.each(data.features, function(index, path){
+                    var subpath = L.geoJSON(path);
+                    if(secondaryPathLayers == null){
+                        secondaryPathLayers = {"Chemin secondaire" : L.layerGroup()}
                     }
-                    else {
-                        typedPOILayers[poi.properties.type.label] = L.layerGroup([marker])
-                    }
+                    secondaryPathLayers["Chemin secondaire"].addLayer(subpath)
                 });
-                if(Object.size(typedPOILayers)){
-                    typedPOILayerControl = L.control.layers(null, typedPOILayers, {collapsed : false}).addTo(map);
+                if(len(secondaryPathLayers)){
+                    secondaryPathLayerControl = L.control.layers(null, secondaryPathLayers, {collapsed : false}).addTo(map);
                 }
-            }).then(function(){
-                $.ajax({
-                    dataType: "json",
-                    url: "{% url 'api-subpath-list' area_slug %}?bbox="+bboxCoords.join(',')
-                }).done(function(data){
-                    $.each(data.features, function(index, path){
-                        var subpath = L.geoJSON(path);
-                        secondaryPathLayers["Chemin secondaire"].addLayer(subpath)
-                    });
-                    if(Object.size(secondaryPathLayers)){
-                        secondaryPathLayerControl = L.control.layers(null, secondaryPathLayers, {collapsed : false}).addTo(map);
-                    }
-                });
             });
-        }
-
-
-
+        });
     }
 </script>
+{% endcompress %}
 {% endaddtoblock%}
 {% endblock %}
