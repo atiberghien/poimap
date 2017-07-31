@@ -12,22 +12,29 @@ from treebeard.forms import MoveNodeForm, movenodeform_factory
 
 from .models import POIType, POI, poi_child_models, Area, Path
 
-class AreaAdmin(LeafletGeoAdmin):
-    list_display = ('name',)
-
-    class Meta:
-        model = Area
-        fields = '__all__'
-
-
-class PathAdminForm(MoveNodeForm):
-
+class CleanZDimensionMixin(object):
     def clean_geom(self):
         """ Tricks to add default Z dimension into geometry """
         geom = self.cleaned_data["geom"]
         ogr = OGRGeometry(geom.wkt)
         ogr.coord_dim = 3
         return ogr.geos
+
+class AreaAdmin(CleanZDimensionMixin, LeafletGeoAdmin):
+    list_display = ('name',)
+
+    class Meta:
+        model = Area
+        fields = '__all__'
+
+    class Media:
+        js = (
+            'poimap/js/path_admin_form.js',
+            'togeojson/togeojson.js',
+        )
+
+
+class PathAdminForm(CleanZDimensionMixin, MoveNodeForm):
 
     class Meta:
         model = Path
@@ -53,17 +60,10 @@ class PathAdmin(LeafletGeoAdminMixin, TreeAdmin):
     class Media:
         js = (
             'poimap/js/path_admin_form.js',
-            'bower_components/togeojson/togeojson.js',
+            'togeojson/togeojson.js',
         )
 
-class POIAdminForm(forms.ModelForm):
-
-    def clean_geom(self):
-        """ Tricks to add default Z dimension into geometry """
-        geom = self.cleaned_data["geom"]
-        ogr = OGRGeometry(geom.wkt)
-        ogr.coord_dim = 3
-        return ogr.geos
+class POIAdminForm(CleanZDimensionMixin, forms.ModelForm):
 
     class Media:
         if "grappelli" in settings.INSTALLED_APPS:
@@ -129,6 +129,7 @@ class POIAdmin(LeafletGeoAdmin):
             'fields': ('geom',),
         }),
     )
+
 
 admin.site.register(Area, AreaAdmin)
 admin.site.register(Path, PathAdmin)
