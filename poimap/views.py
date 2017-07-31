@@ -4,8 +4,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.gis.geos import Polygon
 from django.views.generic import TemplateView
 from django.shortcuts import redirect, get_object_or_404
-from django.conf import settings
-from copy import deepcopy
+from django.contrib.gis.measure import D
 from rest_framework import generics
 
 from .serializers import PathSerializer, POISerializer, TypedPOISerializer, AreaSerializer
@@ -38,6 +37,11 @@ class AreaPathsView(generics.ListAPIView):
 
     def get_queryset(self):
         area = get_object_or_404(Area, slug=self.kwargs["slug"])
+
+        ## FIXME
+        return Path.objects.all()
+
+
         queryset = Path.objects.filter(geom__within=area.geom)
         bbox_param = self.request.query_params.get('bbox', None)
         if bbox_param:
@@ -55,8 +59,11 @@ class POIList(generics.ListAPIView):
 
     def get_queryset(self):
         queryset = POI.objects.all()
-        if 'pk' in self.kwargs:
-            queryset = queryset.filter(id=self.kwargs['pk'])
+
+        path_pk = self.request.query_params.get('path_pk', None)
+        if path_pk:
+            path = get_object_or_404(Path, id=path_pk)
+            return queryset.filter(geom__distance_lte=(path.geom, D(km=2)))
 
         bbox_param = self.request.query_params.get('bbox', None)
         if bbox_param:
@@ -66,7 +73,8 @@ class POIList(generics.ListAPIView):
             xmax = bbox_param[2]
             ymax = bbox_param[3]
             bbox = Polygon.from_bbox((xmin, ymin, xmax, ymax))
-            queryset = queryset.filter(geom__contained=bbox)
+            return queryset.filter(geom__contained=bbox)
+
         return queryset
 
 class MapView(TemplateView):

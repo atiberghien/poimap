@@ -11,6 +11,9 @@ urlpatterns = [
     url(r'^api/path/(?P<slug>[\w-]+)/$', PathView.as_view(), name='path-api-detail'),
 
     url(r'^api/poi/(?P<pk>\d+)/$', POIList.as_view(), name='poi-api-detail'),
+
+    url(r'^api/path/(?P<path_pk>\d+)/poi/list/$', POIList.as_view(), name='api-poi-list'),
     url(r'^api/poi/list/$', POIList.as_view(), name='api-poi-list'),
+
     url(r'^(?P<area_slug>[\w-]+)/$', MapView.as_view(), name='map'),
 ]
