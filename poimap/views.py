@@ -1,14 +1,15 @@
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.gis.geos import Polygon
+from django.contrib.gis.geos import Polygon, Point
+from django.contrib.gis.db.models.functions import Distance
+from django.contrib.gis.measure import D
 from django.views.generic import TemplateView
 from django.shortcuts import redirect, get_object_or_404
-from django.contrib.gis.measure import D
 from rest_framework import generics
 
-from .serializers import PathSerializer, POISerializer, TypedPOISerializer, AreaSerializer
-from .models import Path, POI, POIType, Area
+from .serializers import PathSerializer, POISerializer, AreaSerializer
+from .models import Path, POI, Area
 
 
 class AreaView(generics.RetrieveAPIView):
@@ -63,18 +64,19 @@ class POIList(generics.ListAPIView):
         path_pk = self.request.query_params.get('path_pk', None)
         if path_pk:
             path = get_object_or_404(Path, id=path_pk)
-            return queryset.filter(geom__distance_lte=(path.geom, D(km=2)))
+            queryset = queryset.filter(geom__distance_lte=(path.geom, D(km=2)))
+        else:
+            bbox_param = self.request.query_params.get('bbox', None)
+            if bbox_param:
+                bbox_param = [float(x) for x in bbox_param.split(',')]
+                xmin = bbox_param[0]
+                ymin = bbox_param[1]
+                xmax = bbox_param[2]
+                ymax = bbox_param[3]
+                bbox = Polygon.from_bbox((xmin, ymin, xmax, ymax))
+                queryset = queryset.filter(geom__contained=bbox)
 
-        bbox_param = self.request.query_params.get('bbox', None)
-        if bbox_param:
-            bbox_param = [float(x) for x in bbox_param.split(',')]
-            xmin = bbox_param[0]
-            ymin = bbox_param[1]
-            xmax = bbox_param[2]
-            ymax = bbox_param[3]
-            bbox = Polygon.from_bbox((xmin, ymin, xmax, ymax))
-            return queryset.filter(geom__contained=bbox)
-
+        queryset = queryset.annotate(distance=Distance('geom', Point(0, 90, srid=4326))).order_by('distance')
         return queryset
 
 class MapView(TemplateView):
