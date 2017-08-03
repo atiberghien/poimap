@@ -5,6 +5,8 @@ from django.contrib.gis import admin
 from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
 from django.contrib.gis.gdal import OGRGeometry
+from django.contrib.gis.geos import Point
+from django.contrib.gis.db.models.functions import Distance
 
 from leaflet.admin import LeafletGeoAdmin, LeafletGeoAdminMixin
 from treebeard.admin import TreeAdmin
@@ -19,6 +21,12 @@ class CleanZDimensionMixin(object):
         ogr = OGRGeometry(geom.wkt)
         ogr.coord_dim = 3
         return ogr.geos
+
+class OrderByDistanceMixin(object):
+    def get_queryset(self, request):
+        qs = super(OrderByDistanceMixin, self).get_queryset(request)
+        qs = qs.annotate(distance=Distance('geom', Point(0, 90, srid=4326))).order_by('distance')
+        return qs
 
 class AreaAdmin(CleanZDimensionMixin, LeafletGeoAdmin):
     list_display = ('name',)
