@@ -39,7 +39,8 @@ function fetchPOI(pathPK) {
     } else {
         url = "{% url 'api-poi-list' %}?bbox="+bboxCoords.join(',');
     }
-    $.getJSON(url).done(function(data){
+
+    return $.getJSON(url).done(function(data){
 
         clearLayersAndControls();
         var count = 0
