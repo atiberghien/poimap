@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
 
 setup(name='poimap',
-      version='0.1',
-      description='Set POI on a map',
+      version='0.6.1',
+      description='Manage POI on a map',
       url='https://github.com/atiberghien/poimap',
       author='Alban Tiberghien',
       author_email='alban.tiberghien@gmail.com',
