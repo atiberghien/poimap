@@ -1,7 +1,6 @@
 {% load static %}
 
 var typedPOILayers = {}
-var simplePOILayer = null;
 var typedPOILayerControl = null
 var secondaryPathLayers = null;
 var secondaryPathLayerControl = null
