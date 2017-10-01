@@ -50,7 +50,7 @@ function fetchPOI(pathPK) {
                         icon: poi.properties.type.icon,
                         prefix : 'fa',
                     }));
-                    layer.bindPopup('<h4>'+feature.properties.name+'</h4>');
+                    layer.bindPopup(feature.properties.marker_popup, {'className':'custom-poimap-popup' });
                     count++;
                     layer.on("click", function(){
                         $(document).trigger("poimap:marker-clicked", [feature, layer]);
