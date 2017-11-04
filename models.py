@@ -1,12 +1,9 @@
 from __future__ import unicode_literals
 
 from django.db import models
-from django.contrib.gis.db import models as gismodels
-from django.contrib.gis.db.models import PointField
-from filer.models import File
 from filer.fields.image import FilerImageField
 
-from itinerary.models import POIType, POI, poi_child_models
+from poimap.models import POI, poi_child_models
 
 class PaymentType(models.Model):
     label = models.CharField(max_length=30)         # hotel gite chambre_hote camping autres

@@ -9,7 +9,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('itinerary', '0005_poi'),
+        ('poimap', '0005_poi'),
         ('hostings', '0008_auto_20170327_1854'),
     ]
 
@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='hostings',
             name='poi_ptr',
-            field=models.OneToOneField(auto_created=True, default=1, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='itinerary.POI'),
+            field=models.OneToOneField(auto_created=True, default=1, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='poimap.POI'),
             preserve_default=False,
         ),
     ]

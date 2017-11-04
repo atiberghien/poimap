@@ -10,14 +10,14 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('hostings', '0007_auto_20170323_1730'),
-        ('itinerary', '0003_auto_20170327_2236'),
+        ('poimap', '0004_poiaddress'),
     ]
 
     operations = [
         migrations.AlterField(
             model_name='hostings',
             name='hosting_type',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='itinerary.POIType'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='poimap.POIType'),
         ),
         migrations.DeleteModel(
             name='HostingType',

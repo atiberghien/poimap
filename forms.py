@@ -1,6 +1,6 @@
 from django import forms
 from hostings.models import Hostings, PaymentType
-from itinerary.models import POIType
+from poimap.models import POIType
 
 
 class HostingsForm(forms.ModelForm):
