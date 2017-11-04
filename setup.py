@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(name='poimap',
-      version='0.6.1',
+      version='1.0.0',
       description='Manage POI on a map',
       url='https://github.com/atiberghien/poimap',
       author='Alban Tiberghien',
@@ -11,7 +11,7 @@ setup(name='poimap',
       include_package_data=True,
       install_requires=[
            'psycopg2>=2.7.3',
-           'Django>=1.11.3',
+           'Django<1.10',
            "django-compress>=1.0.1",
            "django-sekizai>=0.10.0",
            'django-autoslug>=1.9.3',
@@ -25,5 +25,6 @@ setup(name='poimap',
            'easy-thumbnails>=2.4.1',
            'django-leaflet>=0.22.0',
            'django-fontawesome>=0.3.1',
+           'shapely'
       ],
       zip_safe=False)
