@@ -28,9 +28,15 @@ class OrderByDistanceMixin(object):
         qs = qs.annotate(distance=Distance('geom', Point(0, 90, srid=4326))).order_by('distance')
         return qs
 
-class AreaAdmin(CleanZDimensionMixin, LeafletGeoAdmin):
-    list_display = ('name',)
+class AreaAdminForm(CleanZDimensionMixin, forms.ModelForm):
+    class Meta:
+        model = Area
+        fields = "__all__"
 
+class AreaAdmin(LeafletGeoAdmin):
+    list_display = ('name',)
+    form = AreaAdminForm
+    
     class Meta:
         model = Area
         fields = '__all__'
