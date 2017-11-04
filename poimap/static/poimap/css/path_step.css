@@ -1,0 +1,66 @@
+#toolbar {
+    float: right;
+    z-index: 100;
+    position: sticky;
+    top: 0;
+    font-size: 1.5em
+}
+
+#toolbar ul {
+    list-style: none;
+    font-size: 2em;
+}
+
+.path-step-selector {
+    float: right;
+}
+
+
+.path-step.not-selected {
+    color: black;
+    background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 10px,
+        #ccc 10px,
+        #ccc 20px
+    );
+    height: 2em;
+}
+
+.path-step .distance {
+    vertical-align: middle;
+    border-left: solid 2px #FE7569;
+}
+
+.path-step .distance div {
+    font-weight: bold;
+    font-size: 1.5em;
+    margin-left: 0.5em;
+    width: 100%;
+}
+
+.path-step .distance i {
+    color : #FE7569;
+    font-size: 2em;
+    margin-left: -20px;
+    position: absolute;
+    background-color: white;
+}
+
+.path-step.not-selected h2 {
+    font-size: 1em;
+    font-weight: bold;
+    color: grey;
+    padding: 0;
+    margin: 0;
+    line-height: 2em;
+}
+
+.path-step.not-selected .path-step-selector {
+    font-size: 2em;
+}
+.path-step.not-selected .leaflet-container, .path-step.not-selected .form-group {
+    visibility: hidden;
+    display: none;
+}

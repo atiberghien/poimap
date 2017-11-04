@@ -40,7 +40,7 @@ L.Marker.prototype.fetchGeoInfo = function(labelId) {
                 if(data.results.length > 0) {
                     var poiResult = data.results[0];
                     $(labelId+" span.geo-text").text(poiResult.formatted_address);
-                    $(labelId+" input").val(poiResult.formatted_address);
+                    $(labelId+" input").val(JSON.stringify(poiResult.geometry.location));
                 }
             }
         }

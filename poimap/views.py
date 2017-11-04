@@ -5,12 +5,16 @@ from django.contrib.gis.geos import Polygon, Point
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.measure import D
 from django.views.generic import TemplateView
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import redirect, get_object_or_404, render
 from rest_framework import generics
+from shapely.geometry import box
+from shapely.affinity import scale
 
 from .serializers import PathSerializer, POISerializer, AreaSerializer
 from .models import Path, POI, Area
 
+import operator
+import json
 
 class AreaView(generics.RetrieveAPIView):
     queryset = Area.objects.all()
@@ -55,6 +59,10 @@ class AreaPathsView(generics.ListAPIView):
             queryset = queryset.filter(geom__contained=bbox)
         return queryset
 
+class POIView(generics.RetrieveAPIView):
+    queryset = POI.objects.all()
+    serializer_class = POISerializer
+
 class POIList(generics.ListAPIView):
     serializer_class = POISerializer
 
@@ -89,6 +97,47 @@ class MapView(TemplateView):
         })
         return context
 
+
+
+def custom_itinerary(request, path_slug):
+    path = Path.objects.get(slug=path_slug)
+    # ogr = OGRGeometry(path.geom.wkt)
+    # ogr.coord_dim = 2
+    # path2d_geom = ogr.geos
+    start = json.loads(request.POST["start"])
+    end = json.loads(request.POST["end"])
+    bbox = box(start["lng"], start["lat"], end["lng"], end["lat"])
+    bbox = scale(bbox, xfact=1.1, yfact=1.1)
+    bbox = Polygon(list(bbox.exterior.coords))
+    custom_path = path.geom.intersection(bbox)
+    custom_path.transform(3035)
+    length = custom_path.length / 1000
+    custom_path.transform(4326)
+    poi_list = []
+
+    for poi in POI.objects.filter(geom__within=bbox):
+        temp_bbox = box(start["lng"], start["lat"], poi.geom.coords[0], poi.geom.coords[1])
+        temp_bbox = scale(temp_bbox, xfact=1.2, yfact=1.2)
+        temp_bbox = Polygon(list(temp_bbox.exterior.coords))
+        temp_path = custom_path.intersection(temp_bbox)
+        temp_path.transform(3035)
+        distance = temp_path.length / 1000
+        temp_path.transform(4326)
+        poi_list.append({
+            "distance" : distance,
+            "poi" : poi,
+            "bbox" : temp_bbox,
+            'poi_path' : temp_path
+        })
+    poi_list = sorted(poi_list, key=lambda data: data["distance"])
+
+    return render(request, "itinerary.html", {
+        "path_slug" : path_slug,
+        "custom_bbox" : bbox.geojson,
+        "custom_path" : custom_path.geojson,
+        "poi_list" : poi_list[:10],
+        "total_length" : length,
+    })
 
 @login_required
 @staff_member_required

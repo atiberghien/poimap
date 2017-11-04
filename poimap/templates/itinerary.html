@@ -1,43 +1,141 @@
 {% extends "base.html" %}
-
+{% load leaflet_tags static sekizai_tags compress%}
 {% block title %}Votre itinéraire{% endblock %}
 
 {% block content %}
-
-<h1 class="text-center">Préparer son itinéraire</h1>
-
-
-    <form class="" action="index.html" method="post">
-        <div class="">
-            <label for="">Point de départ</label>
-            <select class="" name="">
-                {% for base in bases %}
-                <option value="">{{ base.name }}</option>
-                {% endfor %}
-            </select>
+    <div class="col-md-12">
+        <h1 class="text-center">Personnaliser votre itinéraire</h1>
+        <p>Distance totale de votre randonnée : {{total_length|floatformat:2}} km</p>
+        <div id="toolbar">
+            <ul>
+                <li><a href="#"><i class="fa fa-floppy-o"></i></a></li>
+                <li><a id="generate-pdf" href="#"><i class="fa fa-file-pdf-o"></i></a></li>
+            </ul>
         </div>
-        <div class="">
-            <label for="">Sens de l'itinéraire</label>
-            Nord Sud <input type="radio" name="sens" value="NS" checked >
-            Sud Nord <input type="radio" name="sens" value="SN" >
+        <div class="table-responsive">
+            <form id="itineraryForm">
+                <table class="table">
+                    {% for data in poi_list %}
+                    <tr id="path-step-{{data.poi.id}}" class="path-step">
+                        <td class="distance">
+                            <i class="fa fa-dot-circle-o"></i>
+                            <div>{{data.distance|floatformat:2}} km</div>
+                        </td>
+                        {% with data.poi.id|stringformat:"s" as poi_id %}
+                            {% with map_id="map-"|add:poi_id map_callback="map_init_"|add:poi_id %}
+                        <td>
+                            <div id='{{map_id}}'>
+                                {% leaflet_map map_id callback=map_callback%}
+                            </div>
+                        </td>
+                            {% endwith %}
+                        {% endwith %}
+                        <td>
+                            <h2>{{data.poi.name}} <a class="path-step-selector" data-step-id="{{data.poi.id}}" href="#"><i class="fa fa-eye"></i></a></h2>
+                            <input type="hidden" name="path-step-{{data.poi.id}}-selected" value="true">
+                            <div class="form-group">
+                                <label for="path-step-{{data.poi.id}}-comment">Commentaire</label>
+                                <textarea class="form-control" name="path-step-{{data.poi.id}}-comment" rows="8"></textarea>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </form>
         </div>
-        <div class="">
-            <label for="">Jours de marche</label>
-            <input type="text" name="" value="">
-        </div>
-        <div class="">
-            <label for="">Kms journaliers</label>
-            <input type="text" name="" value="">
-        </div>
-        <div class="">
-            <label for="">Point d'arrivée</label>
-            <select class="" name="">
-                {% for base in bases %}
-                <option value="">{{ base.name }}</option>
-                {% endfor %}
-            </select>
-        </div>
-    </form>
 
+    </div>
 
+{% addtoblock "css" %}
+<style>
+    .leaflet-container {
+        width:  350px;
+        height: 300px;
+    }
+</style>
+<link rel="stylesheet" href="{% static 'poimap/css/path_step.css' %}">
+<link rel="stylesheet" href="{% static 'bower_components/Leaflet.awesome-markers/dist/leaflet.awesome-markers.css' %}">
+{% endaddtoblock %}
+{% addtoblock "prior_js" %}
+{% endaddtoblock %}
+{% addtoblock "js" %}
+{# {% compress js %}#}
+<script src="{% static 'bower_components/jspdf/dist/jspdf.min.js' %}" charset="utf-8"></script>
+<script src="{% static 'bower_components/leaflet-image/leaflet-image.js' %}" charset="utf-8"></script>
+<script src="{% static 'bower_components/Leaflet.awesome-markers/dist/leaflet.awesome-markers.min.js' %}" charset="utf-8"></script>
+{# {% endcompress %}#}
+{# {% compress js inline %}#}
+<script type="text/javascript">
+
+        {% for data in poi_list %}
+        function map_init_{{data.poi.id}}(map, options) {
+            console.log(options);
+            $(".leaflet-control-attribution").remove();
+            $(".leaflet-control-scale").remove();
+            $(".leaflet-control-zoom-out.leaflet-bar-part").remove();
+            map.scrollWheelZoom.disable();
+            map.dragging.disable();
+            $.getJSON("{% url 'path-api-detail' path_slug %}").done(function(data){
+                L.geoJSON(data, { color : "red"}).addTo(map);
+                $.getJSON("{% url 'poi-api-detail' data.poi.id %}").done(function(data){
+                    var coords = null;
+                    var poi = L.geoJSON(data, {
+                        pointToLayer: function (feature, latlng) {
+                            coords = latlng;
+                            var marker = L.marker(latlng)
+                            // , {
+                            //     icon : L.AwesomeMarkers.icon({
+                            //         icon: data.properties.type.icon,
+                            //         prefix : 'fa',
+                            //     })
+                            // });
+                            map.setView(coords, 14);
+                            return marker;
+                        }
+                    }).addTo(map);
+                });
+            });
+        }
+        {% endfor %}
+        $(document).ready(function(){
+
+            $(".path-step-selector .fa").hover(function(){
+                $(this).toggleClass(function() {
+                    if ($(this).is(".fa-eye")) {
+                        return "fa-eye-slash";
+                    } else {
+                        return "fa-eye";
+                    }
+                })
+            });
+            $(".path-step-selector").click(function(){
+                event.preventDefault();
+                var stepId = $(this).data("step-id");
+                $(this).find("i").toggleClass(function() {
+                    $(`#path-step-${stepId}`).toggleClass("not-selected");
+                    if ($(this).is(".fa-eye")) {
+                        $(`input[name=path-step-${stepId}-selected]`).val(false);
+                        return "fa-eye-slash";
+                    } else {
+                        $(`input[name=path-step-${stepId}-selected]`).val(true);
+                        return "fa-eye";
+                    }
+                });
+                return false;
+            });
+
+            $("#generate-pdf").click(function(){
+                event.preventDefault();
+                var pdf = new jsPDF('p','pt','a4');
+
+                var doc = $(document.body).clone();
+                $(doc).find(".leaflet-container").remove();
+                pdf.addHTML(doc[0],function() {
+                    pdf.save('a4.pdf')
+                });
+            });
+        })
+</script>
+{# {% endcompress %}#}
+{% endaddtoblock%}
 {% endblock %}

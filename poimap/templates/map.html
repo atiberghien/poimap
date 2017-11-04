@@ -1,33 +1,33 @@
 {% extends "base.html" %}
-{% load leaflet_tags static sekizai_tags %}
-{% load compress %}
+{% load leaflet_tags static sekizai_tags compress%}
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-12">
-            <h1 class="text-center">Carte des POI</h1>
+<div class="row">
+    <div class="col-md-12">
+        <h1 class="text-center">Carte des POI</h1>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-8">
+        <div id='map'>
+            {% leaflet_map "main" callback="main_map_init" settings_overrides=map_settings%}
         </div>
     </div>
-    <div class="row">
-        <div class="col-md-8">
-            <div id='map'>
-                {% leaflet_map "main" callback="main_map_init" settings_overrides=map_settings%}
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="row">
-                <div class="col-md-12">
+    <div class="col-md-4">
+        <div class="row">
+            <div class="col-md-12">
+                <form class="" action="{% url 'itinerary' area_slug %}" method="post">
+                    {% csrf_token %}
                     <table class="table">
                         <tr>
                             <td>Départ</td>
-                            <td id="start">
+                            <td id="start-{{area_slug}}">
                                 <span class="geo-text"></span>
                                 <input class="geo-info" type="hidden" name="start"/>
                             </td>
                         </tr>
                         <tr>
                             <td>Arrivé</td>
-                            <td id="end">
+                            <td id="end-{{area_slug}}">
                                 <span class="geo-text"></span>
                                 <input class="geo-info" type="hidden" name="end"/>
                             </td>
@@ -47,47 +47,13 @@
                             </td>
                         </tr>
                     </table>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <h2 id="poi-title"></h2>
-                    <p id="poi-description"></p>
-                </div>
+                    {% if POI_CUSTOM_ITINERARY %}
+                    <button type="submit" name="button">Personnaliser mon itinéraire</button>
+                    {% endif %}
+                </form>
             </div>
         </div>
     </div>
-</div>
-<style media="screen">
-
-/* Important part */
-.modal-dialog{
-overflow-y: initial !important
-}
-.modal-body{
-height: 400px;
-overflow-y: auto;
-}
-</style>
-<div class="modal"
-     id="poiModal"
-     tabindex="-1"
-     role="dialog"
-     aria-labelledby="poiModal"
-     aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="poiModalTitle"></h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-          <p id="poiModalDescription"></p>
-      </div>
-    </div>
-  </div>
 </div>
 {% addtoblock "css" %}
 <link rel="stylesheet" href="{% static 'bower_components/Leaflet.awesome-markers/dist/leaflet.awesome-markers.css' %}">
@@ -127,13 +93,13 @@ overflow-y: auto;
                         var startPointOptions = {
                             draggable: true,
                             icon : startIcon,
-                            labelId : "#start-"+path_.slug
+                            labelId : "#start-"+path_.properties.slug
                         }
 
                         var endPointOptions = {
                             draggable: true,
                             icon :endIcon,
-                            labelId : "#end-"+path_.slug
+                            labelId : "#end-"+path_.properties.slug
                         }
                         var coords = path_.geometry.coordinates
                         startPoint = L.marker([coords[0][1], coords[0][0]], startPointOptions).addTo(map);
@@ -174,8 +140,6 @@ overflow-y: auto;
                         }
 
                         computePath();
-                        startPoint.on('dragend', computePath);
-                        endPoint.on('dragend', computePath);
 
                         function updateCheckPoints(steps, stepLength) {
                             for (var i = 0; i < checkpoints.length; i++) {
@@ -187,11 +151,10 @@ overflow-y: auto;
                                 var along = turf.along(geop, stepLength * i, 'kilometers');
                                 L.geoJSON(along, {
                                     pointToLayer: function (feature, latlng) {
-                                        var checkpoint = L.marker(latlng, {
-                                            icon : L.AwesomeMarkers.icon({
-                                                icon: 'star',
-                                                prefix : 'fa',
-                                            })
+                                        var checkpoint = L.circleMarker(latlng, {
+                                            radius : 2,
+                                            color : 'red',
+                                            fill : "red"
                                         });
                                         checkpoints.push(checkpoint);
                                         return checkpoint
@@ -199,6 +162,8 @@ overflow-y: auto;
                                 }).addTo(map);
                             }
                         }
+                        startPoint.on('dragend', computePath);
+                        endPoint.on('dragend', computePath);
 
                         $("#kmPerDay").on("change", function(){
                             var geop = path.toGeoJSON().features[0]
@@ -209,6 +174,7 @@ overflow-y: auto;
 
                             updateCheckPoints(steps, stepLength);
                         });
+                        $("#kmPerDay").change()
                     }
                 });
             });
