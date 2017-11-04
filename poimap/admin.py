@@ -42,10 +42,13 @@ class AreaAdmin(LeafletGeoAdmin):
         fields = '__all__'
 
     class Media:
-        js = (
-            'poimap/js/path_admin_form.js',
-            'togeojson/togeojson.js',
-        )
+        if "grappelli" in settings.INSTALLED_APPS:
+            pass
+        else:
+            js = (
+                'poimap/js/path_admin_form.js',
+                'togeojson/togeojson.js',
+            )
 
 
 class PathAdminForm(CleanZDimensionMixin, MoveNodeForm):
