@@ -54,16 +54,16 @@
     }
 </style>
 <link rel="stylesheet" href="{% static 'poimap/css/path_step.css' %}">
-<link rel="stylesheet" href="{% static 'bower_components/Leaflet.awesome-markers/dist/leaflet.awesome-markers.css' %}">
+{% leaflet_css %}
+<link rel="stylesheet" href="{% static 'leaflet.awesome-markers/dist/leaflet.awesome-markers.css' %}">
 {% endaddtoblock %}
 {% addtoblock "prior_js" %}
 {% endaddtoblock %}
 {% addtoblock "js" %}
-{# {% compress js %}#}
-<script src="{% static 'bower_components/jspdf/dist/jspdf.min.js' %}" charset="utf-8"></script>
-<script src="{% static 'bower_components/leaflet-image/leaflet-image.js' %}" charset="utf-8"></script>
-<script src="{% static 'bower_components/Leaflet.awesome-markers/dist/leaflet.awesome-markers.min.js' %}" charset="utf-8"></script>
-{# {% endcompress %}#}
+{% compress js %}
+{% leaflet_js %}
+<script src="{% static 'leaflet.awesome-markers/dist/leaflet.awesome-markers.min.js' %}" charset="utf-8"></script>
+{% endcompress %}
 {# {% compress js inline %}#}
 <script type="text/javascript">
 
