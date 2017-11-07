@@ -1,8 +1,9 @@
 
-INSTALL
+# INSTALL
 
 Add 'poimap' and its dependencies in INSTALLED_APPS:
 
+```
 INSTALLED_APPS = [
     'polymorphic',
     ...
@@ -19,26 +20,36 @@ INSTALLED_APPS = [
     'poimap',
     ...
 ]
+```
 
-SETTINGS
+# SETTINGS
 
 POI_UNDER_CONTROL(default:True) : POI layer will be gathered (or not) within a layer control
 
+# URLS
 
-MODEL
+```
+urlpatterns = [
+    ...
+    url(r'^api/', include("poimap.urls")),
+    ...
+]
+```
 
+# MODEL
+```
 from poimap.models import POI
 
 
 class MyModel(POI):
     pass
+```
 
-
-ADMIN
+# ADMIN
 
 Admin of a POI related model must look like :
 
-
+```
 from django.contrib import admin
 from leaflet.admin import LeafletGeoAdmin
 from poimap.admin import POIAdminForm
@@ -69,3 +80,4 @@ class MyModelAdmin(LeafletGeoAdmin):
     )
 
 admin.site.register(MyModel, MyModelAdmin)
+```
