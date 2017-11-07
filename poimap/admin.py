@@ -125,8 +125,8 @@ class POIAdmin(LeafletGeoAdmin):
     convert_actions.allow_tags = True
     convert_actions.short_description = ""
 
-    list_display = ('id', 'name', 'type', 'convert_actions')
-    list_editable = ('name', 'type')
+    list_display = ('id', 'name', 'type', "starred", 'convert_actions')
+    list_editable = ('name', 'type', "starred")
     list_filter = ('type',)
     search_fields = ('name',)
 

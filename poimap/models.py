@@ -14,7 +14,7 @@ class Area(models.Model):
     slug = AutoSlugField(populate_from="name", always_update=True)
     description = models.TextField(blank=True, null=True)
     geom = gismodels.GeometryField(dim=3)
-    
+
     def __unicode__(self):
         return self.name
 
@@ -51,6 +51,8 @@ class POI(PolymorphicModel):
     city = models.CharField(max_length=300, blank=True, null=True)
     country = CountryField(default="FR")
     geom = gismodels.PointField(dim=3)
+
+    starred = models.BooleanField(default=False)
 
     @property
     def coords(self):
