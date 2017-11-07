@@ -36,7 +36,7 @@ class AreaAdminForm(CleanZDimensionMixin, forms.ModelForm):
 class AreaAdmin(LeafletGeoAdmin):
     list_display = ('name',)
     form = AreaAdminForm
-    
+
     class Meta:
         model = Area
         fields = '__all__'
@@ -47,7 +47,7 @@ class AreaAdmin(LeafletGeoAdmin):
         else:
             js = (
                 'poimap/js/path_admin_form.js',
-                'togeojson/togeojson.js',
+                '@mapbox/togeojson/togeojson.js',
             )
 
 
@@ -77,7 +77,7 @@ class PathAdmin(LeafletGeoAdminMixin, TreeAdmin):
     class Media:
         js = (
             'poimap/js/path_admin_form.js',
-            'togeojson/togeojson.js',
+            '@mapbox/togeojson/togeojson.js',
         )
 
 class POIAdminForm(CleanZDimensionMixin, forms.ModelForm):
