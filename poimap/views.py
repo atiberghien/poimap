@@ -135,7 +135,7 @@ def custom_itinerary(request, path_slug):
         "path_slug" : path_slug,
         "custom_bbox" : bbox.geojson,
         "custom_path" : custom_path.geojson,
-        "poi_list" : poi_list[:10],
+        "poi_list" : poi_list,
         "total_length" : length,
     })
 
