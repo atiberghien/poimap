@@ -3,7 +3,7 @@
 {% block content %}
 <div class="row">
     <div class="col-md-12">
-        <h1 class="text-center">Carte des POI</h1>
+        <h1 class="text-center">Carte du {{area.name}}</h1>
     </div>
 </div>
 <div class="row">
@@ -15,19 +15,19 @@
     <div class="col-md-4">
         <div class="row">
             <div class="col-md-12">
-                <form class="" action="{% url 'itinerary' area_slug %}" method="post">
+                <form class="" action="{% url 'itinerary' area.slug %}" method="post">
                     {% csrf_token %}
                     <table class="table">
                         <tr>
                             <td>Départ</td>
-                            <td id="start-{{area_slug}}">
+                            <td id="start-{{area.slug}}">
                                 <span class="geo-text"></span>
                                 <input class="geo-info" type="hidden" name="start"/>
                             </td>
                         </tr>
                         <tr>
                             <td>Arrivé</td>
-                            <td id="end-{{area_slug}}">
+                            <td id="end-{{area.slug}}">
                                 <span class="geo-text"></span>
                                 <input class="geo-info" type="hidden" name="end"/>
                             </td>
@@ -56,17 +56,22 @@
     </div>
 </div>
 {% addtoblock "css" %}
-<link rel="stylesheet" href="{% static 'bower_components/Leaflet.awesome-markers/dist/leaflet.awesome-markers.css' %}">
+{% leaflet_css %}
+<link rel="stylesheet" href="{% static 'leaflet.awesome-markers/dist/leaflet.awesome-markers.css' %}">
+<style media="screen">
+    .leaflet-container {
+        height: 500px;
+    }
+</style>
 {% endaddtoblock %}
 
 {% addtoblock "js" %}
 {% compress js %}
-<script src="{% static 'bower_components/turfjs/turf.min.js' %}" charset="utf-8"></script>
-<script src="{% static 'bower_components/togeojson/togeojson.js' %}" charset="utf-8"></script>
-<script src="{% static 'bower_components/leaflet-knn/leaflet-knn.min.js' %}" charset="utf-8"></script>
-<script src="{% static 'bower_components/Leaflet.awesome-markers/dist/leaflet.awesome-markers.min.js' %}" charset="utf-8"></script>
-<script src="{% static 'bower_components/Wicket/wicket.js' %}" charset="utf-8"></script>
-<script src="{% static 'bower_components/Wicket/wicket-leaflet.js' %}" charset="utf-8"></script>
+{% leaflet_js %}
+<script src="{% static 'leaflet.awesome-markers/dist/leaflet.awesome-markers.min.js' %}" charset="utf-8"></script>
+<script src="{% static 'turf/turf.min.js' %}" charset="utf-8"></script>
+<script src="{% static '@mapbox/togeojson/togeojson.js' %}" charset="utf-8"></script>
+<script src="{% static 'leaflet-knn/leaflet-knn.min.js' %}" charset="utf-8"></script>
 <script src="{% static 'poimap/js/poimap.utils.js' %}" charset="utf-8"></script>
 {% endcompress %}
 {% compress js inline %}
@@ -80,13 +85,13 @@
 
         var checkpoints = [];
 
-        {% include "poimap/scripts/global_vars.js" %}
-        {% include "poimap/scripts/fetch_poi.js" %}
-        {% include "poimap/scripts/fetch_area.js" %}
+        {% include "poimap/scripts/global_vars.js" with area_slug=area.slug %}
+        {% include "poimap/scripts/fetch_poi.js"  with area_slug=area.slug %}
+        {% include "poimap/scripts/fetch_area.js"  with area_slug=area.slug %}
 
 
         $(document).on("poimap:fetch-data", function(evt, area){
-            $.getJSON("{% url 'api-area-paths' area_slug %}").done(function(paths){
+            $.getJSON("{% url 'api-area-paths' area.slug %}").done(function(paths){
                 $.each(paths.features, function(index, path_){
                     if(path_.properties.is_root){
                         originalPath = path = L.geoJSON(path_)
@@ -181,7 +186,7 @@
         });
 
         $(document).on("poimap:fetch-secondary-data", function(evt, bboxCoords){
-            $.getJSON("{% url 'api-subpath-list' area_slug %}?bbox="+bboxCoords.join(',')).done(function(data){
+            $.getJSON("{% url 'api-subpath-list' area.slug %}?bbox="+bboxCoords.join(',')).done(function(data){
                 $.each(data.features, function(index, path){
                     var subpath = L.geoJSON(path);
                     if(secondaryPathLayers == null){
