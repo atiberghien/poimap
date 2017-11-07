@@ -63,6 +63,7 @@ class AreaPathsView(generics.ListAPIView):
 class POIDetailView(DetailView):
     model = POI
 
+
 class POIView(generics.RetrieveAPIView):
     queryset = POI.objects.all()
     serializer_class = POISerializer
@@ -96,8 +97,11 @@ class MapView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(MapView, self).get_context_data(**kwargs)
+        area = Area.objects.first()
+        if "area_slug" in kwargs:
+            area = Area.objects.get(slug=kwargs["area_slug"])
         context.update({
-            'area_slug' : kwargs["area_slug"]
+            'area' : area
         })
         return context
 
