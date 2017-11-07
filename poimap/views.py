@@ -4,7 +4,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.gis.geos import Polygon, Point
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.measure import D
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, DetailView
 from django.shortcuts import redirect, get_object_or_404, render
 from rest_framework import generics
 from shapely.geometry import box
@@ -58,6 +58,10 @@ class AreaPathsView(generics.ListAPIView):
             bbox = Polygon.from_bbox((xmin, ymin, xmax, ymax))
             queryset = queryset.filter(geom__contained=bbox)
         return queryset
+
+
+class POIDetailView(DetailView):
+    model = POI
 
 class POIView(generics.RetrieveAPIView):
     queryset = POI.objects.all()
