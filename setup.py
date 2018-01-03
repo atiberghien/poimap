@@ -21,10 +21,13 @@ setup(name='poimap',
            'django-treebeard',
            'django-polymorphic',
            'django-polymorphic-tree',
-           'django-filer',
+           # 'django-filer',
            'easy-thumbnails',
            'django-leaflet',
            'django-fontawesome',
            'shapely'
+      ],
+      dependency_links=[
+        "git+https://github.com/iplweb/django-autoslug-iplweb.git#egg=django-autoslug"
       ],
       zip_safe=False)

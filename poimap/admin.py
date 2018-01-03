@@ -3,7 +3,7 @@ from django import forms
 from django.conf import settings
 from django.contrib.gis import admin
 from django.contrib.contenttypes.models import ContentType
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib.gis.gdal import OGRGeometry
 from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance

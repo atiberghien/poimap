@@ -7,7 +7,7 @@ from cms.apphook_pool import apphook_pool
 from menus.base import NavigationNode
 from menus.menu_pool import menu_pool
 from cms.menu_bases import CMSAttachMenu
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from .models import POI
 
 class StarredPOIMenu(CMSAttachMenu):
