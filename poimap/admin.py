@@ -147,8 +147,14 @@ class POIAdmin(LeafletGeoAdmin):
         }),
     )
 
+class POITypeAdmin(admin.ModelAdmin):
+    list_display = ('label', )
+
+    class Meta:
+        model = POIType
+        fields = '__all__'
 
 admin.site.register(Area, AreaAdmin)
 admin.site.register(Path, PathAdmin)
 admin.site.register(POI, POIAdmin)
-admin.site.register(POIType)
+admin.site.register(POIType, POITypeAdmin)
