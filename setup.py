@@ -11,10 +11,10 @@ setup(name='poimap',
       include_package_data=True,
       install_requires=[
            'psycopg2',
-           'Django',
+           'Django<2.0',
            "django-compress",
            "django-sekizai",
-           'django-autoslug-iplweb',
+           'django-autoslug',
            'django-countries',
            'djangorestframework',
            'djangorestframework-gis',
@@ -26,8 +26,5 @@ setup(name='poimap',
            'django-leaflet',
            'django-fontawesome',
            'shapely'
-      ],
-      dependency_links=[
-        "git+https://github.com/iplweb/django-autoslug-iplweb.git#egg=django-autoslug-iplweb"
       ],
       zip_safe=False)
