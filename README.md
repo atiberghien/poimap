@@ -15,7 +15,6 @@ INSTALLED_APPS = [
     'treebeard',
     'fontawesome',
     'leaflet',
-    'filer',
     'easy_thumbnails',
     'poimap',
     ...
