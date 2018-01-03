@@ -14,7 +14,7 @@ setup(name='poimap',
            'Django',
            "django-compress",
            "django-sekizai",
-           'django-autoslug',
+           'django-autoslug-iplweb',
            'django-countries',
            'djangorestframework',
            'djangorestframework-gis',
@@ -28,6 +28,6 @@ setup(name='poimap',
            'shapely'
       ],
       dependency_links=[
-        "git+https://github.com/iplweb/django-autoslug-iplweb.git#egg=django-autoslug"
+        "git+https://github.com/iplweb/django-autoslug-iplweb.git#egg=django-autoslug-iplweb"
       ],
       zip_safe=False)
