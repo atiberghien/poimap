@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import django.contrib.gis.db.models.fields
 from django.db import migrations, models
 import django.db.models.deletion
-import filer.fields.image
+# import filer.fields.image
 
 
 class Migration(migrations.Migration):
@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('filer', '0007_auto_20161016_1055'),
+        # ('filer', '0007_auto_20161016_1055'),
     ]
 
     operations = [
@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=50)),
                 ('geo_coordinates', django.contrib.gis.db.models.fields.PointField(blank=True, null=True, srid=4326)),
                 ('description', models.TextField(blank=True)),
-                ('media', filer.fields.image.FilerImageField(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='filer.Image')),
+                # ('media', filer.fields.image.FilerImageField(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='filer.Image')),
             ],
         ),
     ]
