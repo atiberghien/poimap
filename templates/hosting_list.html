@@ -3,21 +3,23 @@
 
 {% block title %}Liste des hébergeurs{% endblock %}
 
+{% block row_class %}content{% endblock %}
+
 {% block content %}
-<div class="col-md-12">
-    <h1 class="text-center">Liste des hébergeurs</h1>
-    {% for hosting in object_list %}
-    <div class="row hosting">
-        <div class="col-md-3">
-            <img src="http://placehold.it/200x200">
-        </div>
-        <div class="col-md-9">
-            <h2><a href="{% url 'hosting_detail' hosting.slug %}">{{hosting.name}}</a></h2>
-            <p>{{hosting.description|truncatechars:500}}</p>
-        </div>
+<h1 class="text-center">Hébergeurs et restaurateurs</h1>
+{% for hosting in object_list %}
+{% if forloop.counter|divisibleby:4 %}
+<div class="row">
+{% endif %}
+    <div class="col-md-3">
+        <img src="http://placehold.it/200x200">
+        <h3><a href="{% url 'hosting_detail' hosting.slug %}">{{hosting.name}}</a></h3>
+        <p>{{hosting.description|default:''}}</p>
     </div>
-    {%endfor%}
+{% if forloop.counter|divisibleby:4 %}
 </div>
+{% endif %}
+{%endfor%}
 
 {% addtoblock "css" %}
 <link rel="stylesheet" href="{% static 'hostings/css/hosting.css' %}" />

@@ -13,4 +13,4 @@ class HostingListView(ListView):
 
 class HostingDetailView(DetailView):
     model = Hostings
-    template_name = "hosting_detail.html"
+    template_name = "hostings/hostings_detail.html"
