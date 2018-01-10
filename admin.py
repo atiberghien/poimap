@@ -1,5 +1,4 @@
 from django.contrib import admin
-from django.contrib.gis import admin
 from models import Hostings, PaymentType, OpeningDate, Contact, SleepingType, Sleeping
 
 from leaflet.admin import LeafletGeoAdmin
