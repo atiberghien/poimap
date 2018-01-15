@@ -12,10 +12,10 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='base',
-            name='media',
-        ),
+        # migrations.RemoveField(
+        #     model_name='base',
+        #     name='media',
+        # ),
         migrations.DeleteModel(
             name='Base',
         ),
