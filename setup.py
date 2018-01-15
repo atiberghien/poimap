@@ -11,7 +11,7 @@ setup(name='poimap',
       include_package_data=True,
       install_requires=[
            'psycopg2',
-           'Django<1.11',
+           'Django<2.0',
            "django-compress",
            "django-sekizai",
            'django-autoslug',
