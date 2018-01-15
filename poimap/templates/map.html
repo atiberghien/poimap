@@ -15,6 +15,12 @@
     <div class="col-md-4">
         <div class="row">
             <div class="col-md-12">
+                <h3 class="text-center">Dénivellés</h3>
+                <div id="elevation-chart"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
                 <form class="" action="{% url 'itinerary' area.slug %}" method="post">
                     {% csrf_token %}
                     <table class="table">
@@ -58,9 +64,13 @@
 {% addtoblock "css" %}
 {% leaflet_css %}
 <link rel="stylesheet" href="{% static 'leaflet.awesome-markers/dist/leaflet.awesome-markers.css' %}">
+<link rel="stylesheet" href="{% static 'c3/c3.min.css' %}">
 <style media="screen">
     .leaflet-container {
         height: 500px;
+    }
+    #elevation-chart .c3-axis-x .tick {
+        display: none;
     }
 </style>
 {% endaddtoblock %}
@@ -68,6 +78,8 @@
 {% addtoblock "js" %}
 {% compress js %}
 {% leaflet_js %}
+<script src="{% static 'd3/d3.min.js' %}" charset="utf-8"></script>
+<script src="{% static 'c3/c3.min.js' %}" charset="utf-8"></script>
 <script src="{% static 'leaflet.awesome-markers/dist/leaflet.awesome-markers.min.js' %}" charset="utf-8"></script>
 <script src="{% static 'turf/turf.min.js' %}" charset="utf-8"></script>
 <script src="{% static '@mapbox/togeojson/togeojson.js' %}" charset="utf-8"></script>
@@ -89,6 +101,43 @@
         {% include "poimap/scripts/fetch_poi.js"  with area_slug=area.slug %}
         {% include "poimap/scripts/fetch_area.js"  with area_slug=area.slug %}
 
+        var chart = c3.generate({
+            bindto: '#elevation-chart',
+            data: {
+                columns: [
+
+                ],
+                types: {
+                    Altitude: 'area-spline'
+                }
+            },
+            point : {
+                show : false,
+            },
+            legend: {
+                show: false
+            },
+            grid: {
+                y: {
+                    show: true
+                }
+            },
+            tooltip: {
+                format: {
+                    // title: function (d) { return ""; },
+                    // name: function (name, ratio, id, index) { return ""; },
+                    // value: function (value, ratio, id) {
+                    //     return value + " m";
+                    // }
+                },
+                contents: function (d, defaultTitleFormat, defaultValueFormat, color) {
+                    var text = "<table class='c3-tooltip'><tr>";
+                    text += "<td>"+ d[0].value + " m</td>";
+                    text += "</tr></table>";
+                    return text
+                }
+            }
+        });
 
         $(document).on("poimap:fetch-data", function(evt, area){
             $.getJSON("{% url 'api-area-paths' area.slug %}").done(function(paths){
@@ -141,6 +190,14 @@
 
                                 $("#kmPerDay").change()
                                 fetchPOI();
+                                var altitudes = ['Altitude']
+                                $.each(sliced.geometry.coordinates, function(idx, coords){
+                                    altitudes.push(coords[2]);
+                                });
+                                chart.flow({
+                                    columns: [altitudes],
+                                });
+
                             }
                         }
 
