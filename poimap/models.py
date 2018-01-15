@@ -36,6 +36,9 @@ class POIType(models.Model):
     slug = AutoSlugField(populate_from="label", always_update=True)
     icon = IconField()
 
+    def get_typed_poi_count(self):
+        return self.poi_set.count()
+
 
     def __unicode__(self):
         return self.label

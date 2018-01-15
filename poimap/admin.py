@@ -7,6 +7,7 @@ try:
     from django.urls import reverse
 except:
     from django.core.urlresolvers import reverse
+
 from django.contrib.gis.gdal import OGRGeometry
 from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance
@@ -151,8 +152,8 @@ class POIAdmin(LeafletGeoAdmin):
     )
 
 class POITypeAdmin(admin.ModelAdmin):
-    list_display = ('label', )
-
+    list_display = ('label', 'icon', 'get_typed_poi_count')
+    list_editable = ('icon', )
     class Meta:
         model = POIType
         fields = '__all__'
