@@ -1,12 +1,24 @@
 from django.db import models
 from django.conf import settings
 from django.contrib.gis.db import models as gismodels
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+
 from django_countries.fields import CountryField
 from treebeard.mp_tree import MP_Node
 from polymorphic.models import PolymorphicModel
 
 from autoslug import AutoSlugField
 from fontawesome.fields import IconField
+
+
+class ImportationTrace(models.Model):
+    original_id = models.CharField(max_length=255, unique=True)
+    created_at = models.DateTimeField()
+    updated_at = models.DateTimeField(null=True, blank=True)
+    content_type = models.ForeignKey(ContentType, null=True, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField(null=True)
+    content_object = GenericForeignKey('content_type', 'object_id')
 
 
 class Area(models.Model):
