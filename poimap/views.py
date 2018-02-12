@@ -9,11 +9,13 @@ from django.shortcuts import redirect, get_object_or_404, render
 from rest_framework import generics
 from shapely.geometry import box
 from shapely.affinity import scale
+from django_filters.rest_framework import DjangoFilterBackend
 
 from .serializers import PathSerializer, POISerializer, AreaSerializer
 from .models import Path, POI, Area
 from .forms import CustomItineraryForm
 import json
+
 
 class AreaView(generics.RetrieveAPIView):
     queryset = Area.objects.all()
@@ -69,6 +71,10 @@ class POIView(generics.RetrieveAPIView):
 
 class POIList(generics.ListAPIView):
     serializer_class = POISerializer
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = {
+        'type__slug': ['exact', 'in'],
+    }
 
     def get_queryset(self):
         queryset = POI.objects.all()

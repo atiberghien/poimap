@@ -27,5 +27,6 @@ setup(name='poimap',
            'shapely'
            'django-ckeditor',
            'django-ckeditor-filer',
+           'django-filter',
       ],
       zip_safe=False)

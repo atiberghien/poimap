@@ -37,6 +37,9 @@ function fetchPOI(pathPK) {
         url = "{% url 'api-poi-list' %}?path_pk="+pathPK;
     } else {
         url = "{% url 'api-poi-list' %}?bbox="+bboxCoords.join(',');
+        {% if poi_type_slugs %}
+        url+= "&type__slug__in={{poi_type_slugs|join:','}}"
+        {% endif %}
     }
 
     return $.getJSON(url).done(function(data){
