@@ -82,3 +82,9 @@ class POI(PolymorphicModel):
 
     class Meta:
         verbose_name = verbose_name_plural = "POI"
+
+class POIListing(CMSPlugin):
+    type_display = models.ManyToManyField(POIType, verbose_name="Type de POI à afficher")
+
+    def copy_relations(self, oldinstance):
+        self.type_display = oldinstance.type_display.all()
