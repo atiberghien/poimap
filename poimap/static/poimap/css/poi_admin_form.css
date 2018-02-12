@@ -5,7 +5,7 @@
 
 .location {
     width: 50%;
-    float: left;
+    /* float: left; */
 }
 
 .field-box.field-zipcode, .field-box.field-city, .field-box.field-country {
