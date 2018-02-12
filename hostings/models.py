@@ -25,7 +25,7 @@ class Hostings(POI):
     fax = models.CharField(max_length=15, blank=True)
     email = models.CharField(max_length=150, blank=True)
     web = models.CharField(max_length=150, blank=True)
-    media = FilerImageField(null=True, blank=True,)
+
     food = models.BooleanField(default=False) # restauration
     picnic = models.CharField(
         max_length=1,
