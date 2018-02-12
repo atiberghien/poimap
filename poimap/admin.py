@@ -11,6 +11,7 @@ except:
 from django.contrib.gis.gdal import OGRGeometry
 from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance
+from adminsortable2.admin import SortableInlineAdminMixin
 
 from ckeditor.widgets import CKEditorWidget
 from leaflet.admin import LeafletGeoAdmin, LeafletGeoAdminMixin
@@ -107,6 +108,11 @@ class POIAdminForm(CleanZDimensionMixin, forms.ModelForm):
         model = POI
         fields = "__all__"
 
+
+class POIMediaInline(SortableInlineAdminMixin, admin.StackedInline):
+    model = POIMedia
+    extra = 2
+
 class POIAdmin(LeafletGeoAdmin):
 
     def __init__(self, *args, **kwargs):
@@ -134,7 +140,7 @@ class POIAdmin(LeafletGeoAdmin):
     list_editable = ('name', 'type', "starred")
     list_filter = ('type',)
     search_fields = ('name', 'slug')
-
+    inlines = [POIMediaInline]
     form = POIAdminForm
 
     fieldsets = (
@@ -163,3 +169,4 @@ admin.site.register(Area, AreaAdmin)
 admin.site.register(Path, PathAdmin)
 admin.site.register(POI, POIAdmin)
 admin.site.register(POIType, POITypeAdmin)
+admin.site.register(POIMedia)

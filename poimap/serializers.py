@@ -22,18 +22,27 @@ class POITypeSerializer(ModelSerializer):
         model = POIType
         fields = ('label', 'slug', 'icon')
 
+class POIMediaSerializer(ModelSerializer):
+    class Meta:
+        model = POIMedia
+        fields = "__all__"
+
 
 class POISerializer(GeoFeatureModelSerializer):
     type = POITypeSerializer()
     marker_popup = SerializerMethodField()
+    medias = SerializerMethodField()
 
     def get_marker_popup(self, obj):
         return render_to_string("poimap/partial/poi_marker_popup.html", {"object" : obj})
 
+    def get_medias(self, obj):
+        return obj.medias.values_list('file__file', flat=True)
+
     class Meta:
         model = POI
         geo_field = "geom"
-        fields = ('id', 'name', 'slug', 'description', 'type', 'coords', "marker_popup")
+        fields = ('id', 'name', 'slug', 'description', 'distance', 'type', 'coords', "city", "marker_popup", "medias")
 
 class TypedPOISerializer(ModelSerializer):
 

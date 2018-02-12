@@ -83,6 +83,16 @@ class POI(PolymorphicModel):
     class Meta:
         verbose_name = verbose_name_plural = "POI"
 
+class POIMedia(models.Model):
+    poi = models.ForeignKey(POI, related_name='medias')
+    file = FilerImageField(null=True, blank=True)
+    order = models.PositiveIntegerField(default=0, blank=False, null=False)
+
+    class Meta:
+        ordering = ["order"]
+        verbose_name = "Photo"
+        verbose_name_plural = "Gallerie"
+
 class POIListing(CMSPlugin):
     type_display = models.ManyToManyField(POIType, verbose_name="Type de POI à afficher")
 
