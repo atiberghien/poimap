@@ -94,7 +94,6 @@ class POIList(generics.ListAPIView):
                 bbox = Polygon.from_bbox((xmin, ymin, xmax, ymax))
                 queryset = queryset.filter(geom__contained=bbox)
 
-        queryset = queryset.annotate(distance=Distance('geom', Point(0, 90, srid=4326))).order_by('distance')
         return queryset
 
 class MapView(TemplateView):
