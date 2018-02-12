@@ -15,7 +15,7 @@ from ckeditor.fields import RichTextField
 
 class ImportationTrace(models.Model):
     original_id = models.CharField(max_length=255, unique=True)
-    created_at = models.DateTimeField()
+    created_at = models.DateTimeField(null=True, blank=True)
     updated_at = models.DateTimeField(null=True, blank=True)
     content_type = models.ForeignKey(ContentType, null=True, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField(null=True)
