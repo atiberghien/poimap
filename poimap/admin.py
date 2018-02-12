@@ -12,6 +12,7 @@ from django.contrib.gis.gdal import OGRGeometry
 from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance
 
+from ckeditor.widgets import CKEditorWidget
 from leaflet.admin import LeafletGeoAdmin, LeafletGeoAdminMixin
 from treebeard.admin import TreeAdmin
 from treebeard.forms import MoveNodeForm, movenodeform_factory
@@ -85,7 +86,7 @@ class PathAdmin(LeafletGeoAdminMixin, TreeAdmin):
         )
 
 class POIAdminForm(CleanZDimensionMixin, forms.ModelForm):
-
+    description = forms.CharField(widget=CKEditorWidget())
     class Media:
         if "grappelli" in settings.INSTALLED_APPS:
             css = {

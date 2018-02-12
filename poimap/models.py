@@ -10,6 +10,7 @@ from polymorphic.models import PolymorphicModel
 
 from autoslug import AutoSlugField
 from fontawesome.fields import IconField
+from ckeditor.fields import RichTextField
 
 
 class ImportationTrace(models.Model):
@@ -58,7 +59,7 @@ class POIType(models.Model):
 class POI(PolymorphicModel):
     name = models.CharField(max_length=500)
     slug = AutoSlugField(populate_from="name", always_update=True)
-    description = models.TextField(blank=True, null=True)
+    description = RichTextField(blank=True, null=True)
     type = models.ForeignKey(POIType)
 
     address = models.CharField(max_length=250, blank=True, null=True)

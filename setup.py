@@ -25,5 +25,7 @@ setup(name='poimap',
            'django-leaflet',
            'django-fontawesome',
            'shapely'
+           'django-ckeditor',
+           'django-ckeditor-filer',
       ],
       zip_safe=False)
