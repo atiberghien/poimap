@@ -12,8 +12,7 @@ from shapely.affinity import scale
 
 from .serializers import PathSerializer, POISerializer, AreaSerializer
 from .models import Path, POI, Area
-
-import operator
+from .forms import CustomItineraryForm
 import json
 
 class AreaView(generics.RetrieveAPIView):
@@ -101,7 +100,8 @@ class MapView(TemplateView):
         if "area_slug" in kwargs:
             area = Area.objects.get(slug=kwargs["area_slug"])
         context.update({
-            'area' : area
+            'area' : area,
+            'form' : CustomItineraryForm()
         })
         return context
 

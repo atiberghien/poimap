@@ -23,38 +23,15 @@
             <div class="col-md-12">
                 <form class="" action="{% url 'itinerary' area.slug %}" method="post">
                     {% csrf_token %}
-                    <table class="table">
-                        <tr>
-                            <td>Départ</td>
-                            <td id="start-{{area.slug}}">
-                                <span class="geo-text"></span>
-                                <input class="geo-info" type="hidden" name="start"/>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Arrivé</td>
-                            <td id="end-{{area.slug}}">
-                                <span class="geo-text"></span>
-                                <input class="geo-info" type="hidden" name="end"/>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Distance totale</td>
-                            <td id="distance"></td>
-                        </tr>
-                        <tr>
-                            <td>Kms journaliers</td>
-                            <td>
-                                <select id="kmPerDay" name="kmPerDay">
-                                    <option value="10" selected>10 km</option>
-                                    <option value="20">20 km</option>
-                                    <option value="30">30 km</option>
-                                </select>
-                            </td>
-                        </tr>
-                    </table>
+                    <h4>
+                        Distance totale
+                        <span id="distance"></span>
+                    </h4>
+                    {% bootstrap_form form%}
                     {% if POI_CUSTOM_ITINERARY %}
-                    <button type="submit" name="button">Personnaliser mon itinéraire</button>
+                        {% buttons %}
+                        <button type="submit" class="btn btn-primary">Personnaliser mon itinéraire</button>
+                        {% endbuttons %}
                     {% endif %}
                 </form>
             </div>
