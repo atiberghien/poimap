@@ -136,8 +136,8 @@ class POIAdmin(LeafletGeoAdmin):
     convert_actions.allow_tags = True
     convert_actions.short_description = ""
 
-    list_display = ('id', 'name', 'type', "starred", 'convert_actions')
-    list_editable = ('name', 'type', "starred")
+    list_display = ('id', 'name', 'type', "related_path", 'distance', "starred", 'convert_actions')
+    list_editable = ('name', 'type', "related_path", "starred")
     list_filter = ('type',)
     search_fields = ('name', 'slug')
     inlines = [POIMediaInline]
@@ -145,7 +145,7 @@ class POIAdmin(LeafletGeoAdmin):
 
     fieldsets = (
         (None, {
-            'fields': (('name', 'type'), 'description')
+            'fields': (('name', 'type', 'related_path'), 'description')
         }),
         (None, {
             'classes': ('address',),
