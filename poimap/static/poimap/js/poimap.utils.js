@@ -56,3 +56,42 @@ L.Marker.prototype.applyDragEventListener = function (currentPath, markerOptions
         this.fetchGeoInfo(markerOptions.labelId)
     });
 }
+
+
+
+
+
+
+// var checkpoints = [];
+// function updateCheckPoints(steps, stepLength) {
+//     for (var i = 0; i < checkpoints.length; i++) {
+//         map.removeLayer(checkpoints[i])
+//     }
+//     checkpoints = []
+//     var geop = path.toGeoJSON().features[0]
+//     for (var i = 1; i <= steps-1; i++) {
+//         var along = turf.along(geop, stepLength * i, 'kilometers');
+//         L.geoJSON(along, {
+//             pointToLayer: function (feature, latlng) {
+//                 var checkpoint = L.circleMarker(latlng, {
+//                     radius : 2,
+//                     color : 'red',
+//                     fill : "red"
+//                 });
+//                 checkpoints.push(checkpoint);
+//                 return checkpoint
+//             }
+//         }).addTo(map);
+//     }
+// }
+
+// $("#kmPerDay").on("change", function(){
+//     var geop = path.toGeoJSON().features[0]
+//     var length = turf.lineDistance(geop, 'kilometers');
+//
+//     var stepLength = parseFloat($(this).val());
+//     var steps = Math.round(length / stepLength);
+//
+//     updateCheckPoints(steps, stepLength);
+// });
+// $("#kmPerDay").change()
