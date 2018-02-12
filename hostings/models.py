@@ -20,19 +20,11 @@ class Hostings(POI):
     ('3', 'A la demande'),
     )
 
-    # hosting_type = models.ForeignKey(POIType)
     accepted_payments = models.ManyToManyField(PaymentType)
-    # name = models.CharField(max_length=100)
-    # address = models.CharField(max_length=250)
-    # zipcode = models.CharField(max_length=50)
-    # city = models.CharField(max_length=300)
     phone = models.CharField(max_length=15, blank=True)
     fax = models.CharField(max_length=15, blank=True)
     email = models.CharField(max_length=150, blank=True)
     web = models.CharField(max_length=150, blank=True)
-    # geom = gismodels.PointField(null=True, blank=True)
-    # objects = gismodels.GeoManager()
-    # description = models.TextField(blank=True)
     media = FilerImageField(null=True, blank=True,)
     food = models.BooleanField(default=False) # restauration
     picnic = models.CharField(
