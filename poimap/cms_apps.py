@@ -2,13 +2,13 @@
 from django.utils.translation import ugettext_lazy as _
 
 from cms.app_base import CMSApp
+from cms.plugin_base import CMSPluginBase
+from cms.plugin_pool import plugin_pool
 from cms.apphook_pool import apphook_pool
-
+from cms.menu_bases import CMSAttachMenu
 from menus.base import NavigationNode
 from menus.menu_pool import menu_pool
-from cms.menu_bases import CMSAttachMenu
 from django.urls import reverse
-from .models import POI
 from .models import POI, POIListing#, PathElevationChart
 
 class StarredPOIMenu(CMSAttachMenu):
