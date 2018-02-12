@@ -16,7 +16,7 @@ from leaflet.admin import LeafletGeoAdmin, LeafletGeoAdminMixin
 from treebeard.admin import TreeAdmin
 from treebeard.forms import MoveNodeForm, movenodeform_factory
 
-from .models import POIType, POI, poi_child_models, Area, Path
+from .models import *
 
 class CleanZDimensionMixin(object):
     def clean_geom(self):

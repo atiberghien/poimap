@@ -1,7 +1,7 @@
 from django.template.loader import render_to_string
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
-from .models import POI, POIType, Path, Area
+from .models import *
 
 class AreaSerializer(GeoFeatureModelSerializer):
     class Meta:
