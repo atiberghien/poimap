@@ -11,3 +11,17 @@ var endIcon = L.AwesomeMarkers.icon({
     prefix : 'fa',
     markerColor: 'red'
 });
+
+var startPointOptions = {
+    draggable: false,
+    // draggable: true,
+    icon : startIcon,
+    // labelId : "#start-"+path_.properties.slug
+}
+
+var endPointOptions = {
+    draggable: false,
+    // draggable: true,
+    icon :endIcon,
+    // labelId : "#end-"+path_.properties.slug
+}

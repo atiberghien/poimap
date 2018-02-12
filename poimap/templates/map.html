@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load leaflet_tags static sekizai_tags compress%}
+{% load leaflet_tags static sekizai_tags compress bootstrap4 %}
 {% block content %}
 <div class="row">
     <div class="col-md-12">
@@ -15,8 +15,7 @@
     <div class="col-md-4">
         <div class="row">
             <div class="col-md-12">
-                <h3 class="text-center">Dénivellés</h3>
-                <div id="elevation-chart"></div>
+                {% include "poimap/partial/path_elevation_chart.html"%}
             </div>
         </div>
         <div class="row">
@@ -41,13 +40,9 @@
 {% addtoblock "css" %}
 {% leaflet_css %}
 <link rel="stylesheet" href="{% static 'leaflet.awesome-markers/dist/leaflet.awesome-markers.css' %}">
-<link rel="stylesheet" href="{% static 'c3/c3.min.css' %}">
 <style media="screen">
     .leaflet-container {
         height: 500px;
-    }
-    #elevation-chart .c3-axis-x .tick {
-        display: none;
     }
 </style>
 {% endaddtoblock %}
@@ -55,168 +50,65 @@
 {% addtoblock "js" %}
 {% compress js %}
 {% leaflet_js %}
-<script src="{% static 'd3/d3.min.js' %}" charset="utf-8"></script>
-<script src="{% static 'c3/c3.min.js' %}" charset="utf-8"></script>
 <script src="{% static 'leaflet.awesome-markers/dist/leaflet.awesome-markers.min.js' %}" charset="utf-8"></script>
-<script src="{% static 'turf/turf.min.js' %}" charset="utf-8"></script>
+<script src="{% static '@turf/turf/turf.min.js' %}" charset="utf-8"></script>
 <script src="{% static '@mapbox/togeojson/togeojson.js' %}" charset="utf-8"></script>
 <script src="{% static 'leaflet-knn/leaflet-knn.min.js' %}" charset="utf-8"></script>
 <script src="{% static 'poimap/js/poimap.utils.js' %}" charset="utf-8"></script>
+{{form.media}} <!--/static/poimap/js/custom_itinerary.js-->
 {% endcompress %}
 {% compress js inline %}
 <script type="text/javascript">
+
     function main_map_init(map, options) {
-        var originalPath = null
-        var isOriginalDisplay = true;
-        var isCustomDisplay = false;
-
-        var path = null;
-
-        var checkpoints = [];
-
         {% include "poimap/scripts/global_vars.js" with area_slug=area.slug %}
         {% include "poimap/scripts/fetch_poi.js"  with area_slug=area.slug %}
         {% include "poimap/scripts/fetch_area.js"  with area_slug=area.slug %}
 
-        var chart = c3.generate({
-            bindto: '#elevation-chart',
-            data: {
-                columns: [
+        var fullPath = null;
+        var path = null;
 
-                ],
-                types: {
-                    Altitude: 'area-spline'
-                }
-            },
-            point : {
-                show : false,
-            },
-            legend: {
-                show: false
-            },
-            grid: {
-                y: {
-                    show: true
-                }
-            },
-            tooltip: {
-                format: {
-                    // title: function (d) { return ""; },
-                    // name: function (name, ratio, id, index) { return ""; },
-                    // value: function (value, ratio, id) {
-                    //     return value + " m";
-                    // }
-                },
-                contents: function (d, defaultTitleFormat, defaultValueFormat, color) {
-                    var text = "<table class='c3-tooltip'><tr>";
-                    text += "<td>"+ d[0].value + " m</td>";
-                    text += "</tr></table>";
-                    return text
-                }
+        function computePath(){
+            var sliced = turf.lineSlice(startPoint.toGeoJSON(), endPoint.toGeoJSON(), fullPath.toGeoJSON().features[0]);
+
+            if(path) {
+                map.removeLayer(path)
             }
-        });
+            path = L.geoJSON(sliced, { color : 'red'}).addTo(map);
+            map.fitBounds(path.getBounds());
+
+            var length = turf.length(sliced);
+            $("#distance").text(length.toFixed(2));
+
+            fetchPOI();
+            console.log(sliced.geometry.coordinates);
+            $(document).trigger("poimap:update-elevation-chart", [sliced.geometry.coordinates])
+        }
 
         $(document).on("poimap:fetch-data", function(evt, area){
+
             $.getJSON("{% url 'api-area-paths' area.slug %}").done(function(paths){
                 $.each(paths.features, function(index, path_){
                     if(path_.properties.is_root){
-                        originalPath = path = L.geoJSON(path_)
-                        var startPointOptions = {
-                            draggable: true,
-                            icon : startIcon,
-                            labelId : "#start-"+path_.properties.slug
-                        }
-
-                        var endPointOptions = {
-                            draggable: true,
-                            icon :endIcon,
-                            labelId : "#end-"+path_.properties.slug
-                        }
-                        var coords = path_.geometry.coordinates
-                        startPoint = L.marker([coords[0][1], coords[0][0]], startPointOptions).addTo(map);
-                        endPoint = L.marker([coords[coords.length-1][1], coords[coords.length-1][0]], endPointOptions).addTo(map);
-
-                        startPoint.applyDragEventListener(originalPath, startPointOptions);
-                        endPoint.applyDragEventListener(originalPath, endPointOptions);
-
-                        startPoint.fetchGeoInfo(startPointOptions.labelId)
-                        endPoint.fetchGeoInfo(endPointOptions.labelId)
-
-                        function computePath(){
-                            if(startPoint && endPoint){
-                                var sliced = turf.lineSlice(startPoint.toGeoJSON(), endPoint.toGeoJSON(), originalPath.toGeoJSON().features[0]);
-
-                                if(isOriginalDisplay) {
-                                    originalPath.addTo(map);
-                                    map.fitBounds(originalPath.getBounds());
-                                    map.options.minZoom = map.getZoom();
-                                    isOriginalDisplay = false;
-                                }
-                                else {
-                                    if(!isCustomDisplay){
-                                        isCustomDisplay = true;
-                                    }
-                                    else {
-                                        map.removeLayer(path)
-                                    }
-                                    path = L.geoJSON(sliced, { color : 'red'}).addTo(map);
-                                    map.fitBounds(path.getBounds());
-                                }
-                                var length = turf.lineDistance(sliced, 'kilometers');
-                                $("#distance").text(length.toFixed(2));
-
-                                $("#kmPerDay").change()
-                                fetchPOI();
-                                var altitudes = ['Altitude']
-                                $.each(sliced.geometry.coordinates, function(idx, coords){
-                                    altitudes.push(coords[2]);
-                                });
-                                chart.flow({
-                                    columns: [altitudes],
-                                });
-
-                            }
-                        }
-
-                        computePath();
-
-                        function updateCheckPoints(steps, stepLength) {
-                            for (var i = 0; i < checkpoints.length; i++) {
-                                map.removeLayer(checkpoints[i])
-                            }
-                            checkpoints = []
-                            var geop = path.toGeoJSON().features[0]
-                            for (var i = 1; i <= steps-1; i++) {
-                                var along = turf.along(geop, stepLength * i, 'kilometers');
-                                L.geoJSON(along, {
-                                    pointToLayer: function (feature, latlng) {
-                                        var checkpoint = L.circleMarker(latlng, {
-                                            radius : 2,
-                                            color : 'red',
-                                            fill : "red"
-                                        });
-                                        checkpoints.push(checkpoint);
-                                        return checkpoint
-                                    }
-                                }).addTo(map);
-                            }
-                        }
-                        startPoint.on('dragend', computePath);
-                        endPoint.on('dragend', computePath);
-
-                        $("#kmPerDay").on("change", function(){
-                            var geop = path.toGeoJSON().features[0]
-                            var length = turf.lineDistance(geop, 'kilometers');
-
-                            var stepLength = parseFloat($(this).val());
-                            var steps = Math.round(length / stepLength);
-
-                            updateCheckPoints(steps, stepLength);
-                        });
-                        $("#kmPerDay").change()
+                        fullPath = L.geoJSON(path_).addTo(map)
+                        $(document).trigger("poimap:update-elevation-chart", [path_.geometry.coordinates])
+                        return
                     }
                 });
             });
+
+            fetchPOI().done(function(){
+                computePath()
+
+                $(document).on("poimap:itinerary-bounds-change", function (evt, startPoiId, endPoiId) {
+                    startPoint = allPOI[startPoiId][1]
+                    endPoint = allPOI[endPoiId][1]
+
+                    computePath()
+                })
+            });
+
+
         });
 
         $(document).on("poimap:fetch-secondary-data", function(evt, bboxCoords){

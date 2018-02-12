@@ -1,5 +1,6 @@
 {% load static %}
 
+var allPOI = {}
 var typedPOILayers = {}
 var typedPOILayerControl = null
 var secondaryPathLayers = null;
@@ -43,9 +44,7 @@ function fetchPOI(pathPK) {
     }
 
     return $.getJSON(url).done(function(data){
-
         clearLayersAndControls();
-        var count = 0
         $.each(data.features, function(index, poi){
             var marker = L.geoJSON(poi, {
                 onEachFeature: function (feature, layer) {
@@ -54,20 +53,22 @@ function fetchPOI(pathPK) {
                         prefix : 'fa',
                     }));
                     layer.bindPopup(feature.properties.marker_popup, {'className':'custom-poimap-popup' });
-                    count++;
                     layer.on("click", function(){
                         $(document).trigger("poimap:marker-clicked", [feature, layer]);
                     })
+                    allPOI[feature.id] = [feature, layer];
+                    $(document).trigger("poimap:marker-added", [poi]);
                 }
             })
             if(typedPOILayers.hasOwnProperty(poi.properties.type.label)){
                 typedPOILayers[poi.properties.type.label].addLayer(marker)
             }
             else {
-                typedPOILayers[poi.properties.type.label] = L.layerGroup([marker])
+                typedPOILayers[poi.properties.type.label] = L.layerGroup([marker]).addTo(map)
+
             }
         });
-        {% if POI_UNDER_CONTROL %}
+        {% if POI_UNDER_CONTROL and not remove_control %}
         if(len(typedPOILayers)){
             typedPOILayerControl = L.control.layers(null, typedPOILayers, {collapsed : false}).addTo(map);
         }
