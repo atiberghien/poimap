@@ -54,9 +54,6 @@ class Hostings(POI):
     def __unicode__(self):
         return '%s' % (self.name)
 
-# Must be a registry
-poi_child_models.append(Hostings)
-
 class OpeningDate(models.Model):
     hosting = models.ForeignKey(Hostings)
     start_date = models.DateField()

@@ -128,7 +128,7 @@ class POIAdmin(LeafletGeoAdmin):
             links = u'<a href="%s">Voir %s associés</a>' % (url, obj.polymorphic_ctype.model_class()._meta.verbose_name.title())
         else:
             #obj is just a POI
-            for child_model in poi_child_models:
+            for child_model in POI.__subclasses__():
                 links += '<a href="%s">Convertir en %s</a>' % (reverse("convert-poi", args=[obj.id, child_model._meta.model_name]),
                                                           child_model._meta.verbose_name.title())
 
