@@ -11,10 +11,12 @@ from shapely.geometry import box
 from shapely.affinity import scale
 from django_filters.rest_framework import DjangoFilterBackend
 
+from hostings.models import Hostings
 from .serializers import PathSerializer, POISerializer, AreaSerializer
 from .models import Path, POI, Area
 from .forms import CustomItineraryForm
 import json
+import math
 
 
 class AreaView(generics.RetrieveAPIView):
@@ -114,11 +116,11 @@ class MapView(TemplateView):
 
 def custom_itinerary(request, path_slug):
     path = Path.objects.get(slug=path_slug)
-    # ogr = OGRGeometry(path.geom.wkt)
-    # ogr.coord_dim = 2
-    # path2d_geom = ogr.geos
-    start = json.loads(request.POST["start"])
-    end = json.loads(request.POST["end"])
+    form = CustomItineraryForm(request.POST)
+    form.is_valid()
+    data = form.cleaned_data
+    start = data["start_point"].coords
+    end = data["end_point"].coords
     bbox = box(start["lng"], start["lat"], end["lng"], end["lat"])
     bbox = scale(bbox, xfact=1.1, yfact=1.1)
     bbox = Polygon(list(bbox.exterior.coords))
@@ -126,29 +128,23 @@ def custom_itinerary(request, path_slug):
     custom_path.transform(3035)
     length = custom_path.length / 1000
     custom_path.transform(4326)
-    poi_list = []
 
-    for poi in POI.objects.filter(geom__within=bbox):
-        temp_bbox = box(start["lng"], start["lat"], poi.geom.coords[0], poi.geom.coords[1])
-        temp_bbox = scale(temp_bbox, xfact=1.2, yfact=1.2)
-        temp_bbox = Polygon(list(temp_bbox.exterior.coords))
-        temp_path = custom_path.intersection(temp_bbox)
-        temp_path.transform(3035)
-        distance = temp_path.length / 1000
-        temp_path.transform(4326)
-        poi_list.append({
-            "distance" : distance,
-            "poi" : poi,
-            "bbox" : temp_bbox,
-            'poi_path' : temp_path
-        })
-    poi_list = sorted(poi_list, key=lambda data: data["distance"])
+    step = data["step"]*1000
+    step_cpt = 1
+    margin = 5000
+    for poi in POI.objects.filter(geom__within=bbox).instance_of(Hostings):
+        print step_cpt*step-margin, poi.distance ,step_cpt*step+margin
+        if poi.distance >= step_cpt*step-margin and poi.distance <= step_cpt*step+margin:
+            print "youpi"
+        step_cpt += 1
+        # for x in range():
+
 
     return render(request, "itinerary.html", {
+        "step" : data["step"]*1000,
+        "margin" : 5000,
         "path_slug" : path_slug,
-        "custom_bbox" : bbox.geojson,
-        "custom_path" : custom_path.geojson,
-        "poi_list" : poi_list,
+        "poi_list" : POI.objects.filter(geom__within=bbox),
         "total_length" : length,
     })
 

@@ -3,53 +3,41 @@
 {% block title %}Votre itinéraire{% endblock %}
 
 {% block content %}
-    <div class="col-md-12">
         <h1 class="text-center">Personnaliser votre itinéraire</h1>
         <p>Distance totale de votre randonnée : {{total_length|floatformat:2}} km</p>
-        <div id="toolbar">
+        <!--<div id="toolbar">
             <ul>
                 <li><a href="#"><i class="fa fa-floppy-o"></i></a></li>
                 <li><a id="generate-pdf" href="#"><i class="fa fa-file-pdf-o"></i></a></li>
             </ul>
+        </div> -->
+        {% for poi in poi_list %}
+        <div class="row">
+            {%if poi.type.slug == 'hebergement' %}
+            <div class="col-md-2">
+                <div id='map-{{poi.id }}'>
+                </div>
+            </div>
+            <div class="col-md-10">
+                <h2>{{poi.distance|floatformat:2}} m - {{poi.name}}</h2>
+                <div class="form-group">
+                    <label for="path-step-{{poi.id}}-comment">Commentaire</label>
+                    <textarea class="form-control" name="path-step-{{poi.id}}-comment" rows="8"></textarea>
+                </div>
+            </div>
+            {% else %}
+            <div class="col-md-10 offset-md-2">
+                <h5>{{poi.distance}} - {{poi.name}}</h5>
+            </div>
+            {% endif %}
         </div>
-        <div class="table-responsive">
-            <form id="itineraryForm">
-                <table class="table">
-                    {% for data in poi_list %}
-                    <tr id="path-step-{{data.poi.id}}" class="path-step">
-                        <td class="distance">
-                            <i class="fa fa-dot-circle-o"></i>
-                            <div>{{data.distance|floatformat:2}} km</div>
-                        </td>
-                        {% with data.poi.id|stringformat:"s" as poi_id %}
-                            {% with map_id="map-"|add:poi_id map_callback="map_init_"|add:poi_id %}
-                        <td>
-                            <div id='{{map_id}}'>
-                                {% leaflet_map map_id callback=map_callback%}
-                            </div>
-                        </td>
-                            {% endwith %}
-                        {% endwith %}
-                        <td>
-                            <h2>{{data.poi.name}} <a class="path-step-selector" data-step-id="{{data.poi.id}}" href="#"><i class="fa fa-eye"></i></a></h2>
-                            <input type="hidden" name="path-step-{{data.poi.id}}-selected" value="true">
-                            <div class="form-group">
-                                <label for="path-step-{{data.poi.id}}-comment">Commentaire</label>
-                                <textarea class="form-control" name="path-step-{{data.poi.id}}-comment" rows="8"></textarea>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </table>
-            </form>
-        </div>
+        {% endfor %}
 
-    </div>
 
 {% addtoblock "css" %}
 <style>
     .leaflet-container {
-        width:  350px;
+        /* width:  350px; */
         height: 300px;
     }
 </style>
@@ -62,42 +50,40 @@
 {% addtoblock "js" %}
 {% compress js %}
 {% leaflet_js %}
+<script src="{% static '@turf/turf/turf.min.js' %}" charset="utf-8"></script>
 <script src="{% static 'leaflet.awesome-markers/dist/leaflet.awesome-markers.min.js' %}" charset="utf-8"></script>
 {% endcompress %}
 {# {% compress js inline %}#}
 <script type="text/javascript">
 
-        {% for data in poi_list %}
-        function map_init_{{data.poi.id}}(map, options) {
-            console.log(options);
-            $(".leaflet-control-attribution").remove();
-            $(".leaflet-control-scale").remove();
-            $(".leaflet-control-zoom-out.leaflet-bar-part").remove();
-            map.scrollWheelZoom.disable();
-            map.dragging.disable();
-            $.getJSON("{% url 'path-api-detail' path_slug %}").done(function(data){
-                L.geoJSON(data, { color : "red"}).addTo(map);
-                $.getJSON("{% url 'poi-api-detail' data.poi.id %}").done(function(data){
-                    var coords = null;
-                    var poi = L.geoJSON(data, {
-                        pointToLayer: function (feature, latlng) {
-                            coords = latlng;
-                            var marker = L.marker(latlng)
-                            // , {
-                            //     icon : L.AwesomeMarkers.icon({
-                            //         icon: data.properties.type.icon,
-                            //         prefix : 'fa',
-                            //     })
-                            // });
-                            map.setView(coords, 14);
-                            return marker;
-                        }
-                    }).addTo(map);
-                });
-            });
-        }
-        {% endfor %}
         $(document).ready(function(){
+            $.getJSON("{% url 'path-api-detail' path_slug %}").done(function(data){
+                var path = L.geoJSON(data);
+                function generateMap(mapId, coords){
+                    var map = L.map(mapId).setView(coords, 9);
+                    var bboxNorthWestCoords = map.getBounds().getNorthWest();
+                    var bboxSouthEastCoords = map.getBounds().getSouthEast();
+                    var start = turf.point([bboxNorthWestCoords.lng, bboxNorthWestCoords.lat]);
+                    var stop = turf.point([bboxSouthEastCoords.lng, bboxSouthEastCoords.lat]);
+                    var sliced = turf.lineSlice(start, stop, path.toGeoJSON().features[0]);
+                    L.tileLayer('https://{s}.tile.thunderforest.com/outdoors/{z}/{x}/{y}.png?apikey=3e3f2b7b947b4cdebeced62f95046ed7', {}).addTo(map);
+                    L.geoJSON(sliced, { color : 'red'}).addTo(map)
+                    var marker = L.marker(coords).addTo(map);
+
+                    map.scrollWheelZoom.disable();
+                    map.dragging.disable()
+                }
+                {% for poi in poi_list %}
+                {%if poi.type.slug == 'hebergement' %}
+                var poi{{poi.id}}coords = [{{poi.geom.coords.1|stringformat:"f"}}, {{poi.geom.coords.0|stringformat:"f"}}]
+                generateMap("map-{{poi.id}}", poi{{poi.id}}coords)
+                {% endif %}
+                {% endfor %}
+
+                $(".leaflet-control-attribution").remove();
+                $(".leaflet-control-scale").remove();
+                $(".leaflet-control-zoom").remove();
+            });
 
             $(".path-step-selector .fa").hover(function(){
                 $(this).toggleClass(function() {
