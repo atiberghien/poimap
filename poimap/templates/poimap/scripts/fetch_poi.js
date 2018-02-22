@@ -34,10 +34,16 @@ function fetchPOI(pathPK) {
                                  endPoint.getLatLng().lng,
                                  endPoint.getLatLng().lat],
                                  1.1);
+    {% if custom_api_poi_list_url %}
+        var baseUrl = "{% url custom_api_poi_list_url %}";
+    {% else %}
+        var baseUrl = "{% url 'api-poi-list' %}";
+    {% endif %}
+
     if(pathPK){
-        url = "{% url 'api-poi-list' %}?path_pk="+pathPK;
+        url = baseUrl+"?path_pk="+pathPK;
     } else {
-        url = "{% url 'api-poi-list' %}?bbox="+bboxCoords.join(',');
+        url = baseUrl+"?bbox="+bboxCoords.join(',');
         {% if poi_type_slugs %}
         url+= "&type__slug__in={{poi_type_slugs|join:','}}"
         {% endif %}
