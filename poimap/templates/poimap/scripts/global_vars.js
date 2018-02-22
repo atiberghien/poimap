@@ -1,3 +1,5 @@
+var rect = null //the area
+
 var startPoint = null;
 var endPoint = null;
 

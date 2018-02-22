@@ -1,5 +1,5 @@
 $.getJSON("{% url 'api-area' area_slug %}").done(function(area){
-    var rect = L.geoJSON(area)
+    rect = L.geoJSON(area)
     rect.setStyle({
         fill : false,
         color : 'grey'
