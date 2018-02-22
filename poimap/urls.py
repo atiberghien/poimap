@@ -1,5 +1,5 @@
 from django.conf.urls import url
-from .views import *
+from .views import convert_poi, POIDetailView, MapView, custom_itinerary
 
 urlpatterns = [
     url(r'^poi/(?P<pk>\d+)/convert/(?P<to_model>\w+)$', convert_poi, name='convert-poi'),

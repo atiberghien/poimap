@@ -1,5 +1,5 @@
 from django.conf.urls import url
-from .views import *
+from .views import AreaView, AreaPathsView, SubPathListView, PathView, POIList, POIView
 
 urlpatterns = [
     url(r'^area/(?P<slug>[\w-]+)/$', AreaView.as_view(), name='api-area'),
