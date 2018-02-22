@@ -29,5 +29,6 @@ setup(name='poimap',
            'django-ckeditor-filer',
            'django-filter',
            'django-bootstrap4',
+           'django-admin-sortable2',
       ],
       zip_safe=False)
