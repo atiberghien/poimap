@@ -1,0 +1,32 @@
+{% extends "transportation/base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 col-lg-12">
+        <h1 class="text-center">{{line.name}}</h1>
+        <ul class="nav nav-pills nav-justified" role="tablist">
+            {% if to_route %}
+            <li role="presentation" class="active"><a href="#to_route" aria-controls="to_route" role="tab" data-toggle="tab">Aller</a></li>
+            {%endif%}
+            {% if from_route %}
+            <li role="presentation"><a href="#from_route" aria-controls="from_route" role="tab" data-toggle="tab">Retour</a></li>
+            {% endif%}
+        </ul>
+
+        <div class="tab-content">
+            {% if to_route %}
+            <div role="tabpanel" class="tab-pane active" id="to_route">
+                <table class="table table-striped">
+
+                    </tr>
+
+                </table>
+            </div>
+            {%endif%}
+            {% if from_route %}
+            <div role="tabpanel" class="tab-pane" id="from_route">FROM</div>
+            {% endif%}
+        </div>
+    </div>
+</div>
+{% endblock %}

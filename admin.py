@@ -1,8 +1,8 @@
 from django.contrib import admin
-from models import Fare, TimeSlot, Stop, Route, RunningDay, Line, LineStop
+from models import Fare, TimeSlot, Stop, Service, RunningDay, Line, RouteStop, Route
 from leaflet.admin import LeafletGeoAdmin
-from grappelli.forms import GrappelliSortableHiddenMixin
 from poimap.admin import POIAdminForm
+from grappelli.forms import GrappelliSortableHiddenMixin
 from .forms import StopForm
 
 class TimeSlotInlineAdmin(admin.TabularInline):
@@ -12,13 +12,13 @@ class TimeSlotInlineAdmin(admin.TabularInline):
     readonly_fields = ('stop',)
     extra = 0
     can_delete = False
-    ordering = ("hour",)
+    ordering = ("order",)
 
     def has_add_permission(self, request):
         return False
 
 
-class RouteAdmin(admin.ModelAdmin):
+class ServiceAdmin(admin.ModelAdmin):
     inlines = [
         TimeSlotInlineAdmin
     ]
@@ -53,18 +53,21 @@ class StopAdmin(LeafletGeoAdmin):
     )
 
 
-class LineStopInline(GrappelliSortableHiddenMixin, admin.TabularInline):
-    model = LineStop
+class RouteStopInline(GrappelliSortableHiddenMixin, admin.TabularInline):
+    model = RouteStop
     extra = 0
     sortable_field_name = "order"
 
 
-class LineAdmin(admin.ModelAdmin):
-    inlines = (LineStopInline,)
+class RouteAdmin(admin.ModelAdmin):
+    list_display = ("id", "line", "name", "direction", "path")
+    list_editable = ("name", "direction", "path")
+    inlines = (RouteStopInline,)
 
 
-admin.site.register(Line, LineAdmin)
+admin.site.register(Line)
+admin.site.register(Route, RouteAdmin)
 admin.site.register(Fare, FareAdmin)
 admin.site.register(Stop, StopAdmin)
-admin.site.register(Route, RouteAdmin)
+admin.site.register(Service, ServiceAdmin)
 admin.site.register(RunningDay)

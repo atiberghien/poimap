@@ -5,7 +5,7 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from autoslug import AutoSlugField
 
-from poimap.models import POI, poi_child_models
+from poimap.models import POI, Path
 
 class Fare(models.Model):
     FARE_TYPE_CHOICES = (
@@ -40,15 +40,35 @@ class RunningDay(models.Model):
 class Line(models.Model):
     name = models.CharField(max_length=150)
     slug = AutoSlugField(populate_from='name', always_update=True)
-    stops = models.ManyToManyField("Stop", through="LineStop")
 
     def __unicode__(self):
         return "%s " % self.name
 
+class Route(models.Model):
+    DIRECTION_CHOICES = (
+        ('1', 'Aller'),
+        ('2', 'Retour')
+    )
+    name = models.CharField(max_length=150)
+    slug = AutoSlugField(populate_from='name', always_update=True)
+    line = models.ForeignKey(Line, related_name="routes")
+    direction = models.CharField(max_length=1, choices=DIRECTION_CHOICES, default="1")
+    path = models.ForeignKey(Path, null=True, blank=True)
+    stops = models.ManyToManyField("Stop", through="RouteStop")
 
-class LineStop(models.Model):
-    line = models.ForeignKey(Line)
-    stop = models.ForeignKey("Stop")
+    def __unicode__(self):
+        return "%s - %s (%s)" % (self.line.name, self.name, self.get_direction_display())
+
+    def get_stops(self):
+        return self.stops.order_by("stop")
+
+    class Meta:
+        unique_together = ("line", "direction")
+        ordering = ('id', 'direction')
+
+class RouteStop(models.Model):
+    route = models.ForeignKey(Route)
+    stop = models.ForeignKey("Stop", related_name='stop')
     order = models.PositiveIntegerField()
 
     class Meta:
@@ -56,55 +76,50 @@ class LineStop(models.Model):
 
 
 class Stop(POI):
-    slug = AutoSlugField(populate_from='name', always_update=True)
 
     def __unicode__(self):
-        if self.description:
-            return "%s (%s) " % (self.name, self.description)
         return self.name
 
-poi_child_models.append(Stop)
 
-
-class Route(models.Model):
+class Service(models.Model):
     name = models.CharField(max_length=64)
-    line = models.ForeignKey(Line, related_name="routes")
     slug = AutoSlugField(populate_from='name', always_update=True)
-    periode = models.ManyToManyField(RunningDay)
+    route = models.ForeignKey(Route, related_name="services")
+    frequency_label = models.CharField(max_length=10)
 
     def __unicode__(self):
-        return "%s / %s" % (self.line.name, self.name)
+        return "%s - %s - %s" % (self.route.line.name, self.route.name, self.name)
 
 class TimeSlot(models.Model):
-    hour = models.TimeField(null=True)
+    hour = models.TimeField(null=True, blank=True)
     stop = models.ForeignKey(Stop)
-    route = models.ForeignKey(Route, related_name='timeslots')
-    order = models.PositiveIntegerField(null=True)
+    service = models.ForeignKey(Service, related_name='timeslots')
+    order = models.PositiveIntegerField(default=0)
 
     def __unicode__(self):
-        return "%s - %s - %s " % (self.route, self.stop, self.hour)
+        return "%s - %s - %s " % (self.service, self.stop, self.hour)
 
     class Meta:
-        ordering = ("hour", 'order')
+        ordering = ('order',)
 
-
-
-@receiver(post_save,  sender=Route)
-def autocreate_timeslot_for_route(sender, instance, created, **kwargs):
+@receiver(post_save,  sender=Service)
+def autocreate_timeslot_for_service(sender, instance, created, **kwargs):
     if created:
-        for stop in instance.line.stops.all():
-            TimeSlot.objects.create(stop=stop, route=instance)
+        i = 0
+        for stop in instance.route.get_stops():
+            TimeSlot.objects.create(stop=stop, service=instance, order=i)
+            i += 1
 
 
-@receiver(post_save, sender=LineStop)
-def update_route_timeslot(sender, instance, created, update_fields, **kwargs):
-    for route in instance.line.routes.all():
-        for linestop in LineStop.objects.filter(line=route.line):
-            timeslot, nop = route.timeslots.get_or_create(stop=linestop.stop, route=route)
-            timeslot.order = linestop.order
+@receiver(post_save, sender=RouteStop)
+def update_service_timeslot(sender, instance, created, update_fields, **kwargs):
+    for service in instance.route.services.all():
+        for routestop in RouteStop.objects.filter(route=service.route):
+            timeslot, nop = service.timeslots.get_or_create(stop=routestop.stop, service=service)
+            timeslot.order = routestop.order
             timeslot.save()
 
-@receiver(post_delete, sender=LineStop)
-def delete_route_timeslot(sender, instance, **kwargs):
-    for route in instance.line.routes.all():
-        TimeSlot.objects.filter(stop=instance.stop, route=route).delete()
+@receiver(post_delete, sender=RouteStop)
+def delete_service_timeslot(sender, instance, **kwargs):
+    for service in instance.route.services.all():
+        TimeSlot.objects.filter(stop=instance.stop, service=service).delete()

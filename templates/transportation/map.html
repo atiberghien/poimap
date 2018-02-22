@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% load leaflet_tags static sekizai_tags compress bootstrap4 %}
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1 class="text-center">Carte du réseaux de {{area.name}}</h1>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-8">
+        <div id='map'>
+            {% leaflet_map "main" callback="main_map_init"%}
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="row">
+            <div class="col-md-12">
+
+            </div>
+        </div>
+    </div>
+</div>
+{% addtoblock "css" %}
+{% leaflet_css %}
+<link rel="stylesheet" href="{% static 'leaflet-routing-machine/dist/leaflet-routing-machine.css' %}">
+<link rel="stylesheet" href="{% static 'leaflet.awesome-markers/dist/leaflet.awesome-markers.css' %}">
+<style media="screen">
+    .leaflet-container {
+        height: 800px;
+    }
+</style>
+{% endaddtoblock %}
+
+{% addtoblock "js" %}
+{% compress js %}
+{% leaflet_js %}
+<script src="{% static 'leaflet-routing-machine/dist/leaflet-routing-machine.js' %}" charset="utf-8"></script>
+<script src="{% static 'leaflet.awesome-markers/dist/leaflet.awesome-markers.min.js' %}" charset="utf-8"></script>
+<script src="{% static 'poimap/js/poimap.utils.js' %}" charset="utf-8"></script>
+{% endcompress %}
+{% compress js inline %}
+<script type="text/javascript">
+
+    function main_map_init(map, options) {
+        {% include "poimap/scripts/global_vars.js" with area_slug=area.slug %}
+        {% include "poimap/scripts/fetch_poi.js"  with area_slug=area.slug custom_api_poi_list_url='api-stop-list' %}
+        {% include "poimap/scripts/fetch_area.js"  with area_slug=area.slug  %}
+
+        $(document).on("poimap:fetch-data", function(evt, area){
+            fetchPOI()
+        });
+        $(document).on("poimap:marker-added", function(evt, stop){
+            var data = allPOI[stop.id]
+            if(stop.properties.connection_count > 2){
+                data[1].setIcon(L.AwesomeMarkers.icon({
+                    icon: stop.properties.type.icon,
+                    prefix : 'fa',
+                    markerColor : "red"
+                }));
+            }
+        });
+        $.getJSON("{% url 'api-line-list' %}", function(data) {
+            var routeStyles = [
+                {color: 'red', opacity: 1, weight: 4},
+                {color: 'red', opacity: 1, weight: 4, dashArray: '20,15'},
+                {color: 'blue', opacity: 1, weight: 4},
+                {color: 'blue', opacity: 1, weight: 4, dashArray: '20,15'},
+                {color: 'yellow', opacity: 1, weight: 4},
+                {color: 'yellow', opacity: 1, weight: 4, dashArray: '20,15'},
+                {color: 'green', opacity: 1, weight: 4},
+                {color: 'green', opacity: 1, weight: 4, dashArray: '20,15'},
+            ]
+            var cpt = 0
+            var control = L.control.layers({}, {}, {collapsed:false}).addTo(map);
+            $.each(data, function(idx, line){
+                $.each(line.routes, function(idx, route){
+                    var path = L.geoJSON(route.path , {
+                        style : routeStyles[cpt++]
+                    })
+                    control.addOverlay(path, `${line.name} - ${route.name}`)
+                });
+            });
+        });
+        map.on('overlayadd', function(evt) {
+            map.fitBounds(evt.layer.getBounds());
+        });
+        map.on('overlayremove', function(evt) {
+            map.fitBounds(rect.getBounds());
+        });
+    }
+</script>
+{% endcompress %}
+{% endaddtoblock%}
+{% endblock %}
