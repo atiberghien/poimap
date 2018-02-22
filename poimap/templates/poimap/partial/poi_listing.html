@@ -74,7 +74,7 @@
                     context.img_url = "{{MEDIA_URL}}/"+poi.properties.medias[0]
                 }
                 else {
-                    context.img_url = "{% static 'img/no_picture.svg'%}/"
+                    context.img_url = "{% static 'img/no_picture.svg'%}"
                 }
                 if(lastCity != poi.properties.city){
                     lastCity = poi.properties.city;
