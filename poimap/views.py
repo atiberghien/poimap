@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
@@ -11,10 +12,13 @@ from shapely.geometry import box
 from shapely.affinity import scale
 from django_filters.rest_framework import DjangoFilterBackend
 
-from hostings.models import Hostings
 from .serializers import PathSerializer, POISerializer, AreaSerializer
 from .models import Path, POI, Area
 from .forms import CustomItineraryForm
+
+if "hostings" in settings.INSTALLED_APPS:
+    from hostings.models import Hostings
+
 import json
 import math
 
@@ -132,7 +136,10 @@ def custom_itinerary(request, path_slug):
     step = data["step"]*1000
     step_cpt = 1
     margin = 5000
-    for poi in POI.objects.filter(geom__within=bbox).instance_of(Hostings):
+    qs = POI.objects.filter(geom__within=bbox)
+    if "hostings" in settings.INSTALLED_APPS:
+        qs = qs.instance_of(Hostings)
+    for poi in qs:
         print step_cpt*step-margin, poi.distance ,step_cpt*step+margin
         if poi.distance >= step_cpt*step-margin and poi.distance <= step_cpt*step+margin:
             print "youpi"
