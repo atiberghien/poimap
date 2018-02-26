@@ -57,7 +57,22 @@ L.Marker.prototype.applyDragEventListener = function (currentPath, markerOptions
     });
 }
 
-
+function createPOIMarker(poi) {
+    return marker = L.geoJSON(poi, {
+        onEachFeature: function (feature, layer) {
+            layer.setIcon(L.AwesomeMarkers.icon({
+                icon: feature.properties.type.icon,
+                prefix : 'fa',
+            }));
+            layer.bindPopup(feature.properties.marker_popup, {'className':'custom-poimap-popup' });
+            layer.on("click", function(){
+                $(document).trigger("poimap:marker-clicked", [feature, layer]);
+            })
+            allPOI[feature.id] = [feature, layer];
+            $(document).trigger("poimap:marker-added", [feature]);
+        }
+    })
+}
 
 
 

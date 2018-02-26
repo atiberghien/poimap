@@ -1,6 +1,5 @@
 {% load static %}
 
-var allPOI = {}
 var typedPOILayers = {}
 var typedPOILayerControl = null
 var secondaryPathLayers = null;
@@ -48,24 +47,10 @@ function fetchPOI(pathPK) {
         url+= "&type__slug__in={{poi_type_slugs|join:','}}"
         {% endif %}
     }
-
     return $.getJSON(url).done(function(data){
         clearLayersAndControls();
         $.each(data.features, function(index, poi){
-            var marker = L.geoJSON(poi, {
-                onEachFeature: function (feature, layer) {
-                    layer.setIcon(L.AwesomeMarkers.icon({
-                        icon: poi.properties.type.icon,
-                        prefix : 'fa',
-                    }));
-                    layer.bindPopup(feature.properties.marker_popup, {'className':'custom-poimap-popup' });
-                    layer.on("click", function(){
-                        $(document).trigger("poimap:marker-clicked", [feature, layer]);
-                    })
-                    allPOI[feature.id] = [feature, layer];
-                    $(document).trigger("poimap:marker-added", [poi]);
-                }
-            })
+            var marker = createPOIMarker(poi);
             if(typedPOILayers.hasOwnProperty(poi.properties.type.label)){
                 typedPOILayers[poi.properties.type.label].addLayer(marker)
             }
