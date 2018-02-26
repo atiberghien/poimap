@@ -29,6 +29,7 @@
 {% addtoblock 'js' %}
 {% leaflet_js %}
 <script src="{% static 'leaflet.awesome-markers/dist/leaflet.awesome-markers.min.js' %}" charset="utf-8"></script>
+<script src="{% static 'poimap/js/global_vars.js' %}" charset="utf-8"></script>
 <script src="{% static 'poimap/js/poimap.utils.js' %}" charset="utf-8"></script>
 <script>
 function main_map_init(map, options) {
@@ -38,7 +39,6 @@ function main_map_init(map, options) {
     map.options.minZoom = 8;
     $(".leaflet-control-zoom-out.leaflet-bar-part").parent().css("visibility", "hidden");
     $(document).ready(function(){
-        {% include "poimap/scripts/global_vars.js" with area_slug=area.slug %}
         {% include "poimap/scripts/fetch_area.js"  with area_slug=area.slug  %}
         overlays = {}
         lineSlug = "{{lines.0.slug}}"
@@ -53,7 +53,7 @@ function main_map_init(map, options) {
                             style : {color: 'red', opacity: 1, weight: 6}
                         }),
                         stops : $.map(route.stops.features, function(stop, idx){
-                            return L.geoJSON(stop);
+                            return createPOIMarker(stop);
                         }),
                     }
                 });

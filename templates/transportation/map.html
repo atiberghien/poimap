@@ -36,13 +36,13 @@
 {% leaflet_js %}
 <script src="{% static 'leaflet-routing-machine/dist/leaflet-routing-machine.js' %}" charset="utf-8"></script>
 <script src="{% static 'leaflet.awesome-markers/dist/leaflet.awesome-markers.min.js' %}" charset="utf-8"></script>
+<script src="{% static 'poimap/js/global_vars.js' %}" charset="utf-8"></script>
 <script src="{% static 'poimap/js/poimap.utils.js' %}" charset="utf-8"></script>
 {% endcompress %}
 {% compress js inline %}
 <script type="text/javascript">
 
     function main_map_init(map, options) {
-        {% include "poimap/scripts/global_vars.js" with area_slug=area.slug %}
         {% include "poimap/scripts/fetch_poi.js"  with area_slug=area.slug custom_api_poi_list_url='api-stop-list' %}
         {% include "poimap/scripts/fetch_area.js"  with area_slug=area.slug  %}
 
