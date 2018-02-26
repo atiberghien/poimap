@@ -54,6 +54,7 @@
 <script src="{% static '@turf/turf/turf.min.js' %}" charset="utf-8"></script>
 <script src="{% static '@mapbox/togeojson/togeojson.js' %}" charset="utf-8"></script>
 <script src="{% static 'leaflet-knn/leaflet-knn.min.js' %}" charset="utf-8"></script>
+<script src="{% static 'poimap/js/global_vars.js' %}" charset="utf-8"></script>
 <script src="{% static 'poimap/js/poimap.utils.js' %}" charset="utf-8"></script>
 {{form.media}} <!--/static/poimap/js/custom_itinerary.js-->
 {% endcompress %}
@@ -61,7 +62,6 @@
 <script type="text/javascript">
 
     function main_map_init(map, options) {
-        {% include "poimap/scripts/global_vars.js" with area_slug=area.slug %}
         {% include "poimap/scripts/fetch_poi.js"  with area_slug=area.slug %}
         {% include "poimap/scripts/fetch_area.js"  with area_slug=area.slug %}
 

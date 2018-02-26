@@ -27,3 +27,5 @@ var endPointOptions = {
     icon :endIcon,
     // labelId : "#end-"+path_.properties.slug
 }
+
+var allPOI = {}
