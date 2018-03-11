@@ -9,7 +9,7 @@ from cms.menu_bases import CMSAttachMenu
 from menus.base import NavigationNode
 from menus.menu_pool import menu_pool
 from django.urls import reverse
-from .models import POI, POIListing#, PathElevationChart
+from .models import POI, POIListing, POI_LISTING_TEMPLATES
 
 class StarredPOIMenu(CMSAttachMenu):
 
@@ -36,10 +36,11 @@ class POIMapApp(CMSApp):
 class POIListingPlugin(CMSPluginBase):
     model = POIListing
     name = _("POI List Plugin")
-    render_template = "poimap/partial/poi_listing.html"
+    render_template = POI_LISTING_TEMPLATES[0][0]
     cache = False
 
     def render(self, context, instance, placeholder):
         context = super(POIListingPlugin, self).render(context, instance, placeholder)
         context["poi_type_slugs"] = instance.type_display.all().values_list('slug', flat=True)
+        self.render_template = instance.template
         return context
