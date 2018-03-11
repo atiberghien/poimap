@@ -1,0 +1,26 @@
+{% load sekizai_tags %}
+<div class="row">
+    {% for weather in  instance.weathers.all %}
+    <div class="col-2">
+        <div class="card mt-2 bg-dark-70 text-center">
+            <div class="card-body">
+                <h6 class="card-title text-underline">{{weather.poi.name}}</h6>
+                <h6 class="card-subtitle mb-2">{{weather.get_data.detailed_status|title}}</h6>
+                <div class="text-center">
+                    <img class="img-fluid" src="http://openweathermap.org/img/w/{{weather.get_data.weather_icon_name}}.png" alt="{{weather.get_data.detailed_status}}">
+                    <span class="d-block"><i class="fas fa-thermometer-empty"></i> {{weather.get_data.temperature_c.temp}} &#x2103;</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% addtoblock 'css'%}
+<style media="screen">
+    .bg-dark-70 {
+        /* corresponding to BS4 bg-black */
+        background-color: rgba(52, 58, 64, 0.5);
+        color: white;
+    }
+</style>
+{% endaddtoblock %}
