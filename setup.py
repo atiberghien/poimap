@@ -31,5 +31,6 @@ setup(name='poimap',
            'django-bootstrap4',
            'django-admin-sortable2',
            'pyowm',
+           'django-easy-select2',
       ],
       zip_safe=False)
