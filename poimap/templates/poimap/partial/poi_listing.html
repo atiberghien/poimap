@@ -1,14 +1,7 @@
 {%load leaflet_tags sekizai_tags static %}
 
-<div class="row">
-    <div class="col-sm-12 col-md-6">
-        <div class="map-wrapper">
-            {% leaflet_map "main" callback="main_map_init"  settings_overrides=map_settings%}
-        </div>
-    </div>
-    <div id="cards" class="col-sm-12 col-md-6">
+<div id="cards">
 
-    </div>
 </div>
 
 {% verbatim %}
@@ -28,63 +21,29 @@
  </div>
 </script>
 {% endverbatim %}
-{% addtoblock 'css' %}
-{% leaflet_css %}
-<link rel="stylesheet" href="{% static 'leaflet.awesome-markers/dist/leaflet.awesome-markers.css' %}">
-<style media="screen">
-    .leaflet-container {
-        height: 500px;
-    }
-    .map-wrapper {
-        position: -webkit-sticky;
-        position: sticky;
-        top: 10em; // required as well.
-    }
-</style>
-{% endaddtoblock %}
 {% addtoblock 'js' %}
-{% leaflet_js %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.11/handlebars.min.js" charset="utf-8"></script>
-<script src="{% static 'leaflet.awesome-markers/dist/leaflet.awesome-markers.min.js' %}" charset="utf-8"></script>
-<script src="{% static 'poimap/js/poimap.utils.js' %}" charset="utf-8"></script>
 <script type="text/javascript">
         var source   = document.getElementById("poi-card-template").innerHTML;
         var poiCardTemplate = Handlebars.compile(source);
-
-        function main_map_init(map, options) {
-            {% include "poimap/scripts/fetch_area.js" with area_slug='chemin-urbain-v' %}
-            {% include "poimap/scripts/fetch_poi.js"  with poi_type_slugs=poi_type_slugs remove_control=True %}
-            $.getJSON("{% url 'api-area-paths' 'chemin-urbain-v' %}").done(function(paths){
-                $.each(paths.features, function(index, path_){
-                    if(path_.properties.is_root){
-                        L.geoJSON(path_).addTo(map)
-                        return
-                    }
-                });
-            });
-            var lastCity = null;
-
-            $(document).on("poimap:marker-added",  function(evt, poi){
-                var context = {
-                    title: poi.properties.name,
-                    description: $(poi.properties.description).text().substring(0, 250),
-                    distance : poi.properties.distance / 1000,
-                };
-                if(poi.properties.medias.length > 0){
-                    context.img_url = "{{MEDIA_URL}}/"+poi.properties.medias[0]
-                }
-                else {
-                    context.img_url = "{% static 'img/no_picture.svg'%}"
-                }
-                if(lastCity != poi.properties.city){
-                    lastCity = poi.properties.city;
-                    $("#cards").append(`<h3 class=''>${lastCity}</h3>`);
-                };
-                $("#cards").append(poiCardTemplate(context));
-            });
-            $(document).on("poimap:fetch-data", function(evt, area){
-                fetchPOI();
-            });
-        }
+        var lastCity = null;
+        $(document).on("poimap:marker-added",  function(evt, poi){
+            var context = {
+                title: poi.properties.name,
+                description: $(poi.properties.description).text().substring(0, 250),
+                distance : poi.properties.distance / 1000,
+            };
+            if(poi.properties.medias.length > 0){
+                context.img_url = "{{MEDIA_URL}}/"+poi.properties.medias[0]
+            }
+            else {
+                context.img_url = "{% static 'img/no_picture.svg'%}"
+            }
+            if(lastCity != poi.properties.city){
+                lastCity = poi.properties.city;
+                $("#cards").append(`<h3 class=''>${lastCity}</h3>`);
+            };
+            $("#cards").append(poiCardTemplate(context));
+        });
 </script>
 {% endaddtoblock %}

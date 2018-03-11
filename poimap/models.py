@@ -131,8 +131,14 @@ class POIMedia(models.Model):
         verbose_name = "Photo"
         verbose_name_plural = "Gallerie"
 
+POI_LISTING_TEMPLATES = (
+  ('poimap/partial/poi_map_listing.html', 'Map'),
+  ('poimap/partial/poi_listing.html', 'List'),
+)
+
 class POIListing(CMSPlugin):
     type_display = models.ManyToManyField(POIType, verbose_name="Type de POI à afficher")
+    template = models.CharField('Template', max_length=255, choices=POI_LISTING_TEMPLATES, default="poimap/partial/poi_map_listing.html")
 
     def copy_relations(self, oldinstance):
         self.type_display = oldinstance.type_display.all()

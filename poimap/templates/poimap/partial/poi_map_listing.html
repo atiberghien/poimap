@@ -1,0 +1,36 @@
+{%load leaflet_tags sekizai_tags static %}
+
+{% leaflet_map "main" callback="main_map_init"  settings_overrides=map_settings%}
+
+{% addtoblock 'css' %}
+{% leaflet_css %}
+<link rel="stylesheet" href="{% static 'leaflet.awesome-markers/dist/leaflet.awesome-markers.css' %}">
+<style media="screen">
+    .leaflet-container {
+        height: 500px;
+    }
+</style>
+{% endaddtoblock %}
+{% addtoblock 'js' %}
+{% leaflet_js %}
+<script src="{% static 'leaflet.awesome-markers/dist/leaflet.awesome-markers.min.js' %}" charset="utf-8"></script>
+<script src="{% static 'poimap/js/global_vars.js' %}" charset="utf-8"></script>
+<script src="{% static 'poimap/js/poimap.utils.js' %}" charset="utf-8"></script>
+<script type="text/javascript">
+        function main_map_init(map, options) {
+            {% include "poimap/scripts/fetch_area.js" with area_slug='chemin-urbain-v' %}
+            {% include "poimap/scripts/fetch_poi.js"  with poi_type_slugs=poi_type_slugs remove_control=True %}
+            $.getJSON("{% url 'api-area-paths' 'chemin-urbain-v' %}").done(function(paths){
+                $.each(paths.features, function(index, path_){
+                    if(path_.properties.is_root){
+                        L.geoJSON(path_).addTo(map)
+                        return
+                    }
+                });
+            });
+            $(document).on("poimap:fetch-data", function(evt, area){
+                fetchPOI();
+            });
+        }
+</script>
+{% endaddtoblock %}
