@@ -50,9 +50,6 @@ class Path(MP_Node):
     def __unicode__(self):
         return self.name
 
-
-poi_child_models = getattr(settings, "POI_CHILD_MODELS", [])
-
 class POIType(models.Model):
     label = models.CharField(max_length=30)
     slug = AutoSlugField(populate_from="label", always_update=True)

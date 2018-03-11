@@ -1,9 +1,8 @@
 from __future__ import unicode_literals
 
 from django.db import models
-from filer.fields.image import FilerImageField
 
-from poimap.models import POI, poi_child_models
+from poimap.models import POI
 
 class PaymentType(models.Model):
     label = models.CharField(max_length=30)         # hotel gite chambre_hote camping autres
