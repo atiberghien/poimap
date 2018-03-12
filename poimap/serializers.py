@@ -1,5 +1,5 @@
 from django.template.loader import render_to_string
-from rest_framework.serializers import ModelSerializer, SerializerMethodField
+from rest_framework.serializers import ModelSerializer, SerializerMethodField, HyperlinkedIdentityField
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 from .models import *
 
@@ -32,6 +32,8 @@ class POISerializer(GeoFeatureModelSerializer):
     type = POITypeSerializer()
     marker_popup = SerializerMethodField()
     medias = SerializerMethodField()
+    api_url = HyperlinkedIdentityField(view_name='poi-api-detail', read_only=True)
+    url = HyperlinkedIdentityField(view_name='poi-detail', read_only=True)
 
     def get_marker_popup(self, obj):
         return render_to_string("poimap/partial/poi_marker_popup.html", {"object" : obj})
@@ -42,7 +44,7 @@ class POISerializer(GeoFeatureModelSerializer):
     class Meta:
         model = POI
         geo_field = "geom"
-        fields = ('id', 'name', 'slug', 'description', 'distance', 'type', 'coords', "city", "marker_popup", "medias")
+        fields = ('id', 'name', 'slug', 'description', 'distance', 'type', 'coords', "city", "marker_popup", "medias", "url", "api_url")
 
 class TypedPOISerializer(ModelSerializer):
 

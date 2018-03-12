@@ -1,9 +1,133 @@
 {% extends "base.html" %}
-
+{% load sekizai_tags leaflet_tags compress static %}
 {% block title %}{{object.name}}{% endblock %}
 
+{% block container_class %}container{% endblock %}
+
 {% block content %}
+<div class="row">
+    <div class="col-md-12 mt-2">
+        <h1 class="text-center">{{object.name}}</h1>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <div id="carouselId" class="carousel slide" data-ride="carousel">
+            {% if object.medias.count %}
+            <ol class="carousel-indicators">
+                {% for pic in  object.medias.all %}
+                <li data-target="#carouselId" data-slide-to="{{forloop.counter0}}" {% if forloop.first%}class="active"{%endif%}></li>
+                {% endfor %}
+            </ol>
+            {% endif %}
+            <div class="carousel-inner">
+                {% for pic in  object.medias.all %}
+                <div class="carousel-item {% if forloop.first%}active{%endif%}">
+                    <img class="img-thumbnail rounded d-block w-100" src="{{pic.file.url}}">
+                </div>
+                {% empty %}
+                <div class="carousel-item active">
+                    <img class="img-thumbnail rounded d-block w-100" src="{% static 'img/no_picture.svg' %}">
+                </div>
+                {% endfor %}
+            </div>
+            {% if object.medias.count %}
+            <a class="carousel-control-prev" href="#carouselId" role="button" data-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="sr-only">Previous</span>
+            </a>
+            <a class="carousel-control-next" href="#carouselId" role="button" data-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="sr-only">Next</span>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-md-6">
+        {% block top_right %}
+        <div id='map-{{object.id}}'>
+        </div>
+        {% endblock %}
+    </div>
+</div>
+{% block bottom %}
+{% endblock %}
+<div class="row">
+    <div class="col-md-12">
+        {% block before_tabs %}
+        <address>
+            Latitude : {{object.geom.coords.1|stringformat:"f"}}, Longitude : {{object.geom.coords.0|stringformat:"f"}}<br>
+            Km : {{object.distance}}<br>
+            Altitude : {{object.geom.coords.3|stringformat:"f"|default:0}}<br>
+        </address>
+        {% endblock %}
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+          <li class="nav-item">
+            <a class="nav-link active" id="description-tab" data-toggle="tab" href="#description" role="tab" aria-controls="description" aria-selected="true">Description</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="comments-tab" data-toggle="tab" href="#comments" role="tab" aria-controls="comments" aria-selected="false">Commentaire(s)</a>
+          </li>
+        </ul>
 
+        <div class="tab-content">
+          <div class="tab-pane active" id="description" role="tabpanel" aria-labelledby="description-tab">
+              {{object.description|safe}}
+          </div>
+          <div class="tab-pane" id="comments" role="tabpanel" aria-labelledby="comments-tab">
 
-<h1>{{object.name}}</h1>
+          </div>
+        </div>
+    </div>
+</div>
+
+{% addtoblock "css" %}
+<style>
+    .leaflet-container {
+        height: 300px;
+    }
+</style>
+<link rel="stylesheet" href="{% static 'poimap/css/path_step.css' %}">
+{% leaflet_css %}
+<link rel="stylesheet" href="{% static 'leaflet.awesome-markers/dist/leaflet.awesome-markers.css' %}">
+{% endaddtoblock %}
+{% addtoblock "js" %}
+{% compress js %}
+{% leaflet_js %}
+<script src="{% static '@turf/turf/turf.min.js' %}" charset="utf-8"></script>
+<script src="{% static 'leaflet.awesome-markers/dist/leaflet.awesome-markers.min.js' %}" charset="utf-8"></script>
+{% endcompress %}
+{# {% compress js inline %}#}
+<script type="text/javascript">
+
+$(document).ready(function(){
+    $.getJSON("{% url 'path-api-detail' object.related_path.slug %}").done(function(data){
+        var path = L.geoJSON(data);
+        function generateMap(mapId, coords){
+            var map = L.map(mapId).setView(coords, 13);
+            L.tileLayer('https://{s}.tile.thunderforest.com/outdoors/{z}/{x}/{y}.png?apikey=3e3f2b7b947b4cdebeced62f95046ed7', {}).addTo(map);
+            var marker = L.marker(coords).addTo(map);
+            var latLngs = [ marker.getLatLng() ];
+            var markerBounds = L.latLngBounds(latLngs);
+            // map.fitBounds(markerBounds);
+            var bboxNorthWestCoords = map.getBounds().getNorthWest();
+            var bboxSouthEastCoords = map.getBounds().getSouthEast();
+            var start = turf.point([bboxNorthWestCoords.lng, bboxNorthWestCoords.lat]);
+            var stop = turf.point([bboxSouthEastCoords.lng, bboxSouthEastCoords.lat]);
+            var sliced = turf.lineSlice(start, stop, path.toGeoJSON().features[0]);
+            L.geoJSON(sliced, { color : 'red'}).addTo(map)
+            map.scrollWheelZoom.disable();
+            map.dragging.disable()
+        }
+        var poi{{object.id}}coords = [{{object.geom.coords.1|stringformat:"f"}}, {{object.geom.coords.0|stringformat:"f"}}]
+        generateMap("map-{{object.id}}", poi{{object.id}}coords)
+
+        $(".leaflet-control-attribution").remove();
+        $(".leaflet-control-scale").remove();
+        $(".leaflet-control-zoom").remove();
+    });
+})
+</script>
+{# {% endcompress %}#}
+{% endaddtoblock%}
 {% endblock %}

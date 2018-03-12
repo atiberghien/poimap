@@ -32,6 +32,7 @@
                 title: poi.properties.name,
                 description: $(poi.properties.description).text().substring(0, 250),
                 distance : poi.properties.distance / 1000,
+                url : poi.properties.url,
             };
             if(poi.properties.medias.length > 0){
                 context.img_url = "{{MEDIA_URL}}/"+poi.properties.medias[0]

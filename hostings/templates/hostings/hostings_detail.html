@@ -1,1 +1,60 @@
 {% extends "poimap/poi_detail.html" %}
+
+{% block top_right %}
+<address>
+    <strong>{{object.name}}</strong><br>
+    <strong>Paul Dupont</strong><br>
+    {{object.address|default:'42, rue du chemin'}}, {{object.zipcode|default:'48xxx'}} {{object.city|default:'Lozère'}}<br>
+    <br>
+    <i class="fas fa-phone"></i> <a class="ml-2"  href="tel:+33400000000">04 00 00 00 00 </a><br>
+    <i class="fas fa-envelope"></i> <a class="ml-2" href="mailto:contact@web.fr">contact@web.fr</a><br>
+    <i class="fas fa-globe"></i>  <a class="ml-2" href="http://www.web.fr">www.web.fr</a><br>
+    <br>
+    <a class="mr-3" href="#"><i class="fab fa-facebook fa-3x"></i></a>
+    <a class="mr-3" href="#"><i class="fab fa-twitter fa-3x"></i></a>
+    <a class="mr-3" href="#"><i class="fab fa-tripadvisor fa-3x"></i></a>
+    <br>
+    Latitude : {{object.geom.coords.1|stringformat:"f"}}, Longitude : {{object.geom.coords.0|stringformat:"f"}}<br>
+    Km : {{object.distance}}<br>
+    Altitude : {{object.geom.coords.3|stringformat:"f"|default:0}}<br>
+</address>
+{% endblock %}
+
+{% block bottom %}
+<div class="row">
+    <div class="col-md-6">
+        <ul class="list-unstyled">
+            <li class="my-2">Nombre de randonneurs/an : 300</li>
+            <li class="my-2">Date d'ouverture : du 01/05 au 30/10</li>
+            <li class="my-2">Capacité d'accueil : 50
+                <ul>
+                    <li class="my-2">Nombre de lit en 1 personne : 20</li>
+                    <li class="my-2">Nombre de lit en 2 personnes : 30</li>
+                </ul>
+            </li>
+            <li class="my-2">Tarifs : 15€/nuit/pers</li>
+            <li class="my-2">Moyen(s) de paiement accepté(s) : CB, espèces</li>
+        </ul>
+        <ul class="list-inline w-100">
+            <li class="list-inline-item" style="width:7%"><i class="fab fa-accessible-icon fa-2x" title="Accessible"></i></li>
+            <li class="list-inline-item" style="width:7%"><i class="fas fa-wifi fa-2x" title="Wifi gratuit"></i></li>
+            <li class="list-inline-item" style="width:7%"><i class="fas fa-bicycle fa-2x" title="Garage à vélo"></i></li>
+            <li class="list-inline-item" style="width:7%"><i class="fas fa-tint fa-2x" title="Point d'eau"></i></li>
+            <li class="list-inline-item" style="width:7%"><i class="fas fa-shopping-basket fa-2x" title="Préparation de pique-nique"></i></li>
+            <li class="list-inline-item" style="width:7%"><i class="fas fa-shopping-cart fa-2x" title="Commerce de proximité"></i></li>
+            <li class="list-inline-item" style="width:7%"><i class="far fa-credit-card fa-2x" title="Distributeur automatique"></i></li>
+            <li class="list-inline-item" style="width:7%"><i class="far fa-question fa-2x" title=""></i></li>
+            <li class="list-inline-item" style="width:7%"><i class="far fa-question fa-2x" title=""></i></li>
+            <li class="list-inline-item" style="width:7%"><i class="far fa-question fa-2x" title=""></i></li>
+        </ul>
+    </div>
+    <div class="col-md-6">
+        <div id='map-{{object.id}}'>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block before_tabs %}
+{# empty #}
+{% endblock %}

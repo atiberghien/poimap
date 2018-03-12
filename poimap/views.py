@@ -19,9 +19,6 @@ from .forms import CustomItineraryForm
 if "hostings" in settings.INSTALLED_APPS:
     from hostings.models import Hostings
 
-import json
-import math
-
 
 class AreaView(generics.RetrieveAPIView):
     queryset = Area.objects.all()
@@ -69,6 +66,9 @@ class AreaPathsView(generics.ListAPIView):
 
 class POIDetailView(DetailView):
     model = POI
+
+    def get_template_names(self):
+        return ["%s/%s_detail.html" % (self.get_object().polymorphic_ctype.app_label, self.get_object().polymorphic_ctype.model)]
 
 
 class POIView(generics.RetrieveAPIView):
