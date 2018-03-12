@@ -1,5 +1,5 @@
 {% extends "poimap/poi_detail.html" %}
-
+{% load static sekizai_tags %}
 {% block top_right %}
 <address>
     <strong>{{object.name}}</strong><br>
@@ -36,16 +36,16 @@
             <li class="my-2">Moyen(s) de paiement accepté(s) : CB, espèces</li>
         </ul>
         <ul class="list-inline w-100">
-            <li class="list-inline-item" style="width:7%"><i class="fab fa-accessible-icon fa-2x" title="Accessible"></i></li>
-            <li class="list-inline-item" style="width:7%"><i class="fas fa-wifi fa-2x" title="Wifi gratuit"></i></li>
-            <li class="list-inline-item" style="width:7%"><i class="fas fa-bicycle fa-2x" title="Garage à vélo"></i></li>
-            <li class="list-inline-item" style="width:7%"><i class="fas fa-tint fa-2x" title="Point d'eau"></i></li>
-            <li class="list-inline-item" style="width:7%"><i class="fas fa-shopping-basket fa-2x" title="Préparation de pique-nique"></i></li>
-            <li class="list-inline-item" style="width:7%"><i class="fas fa-shopping-cart fa-2x" title="Commerce de proximité"></i></li>
-            <li class="list-inline-item" style="width:7%"><i class="far fa-credit-card fa-2x" title="Distributeur automatique"></i></li>
-            <li class="list-inline-item" style="width:7%"><i class="far fa-question fa-2x" title=""></i></li>
-            <li class="list-inline-item" style="width:7%"><i class="far fa-question fa-2x" title=""></i></li>
-            <li class="list-inline-item" style="width:7%"><i class="far fa-question fa-2x" title=""></i></li>
+            <li class="list-inline-item icon-list"><i class="fab fa-accessible-icon fa-2x" title="Accessible"></i></li>
+            <li class="list-inline-item icon-list"><i class="fas fa-wifi fa-2x" title="Wifi gratuit"></i></li>
+            <li class="list-inline-item icon-list"><i class="fas fa-bicycle fa-2x" title="Garage à vélo"></i></li>
+            <li class="list-inline-item icon-list"><i class="fas fa-tint fa-2x" title="Point d'eau"></i></li>
+            <li class="list-inline-item icon-list"><i class="fas fa-shopping-basket fa-2x" title="Préparation de pique-nique"></i></li>
+            <li class="list-inline-item icon-list"><i class="fas fa-shopping-cart fa-2x" title="Commerce de proximité"></i></li>
+            <li class="list-inline-item icon-list"><i class="far fa-credit-card fa-2x" title="Distributeur automatique"></i></li>
+            <li class="list-inline-item icon-list"><img class="img-fluid custom-icon" src="{% static 'poimap/img/horse.svg'%}" alt="Accepter les chevaux"></li>
+            <li class="list-inline-item icon-list"><img class="img-fluid custom-icon" src="{% static 'poimap/img/hut.svg'%}" alt="Bivouac possible"></li>
+            <li class="list-inline-item icon-list"><img class="img-fluid custom-icon" src="{% static 'poimap/img/wc.svg'%}" alt="Toilettes publiques"></li>
         </ul>
     </div>
     <div class="col-md-6">
@@ -53,6 +53,17 @@
         </div>
     </div>
 </div>
+{% addtoblock 'css' %}
+<style media="screen">
+
+.icon-list {
+    width : 7%;
+}
+.icon-list .custom-icon {
+    vertical-align: text-bottom;
+}
+</style>
+{% endaddtoblock%}
 {% endblock %}
 
 {% block before_tabs %}
