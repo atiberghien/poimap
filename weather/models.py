@@ -36,6 +36,9 @@ class Weather(models.Model):
             self.fetch_data()
         return json.loads(self.data)
 
+    def __str__(self):
+        return self.poi.name.encode("utf-8")
+
     class Meta:
         ordering = ('poi__distance',)
 
