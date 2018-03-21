@@ -58,7 +58,11 @@
         <address>
             Latitude : {{object.geom.coords.1|stringformat:"f"}}, Longitude : {{object.geom.coords.0|stringformat:"f"}}<br>
             Km : {{object.distance}}<br>
+            {% if object.extra_data.altitude %}
+            Altitude : {{object.extra_data.altitude}}<br>
+            {% elif object.geom.coords.3 %}
             Altitude : {{object.geom.coords.3|stringformat:"f"|default:0}}<br>
+            {% endif %}
         </address>
         {% endblock %}
         <ul class="nav nav-tabs" id="myTab" role="tablist">

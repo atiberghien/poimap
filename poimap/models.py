@@ -4,6 +4,7 @@ from django.conf import settings
 from django.contrib.gis.db import models as gismodels
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.postgres.fields import JSONField
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 
@@ -78,6 +79,8 @@ class POI(PolymorphicModel):
     starred = models.BooleanField(default=False)
 
     distance = models.PositiveIntegerField(default=0)
+
+    extra_data = JSONField(default=dict({}), blank=True)
 
     @property
     def coords(self):

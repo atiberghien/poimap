@@ -156,6 +156,9 @@ class POIAdmin(LeafletGeoAdmin):
             'classes': ('location',),
             'fields': ('geom',),
         }),
+        (None, {
+            'fields': ('extra_data',),
+        }),
     )
 
 class POITypeAdmin(admin.ModelAdmin):
