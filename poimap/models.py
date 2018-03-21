@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 from django.db import models
 from django.conf import settings
+from django.utils.translation import ugettext_lazy as _
 from django.contrib.gis.db import models as gismodels
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import JSONField
 from django.dispatch import receiver
 from django.db.models.signals import post_save
-
-from cms.models.pluginmodel import CMSPlugin
+from cms.models import CMSPlugin, Page
 
 from django_countries.fields import CountryField
 from treebeard.mp_tree import MP_Node
@@ -137,11 +137,28 @@ class POIMedia(models.Model):
 POI_LISTING_TEMPLATES = (
   ('poimap/partial/poi_map_listing.html', 'Map'),
   ('poimap/partial/poi_listing.html', 'List'),
+  ('poimap/partial/itinerary.html', 'Itinerary'),
 )
 
 class POIListing(CMSPlugin):
+    path_display = models.ForeignKey(Path, null=True, blank=True, verbose_name="Chemin à afficher")
     type_display = models.ManyToManyField(POIType, verbose_name="Type de POI à afficher")
     template = models.CharField('Template', max_length=255, choices=POI_LISTING_TEMPLATES, default="poimap/partial/poi_map_listing.html")
+    hide_control = models.BooleanField(default=True)
 
     def copy_relations(self, oldinstance):
         self.type_display = oldinstance.type_display.all()
+
+class CustomItineraryFormPlugin(CMSPlugin):
+    custom_link = models.CharField(
+        verbose_name=_('Custom link'),
+        blank=True,
+        max_length=2040,
+    )
+    internal_link = models.ForeignKey(
+        Page,
+        verbose_name=_('Internal link'),
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+    )

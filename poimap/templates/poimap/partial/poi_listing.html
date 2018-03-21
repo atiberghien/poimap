@@ -6,7 +6,7 @@
 
 {% verbatim %}
 <script id="poi-card-template" type="text/x-handlebars-template">
-<div class="card border-light mb-3">
+<div id="{{slug}}" class="card border-light mb-3">
     <div class="row">
         <div class="col-3 col-sm-3 col-md-3">
             <img src="{{img_url}}" class="img-fluid img-thumbnail">
@@ -27,8 +27,10 @@
         var source   = document.getElementById("poi-card-template").innerHTML;
         var poiCardTemplate = Handlebars.compile(source);
         var lastCity = null;
+
         $(document).on("poimap:marker-added",  function(evt, poi){
             var context = {
+                slug : poi.properties.slug,
                 title: poi.properties.name,
                 description: $(poi.properties.description).text().substring(0, 250),
                 distance : poi.properties.distance / 1000,
@@ -45,6 +47,20 @@
                 $("#cards").append(`<h3 class=''>${lastCity}</h3>`);
             };
             $("#cards").append(poiCardTemplate(context));
+
+
+        });
+        $(document).on("poimap:fetch-secondary-data", function(e){
+            var hash = window.location.hash;
+            $('html, body').animate({
+                scrollTop: $(hash).offset().top- $("nav").height() - 10
+            }, 2000);
+        });
+
+        $(document).on("poimap:marker-clicked", function(e, feature, layer) {
+            $('html, body').animate({
+                scrollTop: $(`#${feature.properties.slug}`).offset().top - $("nav").height() - 10
+            }, 2000);
         });
 </script>
 {% endaddtoblock %}

@@ -2,19 +2,16 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.gis.geos import Polygon, Point
-from django.contrib.gis.db.models.functions import Distance
+
 from django.contrib.gis.measure import D
-from django.views.generic import TemplateView, DetailView
-from django.shortcuts import redirect, get_object_or_404, render
+from django.views.generic import DetailView
+from django.shortcuts import redirect, get_object_or_404
 from rest_framework import generics
-from shapely.geometry import box
-from shapely.affinity import scale
+from django.contrib.gis.geos import Polygon
 from django_filters.rest_framework import DjangoFilterBackend
 
 from .serializers import PathSerializer, POISerializer, AreaSerializer
 from .models import Path, POI, Area
-from .forms import CustomItineraryForm
 
 if "hostings" in settings.INSTALLED_APPS:
     from hostings.models import Hostings
@@ -101,59 +98,6 @@ class POIList(generics.ListAPIView):
                 queryset = queryset.filter(geom__contained=bbox)
 
         return queryset
-
-class MapView(TemplateView):
-    template_name = "map.html"
-
-    def get_context_data(self, **kwargs):
-        context = super(MapView, self).get_context_data(**kwargs)
-        area = Area.objects.first()
-        if "area_slug" in kwargs:
-            area = Area.objects.get(slug=kwargs["area_slug"])
-        context.update({
-            'area' : area,
-            'form' : CustomItineraryForm()
-        })
-        return context
-
-
-
-def custom_itinerary(request, path_slug):
-    path = Path.objects.get(slug=path_slug)
-    form = CustomItineraryForm(request.POST)
-    form.is_valid()
-    data = form.cleaned_data
-    start = data["start_point"].coords
-    end = data["end_point"].coords
-    bbox = box(start["lng"], start["lat"], end["lng"], end["lat"])
-    bbox = scale(bbox, xfact=1.1, yfact=1.1)
-    bbox = Polygon(list(bbox.exterior.coords))
-    custom_path = path.geom.intersection(bbox)
-    custom_path.transform(3035)
-    length = custom_path.length / 1000
-    custom_path.transform(4326)
-
-    step = data["step"]*1000
-    step_cpt = 1
-    margin = 5000
-    qs = POI.objects.filter(geom__within=bbox)
-    if "hostings" in settings.INSTALLED_APPS:
-        qs = qs.instance_of(Hostings)
-    for poi in qs:
-        print step_cpt*step-margin, poi.distance ,step_cpt*step+margin
-        if poi.distance >= step_cpt*step-margin and poi.distance <= step_cpt*step+margin:
-            print "youpi"
-        step_cpt += 1
-        # for x in range():
-
-
-    return render(request, "itinerary.html", {
-        "step" : data["step"]*1000,
-        "margin" : 5000,
-        "path_slug" : path_slug,
-        "poi_list" : POI.objects.filter(geom__within=bbox),
-        "total_length" : length,
-    })
 
 @login_required
 @staff_member_required

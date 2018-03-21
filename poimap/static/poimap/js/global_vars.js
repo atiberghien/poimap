@@ -1,5 +1,8 @@
 var rect = null //the area
 
+var fullPath = null;
+var path = null;
+
 var startPoint = null;
 var endPoint = null;
 

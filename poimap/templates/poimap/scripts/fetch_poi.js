@@ -1,33 +1,4 @@
-{% load static %}
-
-var typedPOILayers = {}
-var typedPOILayerControl = null
-var secondaryPathLayers = null;
-var secondaryPathLayerControl = null
-
-function clearLayersAndControls(){
-    if(len(typedPOILayers)){
-        for (var key in typedPOILayers) {
-            typedPOILayers[key].removeFrom(map);
-        }
-        typedPOILayers = {};
-    }
-    if(typedPOILayerControl) {
-        typedPOILayerControl.remove();
-        typedPOILayerControl = null;
-    }
-    if(secondaryPathLayerControl){
-        for (var key in secondaryPathLayers) {
-            secondaryPathLayers[key].removeFrom(map);
-        }
-        secondaryPathLayers = null;
-        secondaryPathLayerControl.remove();
-        secondaryPathLayerControl = null;
-    }
-    $(".leaflet-control-layers").remove()
-}
-
-function fetchPOI(pathPK) {
+function fetchPOI(map, pathPK) {
     var bboxCoords = resizeBbox([startPoint.getLatLng().lng,
                                  startPoint.getLatLng().lat,
                                  endPoint.getLatLng().lng,
@@ -48,7 +19,7 @@ function fetchPOI(pathPK) {
         {% endif %}
     }
     return $.getJSON(url).done(function(data){
-        clearLayersAndControls();
+        clearLayersAndControls(map);
         $.each(data.features, function(index, poi){
             var marker = createPOIMarker(poi);
             if(typedPOILayers.hasOwnProperty(poi.properties.type.label)){

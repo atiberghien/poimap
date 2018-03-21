@@ -57,6 +57,47 @@ L.Marker.prototype.applyDragEventListener = function (currentPath, markerOptions
     });
 }
 
+var typedPOILayers = {}
+var typedPOILayerControl = null
+var secondaryPathLayers = null;
+var secondaryPathLayerControl = null
+
+function clearLayersAndControls(map){
+    if(len(typedPOILayers)){
+        for (var key in typedPOILayers) {
+            typedPOILayers[key].removeFrom(map);
+        }
+        typedPOILayers = {};
+    }
+    if(typedPOILayerControl) {
+        typedPOILayerControl.remove();
+        typedPOILayerControl = null;
+    }
+    if(secondaryPathLayerControl){
+        for (var key in secondaryPathLayers) {
+            secondaryPathLayers[key].removeFrom(map);
+        }
+        secondaryPathLayers = null;
+        secondaryPathLayerControl.remove();
+        secondaryPathLayerControl = null;
+    }
+    $(".leaflet-control-layers").remove()
+}
+
+function fetchArea(map, url){
+    return $.getJSON(url).done(function(area){
+        rect = L.geoJSON(area)
+        rect.setStyle({
+            fill : false,
+            color : 'grey'
+        })
+        startPoint = L.marker(rect.getBounds().getNorthWest());
+        endPoint = L.marker(rect.getBounds().getSouthEast());
+        map.fitBounds(rect.getBounds());
+        $(document).trigger("poimap:fetch-data", [area]);
+    });
+}
+
 function createPOIMarker(poi) {
     return marker = L.geoJSON(poi, {
         onEachFeature: function (feature, layer) {
@@ -74,39 +115,21 @@ function createPOIMarker(poi) {
     })
 }
 
+function computePath(map, currentPath){
+    console.log("toto", startPoint, endPoint);
+    var sliced = turf.lineSlice(startPoint.toGeoJSON(), endPoint.toGeoJSON(), fullPath.toGeoJSON().features[0]);
 
+    if(currentPath) {
+        map.removeLayer(currentPath)
+    }
+    var tempPath = L.geoJSON(sliced, { color : 'red'}).addTo(map);
+    map.fitBounds(tempPath.getBounds());
 
+    var length = turf.length(sliced);
+    $("#distance").text(length.toFixed(2));
 
-// var checkpoints = [];
-// function updateCheckPoints(steps, stepLength) {
-//     for (var i = 0; i < checkpoints.length; i++) {
-//         map.removeLayer(checkpoints[i])
-//     }
-//     checkpoints = []
-//     var geop = path.toGeoJSON().features[0]
-//     for (var i = 1; i <= steps-1; i++) {
-//         var along = turf.along(geop, stepLength * i, 'kilometers');
-//         L.geoJSON(along, {
-//             pointToLayer: function (feature, latlng) {
-//                 var checkpoint = L.circleMarker(latlng, {
-//                     radius : 2,
-//                     color : 'red',
-//                     fill : "red"
-//                 });
-//                 checkpoints.push(checkpoint);
-//                 return checkpoint
-//             }
-//         }).addTo(map);
-//     }
-// }
+    fetchPOI(map);
+    $(document).trigger("poimap:update-elevation-chart", [sliced.geometry.coordinates])
 
-// $("#kmPerDay").on("change", function(){
-//     var geop = path.toGeoJSON().features[0]
-//     var length = turf.lineDistance(geop, 'kilometers');
-//
-//     var stepLength = parseFloat($(this).val());
-//     var steps = Math.round(length / stepLength);
-//
-//     updateCheckPoints(steps, stepLength);
-// });
-// $("#kmPerDay").change()
+    return tempPath
+}

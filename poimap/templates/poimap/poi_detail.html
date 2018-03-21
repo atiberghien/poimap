@@ -7,6 +7,9 @@
 {% block content %}
 <div class="row">
     <div class="col-md-12 mt-2">
+        {% block return_link%}
+        <a href="{{ request.META.HTTP_REFERER }}#{{object.slug}}">Retour</a>
+        {% endblock %}
         <h1 class="text-center">{{object.name}}</h1>
     </div>
 </div>
@@ -129,7 +132,9 @@ $(document).ready(function(){
         $(".leaflet-control-attribution").remove();
         $(".leaflet-control-scale").remove();
         $(".leaflet-control-zoom").remove();
+        $(".leaflet-container").css('height', $("#carouselId").height())
     });
+
 })
 </script>
 {# {% endcompress %}#}

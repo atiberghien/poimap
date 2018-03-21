@@ -1,0 +1,57 @@
+{% load leaflet_tags static sekizai_tags compress%}
+
+<div class="row">
+    <div class="col-12">
+        <p>Distance totale de votre randonnée : {{total_length|floatformat:2}} km</p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        {% for poi in poi_list %}
+        <div class="row">
+            {%if poi.type.slug == 'hebergement' %}
+            <div class="col-md-12">
+                <h2>{{poi.distance|floatformat:2}} m - {{poi.name}}</h2>
+                <div class="form-group">
+                    <label for="path-step-{{poi.id}}-comment">Commentaire</label>
+                    <textarea class="form-control" name="path-step-{{poi.id}}-comment" rows="8"></textarea>
+                </div>
+            </div>
+            {% else %}
+            <div class="col-md-12">
+                <h5>{{poi.distance}} - {{poi.name}}</h5>
+            </div>
+            {% endif %}
+
+        </div>
+        {% endfor %}
+    </div>
+    <!--<div id="toolbar">
+        <ul>
+            <li><a href="#"><i class="fa fa-floppy-o"></i></a></li>
+            <li><a id="generate-pdf" href="#"><i class="fa fa-file-pdf-o"></i></a></li>
+        </ul>
+    </div> -->
+</div>
+
+
+{% addtoblock "css" %}
+<link rel="stylesheet" href="{% static 'poimap/css/path_step.css' %}">
+{% endaddtoblock %}
+
+{% addtoblock "js" %}
+{% comment %}
+<script type="text/javascript">
+$("#generate-pdf").click(function(){
+    event.preventDefault();
+    var pdf = new jsPDF('p','pt','a4');
+
+    var doc = $(document.body).clone();
+    $(doc).find(".leaflet-container").remove();
+    pdf.addHTML(doc[0],function() {
+        pdf.save('a4.pdf')
+    });
+});
+</script>
+{% endcomment %}
+{% endaddtoblock%}

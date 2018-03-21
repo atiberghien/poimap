@@ -1,0 +1,17 @@
+{% load  sekizai_tags compress bootstrap4 %}
+<form class="" action="{{instance.internal_link.get_absolute_url}}" method="post">
+{% csrf_token %}
+    <h4>
+        Distance totale
+        <span id="distance"></span>
+    </h4>
+    {% bootstrap_form form%}
+    {% buttons %}
+    <button type="submit" class="btn btn-primary">Personnaliser mon itinéraire</button>
+    {% endbuttons %}
+</form>
+{% addtoblock "js" %}
+{% compress js %}
+{{form.media}} <!--/static/poimap/js/custom_itinerary.js-->
+{% endcompress %}
+{% endaddtoblock%}

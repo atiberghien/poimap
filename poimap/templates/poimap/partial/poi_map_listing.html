@@ -14,22 +14,58 @@
 {% addtoblock 'js' %}
 {% leaflet_js %}
 <script src="{% static 'leaflet.awesome-markers/dist/leaflet.awesome-markers.min.js' %}" charset="utf-8"></script>
+<script src="{% static '@turf/turf/turf.min.js' %}" charset="utf-8"></script>
 <script src="{% static 'poimap/js/global_vars.js' %}" charset="utf-8"></script>
+<script type="text/javascript">
+{% include "poimap/scripts/fetch_poi.js"  with poi_type_slugs=poi_type_slugs remove_control=instance.hide_control %}
+</script>
 <script src="{% static 'poimap/js/poimap.utils.js' %}" charset="utf-8"></script>
 <script type="text/javascript">
         function main_map_init(map, options) {
-            {% include "poimap/scripts/fetch_area.js" with area_slug='chemin-urbain-v' %}
-            {% include "poimap/scripts/fetch_poi.js"  with poi_type_slugs=poi_type_slugs remove_control=True %}
-            $.getJSON("{% url 'api-area-paths' 'chemin-urbain-v' %}").done(function(paths){
-                $.each(paths.features, function(index, path_){
-                    if(path_.properties.is_root){
-                        L.geoJSON(path_).addTo(map)
-                        return
-                    }
+            //FIXME : must be instance.area_display.slug instead of nstance.path_display.slug
+            fetchArea(map, "{% url 'api-area' instance.path_display.slug %}").done(function(){
+                $.getJSON("{% url 'api-area-paths' instance.path_display.slug %}").done(function(paths){
+                    $.each(paths.features, function(index, path_){
+                        if(path_.properties.is_root){
+                            fullPath = L.geoJSON(path_).addTo(map)
+                            {% if start_point and end_point %}
+                            startPoint = L.marker([{{start_point.coords.lat|stringformat:"f"}}, {{start_point.coords.lng|stringformat:"f"}}]).addTo(map)
+                            endPoint = L.marker([{{end_point.coords.lat|stringformat:"f"}}, {{end_point.coords.lng|stringformat:"f"}}]).addTo(map)
+                            path = computePath(map, path)
+                            {% endif %}
+                            $(document).trigger("poimap:update-elevation-chart", [path_.geometry.coordinates])
+                            return
+                        }
+                    });
                 });
             });
+
+            {% if not start_point and not end_point %}
             $(document).on("poimap:fetch-data", function(evt, area){
-                fetchPOI();
+                fetchPOI(map).done(function(){
+                    path = computePath(map, path)
+                    $(document).on("poimap:itinerary-bounds-change", function (evt, startPoiId, endPoiId) {
+                        startPoint = allPOI[startPoiId][1]
+                        endPoint = allPOI[endPoiId][1]
+                        path = computePath(map, path)
+                    })
+                });
+            });
+            {% endif %}
+            $(document).on("poimap:fetch-secondary-data", function(evt, bboxCoords){
+                //FIXME : must be instance.area_display.slug instead of nstance.path_display.slu
+                $.getJSON("{% url 'api-subpath-list' instance.path_display.slug %}?bbox="+bboxCoords.join(',')).done(function(data){
+                    $.each(data.features, function(index, path){
+                        var subpath = L.geoJSON(path);
+                        if(secondaryPathLayers == null){
+                            secondaryPathLayers = {"Chemin secondaire" : L.layerGroup()}
+                        }
+                        secondaryPathLayers["Chemin secondaire"].addLayer(subpath)
+                    });
+                    if(len(secondaryPathLayers)){
+                        secondaryPathLayerControl = L.control.layers(null, secondaryPathLayers, {collapsed : false}).addTo(map);
+                    }
+                });
             });
         }
 </script>
