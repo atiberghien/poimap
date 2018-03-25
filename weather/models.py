@@ -2,14 +2,13 @@ from __future__ import unicode_literals
 
 from django.db import models
 from cms.models.pluginmodel import CMSPlugin
-from django.utils.translation import get_language
 from django.contrib.postgres.fields import JSONField
 from django.conf import settings
 
 from poimap.models import POI
 import pyowm
 import json
-
+from datetime import datetime, timedelta
 
 class Weather(models.Model):
     poi = models.OneToOneField(POI, on_delete=models.CASCADE)
@@ -18,7 +17,6 @@ class Weather(models.Model):
 
     def fetch_data(self):
         if hasattr(settings, 'OWM_API_KEY'):
-            print get_language()
             owm = pyowm.OWM(settings.OWM_API_KEY, language='fr')
             coords = self.poi.geom.coords
             observation = owm.weather_at_coords(coords[1], coords[0])
@@ -32,7 +30,10 @@ class Weather(models.Model):
             self.save()
 
     def get_data(self):
-        if not self.data:
+        now = datetime.now().replace(tzinfo=None)
+        td = now - self.updated_at.replace(tzinfo=None)
+        d = timedelta(hours=2)
+        if not self.data or td > d:
             self.fetch_data()
         return json.loads(self.data)
 

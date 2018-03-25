@@ -9,7 +9,7 @@ class WeatherSerializer(ModelSerializer):
     weather = SerializerMethodField()
 
     def get_weather(self, obj):
-        return json.loads(obj.data)
+        return obj.get_data()
 
     class Meta:
         model = Weather
