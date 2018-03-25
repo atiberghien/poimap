@@ -1,20 +1,26 @@
 {% extends "base.html" %}
-{% load sekizai_tags leaflet_tags compress static %}
+{% load sekizai_tags leaflet_tags compress static bootstrap4%}
 {% block title %}{{object.name}}{% endblock %}
 
 {% block container_class %}container{% endblock %}
 
 {% block content %}
 <div class="row">
-    <div class="col-md-12 mt-2">
+    <div class="col-md-2 mt-3">
         {% block return_link%}
-        <a href="{{ request.META.HTTP_REFERER }}#{{object.slug}}">Retour</a>
+            {% include "poimap/partial/listing_return_button.html" %}
         {% endblock %}
+    </div>
+    <div class="col-md-7 mt-2">
         <h1 class="text-center">{{object.name}}</h1>
+    </div>
+    <div class="col-md-3 mt-3">
+        <div class="float-left pl-0" id="rate-{{object.slug}}"></div>
+        <div>({{ object.vote_count }} vote{{ object.vote_count|pluralize}})</div>
     </div>
 </div>
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-6 px-0 align-middle">
         <div id="carouselId" class="carousel slide" data-ride="carousel">
             {% if object.medias.count %}
             <ol class="carousel-indicators">
@@ -29,8 +35,8 @@
                     <img class="img-thumbnail rounded d-block w-100" src="{{pic.file.url}}">
                 </div>
                 {% empty %}
-                <div class="carousel-item active">
-                    <img class="img-thumbnail rounded d-block w-100" src="{% static 'img/no_picture.svg' %}">
+                <div class="border-left carousel-item active bg-white">
+                    <img class="rounded d-block w-50 mx-auto" src="{% static 'img/no_picture.svg' %}">
                 </div>
                 {% endfor %}
             </div>
@@ -58,49 +64,115 @@
 <div class="row">
     <div class="col-md-12">
         {% block before_tabs %}
-        <address>
-            Latitude : {{object.geom.coords.1|stringformat:"f"}}, Longitude : {{object.geom.coords.0|stringformat:"f"}}<br>
-            Km : {{object.distance}}<br>
+        <address class="mt-2">
+            <strong>Latitude : </strong>{{object.geom.coords.1|stringformat:"f"}}, Longitude : {{object.geom.coords.0|stringformat:"f"}}<br>
+            <strong>Distance : </strong>{{object.distance}}<br>
             {% if object.extra_data.altitude %}
-            Altitude : {{object.extra_data.altitude}}<br>
+            <strong>Altitude : </strong>{{object.extra_data.altitude}}<br>
             {% elif object.geom.coords.3 %}
-            Altitude : {{object.geom.coords.3|stringformat:"f"|default:0}}<br>
+            <strong>Altitude : </strong>{{object.geom.coords.3|stringformat:"f"|default:0}}<br>
             {% endif %}
         </address>
         {% endblock %}
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12 pl-0">
         <ul class="nav nav-tabs" id="myTab" role="tablist">
-          <li class="nav-item">
-            <a class="nav-link active" id="description-tab" data-toggle="tab" href="#description" role="tab" aria-controls="description" aria-selected="true">Description</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" id="comments-tab" data-toggle="tab" href="#comments" role="tab" aria-controls="comments" aria-selected="false">Commentaire(s)</a>
-          </li>
+            <li class="nav-item">
+                <a class="nav-link active" id="description-tab" data-toggle="tab" href="#description" role="tab" aria-controls="description" aria-selected="true">Description</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="comments-tab" data-toggle="tab" href="#comments" role="tab" aria-controls="comments" aria-selected="false">
+                Avis ({{object.ratings.count}})
+                </a>
+            </li>
         </ul>
-
-        <div class="tab-content">
-          <div class="tab-pane active" id="description" role="tabpanel" aria-labelledby="description-tab">
-              {{object.description|safe}}
+    </div>
+</div>
+<div class="row tab-content">
+    <div class="col-md-12 tab-pane py-3 active" id="description" role="tabpanel" aria-labelledby="description-tab">
+      {{object.description|safe}}
+    </div>
+    <div class="col-md-12 tab-pane py-3" id="comments" role="tabpanel" aria-labelledby="comments-tab">
+        <div class="row mb-1">
+          <div class="col-12">
+              {% if object.ratings.count == 0 %}
+              <button class="btn btn-sm btn-outline-urbain" data-toggle="modal" data-target="#voteModal">Soyez le 1er à donner votre avis</button>
+              {% else %}
+              <button class="btn btn-sm btn-outline-urbain" data-toggle="modal" data-target="#voteModal">Donnez aussi votre avis</button>
+              {% endif%}
           </div>
-          <div class="tab-pane" id="comments" role="tabpanel" aria-labelledby="comments-tab">
-
+        </div>
+        {% for rating in object.ratings.all %}
+        <div class="row">
+          <div class="col-12">
+              <div class="card">
+                  <div class="card-header pb-0">
+                      <div class="float-left" id="rate-{{rating.id}}"></div>
+                      <label class="align-text-top">Note : {{rating.score}}/5 </label>
+                  </div>
+                  <div class="card-body">
+                      <blockquote class="blockquote mb-0">
+                          <p>{{rating.comment|default:"Aucun commentaire"}}</p>
+                          <footer class="blockquote-footer">le {{rating.created_at}} par <cite title="Source Title">
+                              {% if rating.user.is_anonymous or not rating.user %} Anonyme {% else %} {{rating.user.username}}{% endif %}
+                          </cite></footer>
+                      </blockquote>
+                  </div>
+              </div>
           </div>
+        </div>
+    {% endfor %}
+  </div>
+</div>
+<div id="voteModal" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form action="{% url 'poi-rating' object.id %}" method="post">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">Partager votre avis</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    {% bootstrap_field voting_form.poi %}
+                    {% bootstrap_field voting_form.user %}
+                    {% bootstrap_field voting_form.score %}
+                    <div class="form-group h-100">
+                        <div class="float-left" id="rate-field"></div>
+                        <label class="align-text-top">Note : <span id="score_field">0</span> </label>
+                    </div>
+                    {% bootstrap_field voting_form.comment show_label=False placeholder='Votre avis ...'%}
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Voter maintenant</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
-
 {% addtoblock "css" %}
 <style>
     .leaflet-container {
         height: 300px;
     }
+    #rate-{{object.slug}}:hover {
+        cursor:pointer;
+    }
 </style>
 <link rel="stylesheet" href="{% static 'poimap/css/path_step.css' %}">
 {% leaflet_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/rateYo/2.3.2/jquery.rateyo.min.css">
 <link rel="stylesheet" href="{% static 'leaflet.awesome-markers/dist/leaflet.awesome-markers.css' %}">
 {% endaddtoblock %}
 {% addtoblock "js" %}
 {% compress js %}
 {% leaflet_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/rateYo/2.3.2/jquery.rateyo.min.js"></script>
 <script src="{% static '@turf/turf/turf.min.js' %}" charset="utf-8"></script>
 <script src="{% static 'leaflet.awesome-markers/dist/leaflet.awesome-markers.min.js' %}" charset="utf-8"></script>
 {% endcompress %}
@@ -134,7 +206,30 @@ $(document).ready(function(){
         $(".leaflet-control-zoom").remove();
         $(".leaflet-container").css('height', $("#carouselId").height())
     });
+    $("#rate-{{object.slug}}").rateYo({
+        rating: {{object.rating_score|stringformat:"f"}},
+        readOnly: true,
+        starWidth: "25px",
+    });
 
+    $("#rate-{{object.slug}}").click(function(){
+        $('#voteModal').modal('toggle');
+    });
+
+    $("#rate-field").rateYo({
+        halfStar: true,
+        onSet: function (rating, rateYoInstance) {
+            $("#score_field").html(rating)
+            $("#id_score").val(rating);
+        }
+    });
+     {% for rating in object.ratings.all %}
+     $("#rate-{{rating.id}}").rateYo({
+         rating: {{rating.score|stringformat:"f"}},
+         readOnly: true,
+         starWidth: "20px",
+     });
+     {% endfor %}
 })
 </script>
 {# {% endcompress %}#}

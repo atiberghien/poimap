@@ -2,8 +2,10 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
-
+from django.views.generic.edit import CreateView
+from django.urls import reverse
 from django.contrib.gis.measure import D
+
 from django.views.generic import DetailView
 from django.shortcuts import redirect, get_object_or_404
 from rest_framework import generics
@@ -11,7 +13,8 @@ from django.contrib.gis.geos import Polygon
 from django_filters.rest_framework import DjangoFilterBackend
 
 from .serializers import PathSerializer, POISerializer, AreaSerializer
-from .models import Path, POI, Area
+from .models import Path, POI, Area, POIRating
+from .forms import POIRatingForm
 
 if "hostings" in settings.INSTALLED_APPS:
     from hostings.models import Hostings
@@ -64,9 +67,23 @@ class AreaPathsView(generics.ListAPIView):
 class POIDetailView(DetailView):
     model = POI
 
+    def get_context_data(self, **kwargs):
+        context = super(POIDetailView, self).get_context_data(**kwargs)
+        context["voting_form"] = POIRatingForm(initial={"poi" : self.get_object(), "user" : self.request.user.id})
+        return context
+
     def get_template_names(self):
         return ["%s/%s_detail.html" % (self.get_object().polymorphic_ctype.app_label, self.get_object().polymorphic_ctype.model)]
 
+
+
+class POIRatingView(CreateView):
+    model = POI
+    form_class = POIRatingForm
+    http_method_names = ['post']
+
+    def get_success_url(self):
+        return reverse("poi-detail", kwargs={'slug' : self.get_object().slug})
 
 class POIView(generics.RetrieveAPIView):
     queryset = POI.objects.all()

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.db import models
-from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
+from django.contrib.auth.models import User
 from django.contrib.gis.db import models as gismodels
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -9,7 +9,7 @@ from django.contrib.postgres.fields import JSONField
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from cms.models import CMSPlugin, Page
-
+from django.db.models import Avg
 from django_countries.fields import CountryField
 from treebeard.mp_tree import MP_Node
 from polymorphic.models import PolymorphicModel
@@ -89,6 +89,14 @@ class POI(PolymorphicModel):
             "lng" : self.geom.coords[0],
         }
 
+    @property
+    def rating_score(self):
+        return self.ratings.all().aggregate(Avg('score'))['score__avg'] or 0.0
+
+    @property
+    def vote_count(self):
+        return self.ratings.count()
+
     def __unicode__(self):
         return "%s - %s" % (self.name, self.type.label)
 
@@ -123,6 +131,17 @@ def compute_distance(sender, instance, created, **kwargs):
         if subpath_length < line.length:
             distance += subpath_length
     sender.objects.filter(id=instance.id).update(distance=distance)
+
+class POIRating(models.Model):
+    poi = models.ForeignKey(POI, related_name='ratings')
+    user = models.ForeignKey(User, null=True, blank=True)
+    score = models.FloatField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    comment = models.TextField(blank=True)
+
+    class Meta:
+        verbose_name = verbose_name_plural = "POI"
+        ordering = ['-created_at',]
 
 class POIMedia(models.Model):
     poi = models.ForeignKey(POI, related_name='medias')

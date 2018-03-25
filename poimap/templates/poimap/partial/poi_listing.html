@@ -13,7 +13,19 @@
         </div>
         <div class="col-9 col-sm-9 col-md-9">
             <div class="card-body">
-                <h4 class="card-title">{{title}}<span class="badge badge-secondary float-right">{{distance}} km</span></h4>
+                <div class="row">
+                    <div class="col-md-2">
+                        <span class="badge badge-secondary">{{distance}} km</span>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="card-title">{{title}}</h5>
+                    </div>
+                    <div class="col-md-4">
+                        <div id="rate-{{slug}}" class="float-left"></div>
+                        ({{vote_count}})
+                    </div>
+                </div>
+
                 <p class="card-text">{{description}}...<a href="{{url}}">Lire la suite</a></p>
             </div>
         </div>
@@ -21,8 +33,13 @@
  </div>
 </script>
 {% endverbatim %}
+{% addtoblock 'css' %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/rateYo/2.3.2/jquery.rateyo.min.css">
+{% endaddtoblock %}
 {% addtoblock 'js' %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/rateYo/2.3.2/jquery.rateyo.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.11/handlebars.min.js" charset="utf-8"></script>
+<script src="{% static 'pluralize/pluralize.js' %}" charset="utf-8"></script>
 <script type="text/javascript">
         var source   = document.getElementById("poi-card-template").innerHTML;
         var poiCardTemplate = Handlebars.compile(source);
@@ -35,6 +52,7 @@
                 description: $(poi.properties.description).text().substring(0, 250),
                 distance : poi.properties.distance / 1000,
                 url : poi.properties.url,
+                vote_count : poi.properties.vote_count ? pluralize('vote', poi.properties.vote_count, true) : "0 vote",
             };
             if(poi.properties.medias.length > 0){
                 context.img_url = "{{MEDIA_URL}}/"+poi.properties.medias[0]
@@ -47,6 +65,11 @@
                 $("#cards").append(`<h3 class=''>${lastCity}</h3>`);
             };
             $("#cards").append(poiCardTemplate(context));
+            $(`#rate-${poi.properties.slug}`).rateYo({
+                rating: poi.properties.rating_score,
+                readOnly: true,
+                starWidth: "20px",
+            });
 
 
         });
