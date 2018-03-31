@@ -9,7 +9,6 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cms', '0019_auto_20180320_1626'),
         ('poimap', '0055_poilisting_hide_control'),
     ]
 
