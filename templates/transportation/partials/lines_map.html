@@ -39,7 +39,6 @@ function main_map_init(map, options) {
     map.options.minZoom = 8;
     $(".leaflet-control-zoom-out.leaflet-bar-part").parent().css("visibility", "hidden");
     $(document).ready(function(){
-        {% include "poimap/scripts/fetch_area.js"  with area_slug=area.slug  %}
         overlays = {}
         lineSlug = "{{lines.0.slug}}"
         $.getJSON("{% url 'api-line-list' %}", function(data) {

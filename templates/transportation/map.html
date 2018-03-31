@@ -44,7 +44,6 @@
 
     function main_map_init(map, options) {
         {% include "poimap/scripts/fetch_poi.js"  with area_slug=area.slug custom_api_poi_list_url='api-stop-list' %}
-        {% include "poimap/scripts/fetch_area.js"  with area_slug=area.slug  %}
 
         $(document).on("poimap:fetch-data", function(evt, area){
             fetchPOI()
