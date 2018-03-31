@@ -18,7 +18,7 @@ class RouteSerialized(ModelSerializer):
     stops = SerializerMethodField()
 
     def get_stops(self, obj):
-        return StopSerializer(obj.get_stops(), many=True, read_only=True).data
+        return StopSerializer(obj.get_stops(), many=True, read_only=True, context=self.context).data
 
     class Meta:
         model = Route
