@@ -4,35 +4,8 @@
 
 </div>
 
-{% verbatim %}
-<script id="poi-card-template" type="text/x-handlebars-template">
-<div id="{{slug}}" class="card border-light mb-3">
-    <div class="row">
-        <div class="col-3 col-sm-3 col-md-3">
-            <img src="{{img_url}}" class="img-fluid img-thumbnail">
-        </div>
-        <div class="col-9 col-sm-9 col-md-9">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-2">
-                        <span class="badge badge-secondary">{{distance}} km</span>
-                    </div>
-                    <div class="col-md-6">
-                        <h5 class="card-title">{{title}}</h5>
-                    </div>
-                    <div class="col-md-4">
-                        <div id="rate-{{slug}}" class="float-left"></div>
-                        ({{vote_count}})
-                    </div>
-                </div>
 
-                <p class="card-text">{{description}}...<a href="{{url}}">Lire la suite</a></p>
-            </div>
-        </div>
-     </div>
- </div>
-</script>
-{% endverbatim %}
+{% include "poimap/partial/poi_card.hbs" %}
 {% addtoblock 'css' %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/rateYo/2.3.2/jquery.rateyo.min.css">
 {% endaddtoblock %}
