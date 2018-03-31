@@ -1,0 +1,89 @@
+{% load leaflet_tags static sekizai_tags bootstrap4%}
+<ul class="nav nav-pills mb-3 nav-fill" id="pills-tab" role="tablist">
+    {% for line in lines %}
+    <li class="nav-item  font-weight-bold">
+        <a id="{{line.slug}}-tab"
+        class="nav-link disabled"
+        href="#{{line.slug}}"
+        data-toggle="pill"
+        role="tab"
+        aria-controls="{{line.slug}}"
+        aria-selected="{% if forloop.counter0 == 0 %}true{% else %}false{% endif %}">
+        Ligne <br>{{line.name}}
+    </a>
+</li>
+{% endfor %}
+</ul>
+<div id='map'>
+    {% leaflet_map "main" callback="main_map_init"%}
+</div>
+{% addtoblock "css" %}
+{% leaflet_css %}
+<link rel="stylesheet" href="{% static 'leaflet.awesome-markers/dist/leaflet.awesome-markers.css' %}">
+<style media="screen">
+    .leaflet-container {
+        height: 650px;
+    }
+</style>
+{% endaddtoblock %}
+{% addtoblock 'js' %}
+{% leaflet_js %}
+<script src="{% static 'leaflet.awesome-markers/dist/leaflet.awesome-markers.min.js' %}" charset="utf-8"></script>
+<script src="{% static 'poimap/js/global_vars.js' %}" charset="utf-8"></script>
+<script src="{% static 'poimap/js/poimap.utils.js' %}" charset="utf-8"></script>
+<script>
+function main_map_init(map, options) {
+    map.touchZoom.disable();
+    map.doubleClickZoom.disable();
+    map.keyboard.disable();
+    map.options.minZoom = 8;
+    $(".leaflet-control-zoom-out.leaflet-bar-part").parent().css("visibility", "hidden");
+    $(document).ready(function(){
+        overlays = {}
+        lineSlug = "{{lines.0.slug}}"
+        $.getJSON("{% url 'api-line-list' %}", function(data) {
+            $.each(data, function(idx, line){
+                overlays[line.slug] = {}
+                $.each(line.routes, function(idx, route){
+                    overlays[line.slug][route.direction] = {
+                        line : line,
+                        name : route.name,
+                        path : L.geoJSON(route.path , {
+                            style : {color: 'red', opacity: 1, weight: 6}
+                        }),
+                        stops : $.map(route.stops.features, function(stop, idx){
+                            return createPOIMarker(stop);
+                        }),
+                    }
+                });
+            });
+        }).done(function(){
+            function loadOverlay(slug) {
+                lineSlug = slug;
+                var newOverlay = overlays[lineSlug][1];
+                $(document).trigger("transportation:line-selected", [newOverlay])
+                newOverlay.path.addTo(map);
+                $.each(newOverlay.stops, function(idx, stop){
+                    stop.addTo(map);
+                });
+                map.fitBounds(newOverlay.path.getBounds())
+            }
+            $('a[data-toggle="pill"]').on('hidden.bs.tab', function(){
+                var oldOverlay = overlays[lineSlug][1];
+                map.removeLayer(oldOverlay.path)
+                $.each(oldOverlay.stops, function(idx, stop){
+                    map.removeLayer(stop)
+                });
+            });
+            $('a[data-toggle="pill"]').on('shown.bs.tab', function (e) {
+                loadOverlay(e.target.id.replace("-tab", ""));
+            });
+
+            $('a[data-toggle="pill"]').removeClass('disabled')
+            $('a[data-toggle="pill"]:first').addClass('active')
+            loadOverlay(lineSlug);
+        })
+    })
+}
+</script>
+{% endaddtoblock %}

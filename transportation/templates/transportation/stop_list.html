@@ -1,0 +1,14 @@
+{% extends "transportation/base.html" %}
+
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 col-lg-12">
+        <ul>
+            {% for stop in stops %}
+            <li>{{stop.name}}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}
