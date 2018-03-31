@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load sekizai_tags leaflet_tags compress static bootstrap4%}
-{% block title %}{{object.name}}{% endblock %}
+    {% block title %}{{object.name}}{% endblock %}
 
 {% block container_class %}container{% endblock %}
 
@@ -82,6 +82,8 @@
             <li class="nav-item">
                 <a class="nav-link active" id="description-tab" data-toggle="tab" href="#description" role="tab" aria-controls="description" aria-selected="true">Description</a>
             </li>
+            {% block extra_tab_items%}
+            {% endblock %}
             <li class="nav-item">
                 <a class="nav-link" id="comments-tab" data-toggle="tab" href="#comments" role="tab" aria-controls="comments" aria-selected="false">
                 Avis ({{object.ratings.count}})
@@ -92,8 +94,14 @@
 </div>
 <div class="row tab-content">
     <div class="col-md-12 tab-pane py-3 active" id="description" role="tabpanel" aria-labelledby="description-tab">
+      {% if objects.description %}
       {{object.description|safe}}
+       {% else %}
+        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+      {% endif %}
     </div>
+    {% block extra_tab%}
+    {% endblock %}
     <div class="col-md-12 tab-pane py-3" id="comments" role="tabpanel" aria-labelledby="comments-tab">
         <div class="row mb-1">
           <div class="col-12">
@@ -178,34 +186,47 @@
 {% endcompress %}
 {# {% compress js inline %}#}
 <script type="text/javascript">
+var map = null;
+function generateMap(mapId, path, coords){
+    if(map != undefined || map != null){
+        map.off()
+        map.remove()
+    }
+    map = L.map(mapId).setView(coords, 13);
+    L.tileLayer('https://{s}.tile.thunderforest.com/outdoors/{z}/{x}/{y}.png?apikey=3e3f2b7b947b4cdebeced62f95046ed7', {}).addTo(map);
+    var marker = L.marker(coords).addTo(map);
+    var latLngs = [ marker.getLatLng() ];
+    var markerBounds = L.latLngBounds(latLngs);
+    // map.fitBounds(markerBounds);
+    var bboxNorthWestCoords = map.getBounds().getNorthWest();
+    var bboxSouthEastCoords = map.getBounds().getSouthEast();
+    var start = turf.point([bboxNorthWestCoords.lng, bboxNorthWestCoords.lat]);
+    var stop = turf.point([bboxSouthEastCoords.lng, bboxSouthEastCoords.lat]);
+    if(path) {
+        var sliced = turf.lineSlice(start, stop, path.toGeoJSON().features[0]);
+        L.geoJSON(sliced, { color : 'red'}).addTo(map)
+    }
+    map.scrollWheelZoom.disable();
+    map.dragging.disable()
+}
 
 $(document).ready(function(){
+    {% if object.related_path %}
     $.getJSON("{% url 'path-api-detail' object.related_path.slug %}").done(function(data){
         var path = L.geoJSON(data);
-        function generateMap(mapId, coords){
-            var map = L.map(mapId).setView(coords, 13);
-            L.tileLayer('https://{s}.tile.thunderforest.com/outdoors/{z}/{x}/{y}.png?apikey=3e3f2b7b947b4cdebeced62f95046ed7', {}).addTo(map);
-            var marker = L.marker(coords).addTo(map);
-            var latLngs = [ marker.getLatLng() ];
-            var markerBounds = L.latLngBounds(latLngs);
-            // map.fitBounds(markerBounds);
-            var bboxNorthWestCoords = map.getBounds().getNorthWest();
-            var bboxSouthEastCoords = map.getBounds().getSouthEast();
-            var start = turf.point([bboxNorthWestCoords.lng, bboxNorthWestCoords.lat]);
-            var stop = turf.point([bboxSouthEastCoords.lng, bboxSouthEastCoords.lat]);
-            var sliced = turf.lineSlice(start, stop, path.toGeoJSON().features[0]);
-            L.geoJSON(sliced, { color : 'red'}).addTo(map)
-            map.scrollWheelZoom.disable();
-            map.dragging.disable()
-        }
-        var poi{{object.id}}coords = [{{object.geom.coords.1|stringformat:"f"}}, {{object.geom.coords.0|stringformat:"f"}}]
-        generateMap("map-{{object.id}}", poi{{object.id}}coords)
+        var poi{{object.id}}Coords = [{{object.geom.coords.1|stringformat:"f"}}, {{object.geom.coords.0|stringformat:"f"}}]
+        generateMap("map-{{object.id}}", path, poi{{object.id}}Coords)
 
         $(".leaflet-control-attribution").remove();
         $(".leaflet-control-scale").remove();
         $(".leaflet-control-zoom").remove();
         $(".leaflet-container").css('height', $("#carouselId").height())
     });
+    {% else %}
+    var poi{{object.id}}Coords = [{{object.geom.coords.1|stringformat:"f"}}, {{object.geom.coords.0|stringformat:"f"}}]
+    generateMap("map-{{object.id}}", null, poi{{object.id}}Coords)
+    {% endif %}
+
     $("#rate-{{object.slug}}").rateYo({
         rating: {{object.rating_score|stringformat:"f"}},
         readOnly: true,
