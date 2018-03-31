@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load sekizai_tags static %}
+
+{% block main %}
+{% addtoblock 'css' %}
+<link rel="stylesheet" href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}">
+{% endaddtoblock %}
+
+<div id="app" class="container">
+    {% block content %}
+    {% endblock %}
+</div>
+
+{% addtoblock 'js' %}
+<script src="{% static 'jquery/dist/jquery.slim.min.js' %}"></script>
+<script src="{% static 'bootstrap/dist/js/bootstrap.min.js' %}"></script>
+{% endaddtoblock %}
+{% endblock %}
