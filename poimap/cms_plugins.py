@@ -32,7 +32,6 @@ class POIListingPlugin(CMSPluginBase):
             data = form.cleaned_data
             start_point = data["start_point"]
             end_point = data["end_point"]
-            print start_point.coords, end_point.coords
             bbox = box(start_point.coords["lng"], start_point.coords["lat"], end_point.coords["lng"], end_point.coords["lat"])
             bbox = scale(bbox, xfact=1.1, yfact=1.1)
             bbox = Polygon(list(bbox.exterior.coords))
