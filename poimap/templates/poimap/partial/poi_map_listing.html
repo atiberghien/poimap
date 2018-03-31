@@ -22,9 +22,8 @@
 <script src="{% static 'poimap/js/poimap.utils.js' %}" charset="utf-8"></script>
 <script type="text/javascript">
         function main_map_init(map, options) {
-            //FIXME : must be instance.area_display.slug instead of nstance.path_display.slug
-            fetchArea(map, "{% url 'api-area' instance.path_display.slug %}").done(function(){
-                $.getJSON("{% url 'api-area-paths' instance.path_display.slug %}").done(function(paths){
+            fetchArea(map, "{% url 'api-area' instance.area_display.slug %}").done(function(){
+                $.getJSON("{% url 'api-area-paths' instance.area_display.slug %}").done(function(paths){
                     $.each(paths.features, function(index, path_){
                         if(path_.properties.is_root){
                             fullPath = L.geoJSON(path_).addTo(map)
@@ -53,8 +52,7 @@
             });
             {% endif %}
             $(document).on("poimap:fetch-secondary-data", function(evt, bboxCoords){
-                //FIXME : must be instance.area_display.slug instead of nstance.path_display.slu
-                $.getJSON("{% url 'api-subpath-list' instance.path_display.slug %}?bbox="+bboxCoords.join(',')).done(function(data){
+                $.getJSON("{% url 'api-subpath-list' instance.area_display.slug %}?bbox="+bboxCoords.join(',')).done(function(data){
                     $.each(data.features, function(index, path){
                         var subpath = L.geoJSON(path);
                         if(secondaryPathLayers == null){
