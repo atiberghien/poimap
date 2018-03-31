@@ -115,8 +115,10 @@ function createPOIMarker(poi) {
     })
 }
 
-function computePath(map, currentPath){
-    console.log("toto", startPoint, endPoint);
+function computePath(map, fullPath, currentPath){
+    if(!fullPath){
+        return null;
+    }
     var sliced = turf.lineSlice(startPoint.toGeoJSON(), endPoint.toGeoJSON(), fullPath.toGeoJSON().features[0]);
 
     if(currentPath) {

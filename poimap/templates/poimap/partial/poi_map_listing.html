@@ -30,7 +30,7 @@
                             {% if start_point and end_point %}
                             startPoint = L.marker([{{start_point.coords.lat|stringformat:"f"}}, {{start_point.coords.lng|stringformat:"f"}}]).addTo(map)
                             endPoint = L.marker([{{end_point.coords.lat|stringformat:"f"}}, {{end_point.coords.lng|stringformat:"f"}}]).addTo(map)
-                            path = computePath(map, path)
+                            path = computePath(map, fullPath, path)
                             {% endif %}
                             $(document).trigger("poimap:update-elevation-chart", [path_.geometry.coordinates])
                             return
@@ -42,11 +42,11 @@
             {% if not start_point and not end_point %}
             $(document).on("poimap:fetch-data", function(evt, area){
                 fetchPOI(map).done(function(){
-                    path = computePath(map, path)
+                    path = computePath(map, fullPath, path)
                     $(document).on("poimap:itinerary-bounds-change", function (evt, startPoiId, endPoiId) {
                         startPoint = allPOI[startPoiId][1]
                         endPoint = allPOI[endPoiId][1]
-                        path = computePath(map, path)
+                        path = computePath(map, fullPath, path)
                     })
                 });
             });
