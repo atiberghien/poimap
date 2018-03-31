@@ -30,7 +30,7 @@ function fetchPOI(map, pathPK) {
 
             }
         });
-        {% if POI_UNDER_CONTROL and not remove_control %}
+        {% if not remove_control %}
         if(len(typedPOILayers)){
             typedPOILayerControl = L.control.layers(null, typedPOILayers, {collapsed : false}).addTo(map);
         }
