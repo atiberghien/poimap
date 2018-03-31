@@ -37,8 +37,11 @@ class SubPathListView(generics.ListAPIView):
 
     def get_queryset(self):
         area = get_object_or_404(Area, slug=self.kwargs["slug"])
-        root_path = Path.get_root_nodes().get(geom__within=area.geom)
-        return root_path.get_descendants()
+        try:
+            root_path = Path.get_root_nodes().get(geom__within=area.geom)
+            return root_path.get_descendants()
+        except Path.DoesNotExist:
+            return Path.objects.none()
 
 
 class AreaPathsView(generics.ListAPIView):
