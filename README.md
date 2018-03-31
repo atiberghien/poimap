@@ -16,6 +16,8 @@ INSTALLED_APPS = [
     'fontawesome',
     'leaflet',
     'easy_thumbnails',
+    "compressor",
+    'bootstrap4',
     'poimap',
     ...
 ]
@@ -30,7 +32,8 @@ POI_UNDER_CONTROL(default:True) : POI layer will be gathered (or not) within a l
 ```
 urlpatterns = [
     ...
-    url(r'^api/', include("poimap.urls")),
+    url(r'^poimap/', include('poimap.urls')),
+    url(r'^api/poimap/', include('poimap.api_urls')),
     ...
 ]
 ```
