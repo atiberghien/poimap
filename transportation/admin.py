@@ -19,6 +19,9 @@ class TimeSlotInlineAdmin(admin.TabularInline):
 
 
 class ServiceAdmin(admin.ModelAdmin):
+    search_fields = ('name',)
+    list_filter = ('route',)
+
     inlines = [
         TimeSlotInlineAdmin
     ]
