@@ -87,6 +87,7 @@ class Service(models.Model):
     route = models.ForeignKey(Route, related_name="services")
     frequency_label = models.CharField(max_length=10)
     recurrences = models.TextField(null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
 
     def __unicode__(self):
         return "%s - %s - %s" % (self.route.line.name, self.route.name, self.name)
