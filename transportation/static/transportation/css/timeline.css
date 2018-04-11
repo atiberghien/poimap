@@ -1,0 +1,43 @@
+.timeline {
+  position: relative;
+}
+.timeline:before {
+  content: '';
+  position: absolute;
+  top: 0px;
+  left: calc(33% + 15px);
+  bottom: 0px;
+  width: 4px;
+  background: #ddd;
+}
+.timeline:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.entry {
+  clear: both;
+  position: relative;
+}
+.entry .title {
+  width: 33%;
+  position: relative;
+}
+.entry .title:before {
+    content: '';
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    border: 4px solid salmon;
+    background-color: #fff;
+    border-radius: 100%;
+    top: 15%;
+    right: -25px;
+    z-index: 99;
+}
+
+.entry .body {
+  width: 66%;
+  padding-left: 30px;
+}

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load sekizai_tags static %}
+
+{% block container_classes %}container  bg-light{% endblock %}
+
+{% block content %}
+{% include "transportation/partials/itinerary_form_results.html" %}
+<div class="row text-center my-5 travel-control d-none">
+    <div class="col-md-12">
+    {% include "transportation/search_form.html" %}
+    </div>
+</div>
+<div class="row text-center my-5">
+    <div class="col-md-12">
+        <h2 class="mb-3">Votre trajet aller</h2>
+        <div id="timetable-go">
+        </div>
+        <h2 class="mb-3">Votre trajet retour</h2>
+        <div id="timetable-return">
+        </div>
+    </div>
+</div>
+{% addtoblock 'js' %}
+<script src="{% static 'handlebars/dist/handlebars.min.js' %}" charset="utf-8"></script>
+<script src="{% static 'pluralize/pluralize.js' %}" charset="utf-8"></script>
+<script src="{% static 'moment/min/moment.min.js' %}" charset="utf-8"></script>
+<script src="{% static 'moment/locale/fr.js' %}" charset="utf-8"></script>
+
+{% include "transportation/partials/timetable_template.hbs" %}
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        goTimetable = JSON.parse('{{go|safe}}');
+        returnTimetable =JSON.parse('{{return|safe}}');
+        goTimetable.summary = true;
+        returnTimetable.summary = true;
+
+        var templateSource   = document.getElementById("timetable-template").innerHTML;
+        var template = Handlebars.compile(templateSource);
+
+        $("#timetable-go").html(template(goTimetable));
+        $("#timetable-return").html(template(returnTimetable));
+    })
+</script>
+{% endaddtoblock %}
+{% endblock %}

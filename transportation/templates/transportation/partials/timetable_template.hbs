@@ -1,0 +1,66 @@
+{% load sekizai_tags static %}
+
+{% addtoblock 'css' %}
+<link rel="stylesheet" href="{% static 'transportation/css/timeline.css'%}">
+{% endaddtoblock %}
+
+{% verbatim %}
+<script id="timetable-template" type="text/x-handlebars-template">
+<div class="row">
+    <div class="col-md-12">
+        <div class="row mb-5 pt-2 border">
+            <div class="col-md-4 border-right">
+                <div class="timeline mt-2">
+                    {{#each timeslots}}
+                    <div class="entry text-left">
+                        <div class="title m-0 float-left text-right">{{hour}}</div>
+                        <div class="body float-right mb-3">
+                            {{stop_name}}{{#if service_name}}<br /><i class="fas fa-bus"></i> {{service_name}}{{/if}}
+                        </div>
+                    </div>
+                    {{/each}}
+                </div>
+            </div>
+            <div class="col-md-3 border-right">
+                <ul class="list-unstyled">
+                    <li>Durée : {{total_time}}</li>
+                    <li>Attente max : {{max_wait}}</li>
+                    <li>{{connexion_info}}</li>
+                </ul>
+            </div>
+            <div class="col-md-5">
+                <form id="travel-form-{{timetable_id}}" class="timetable-form" action="." method="post">
+                    <input type="hidden" name="timebable-id" value="{{timetable_id}}">
+                    <div class="row my-2">
+                        <div class="col-md-12">
+                            {{#unless summary}}
+                            <button class="btn btn-sm btn-primary mr-1 btn-minus" type="button">-</button>
+                            {{/unless}}
+                            <span class="traveler-count">{{traveler_count}}</span>
+                            <span class="traveler-info">{{traveler_info}}</span>
+                            {{#unless summary}}
+                            <button class="btn btn-sm btn-primary ml-1 btn-plus" type="button">+</button>
+                            {{/unless}}
+                        </div>
+                    </div>
+                    <div class="row mt-5">
+                        <div class="col-md-12">
+                            <ul class="list-inline my-auto">
+                                <li class="list-inline-item">
+                                    <h3><span class="travel-price">{{travel_price}}</span> €</h3>
+                                </li>
+                                {{#unless summary}}
+                                <li class="list-inline-item">
+                                    <button class="btn btn-lg btn-primary w-100 timetable-btn" type="submit">{{booking_btn_text}}</button>
+                                </li>
+                                {{/unless}}
+                            </ul>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</script>
+{% endverbatim %}

@@ -1,0 +1,32 @@
+{% load sekizai_tags static %}
+
+<div class="row text-center my-5 travel-control">
+    <div class="col-md-12">
+        <div class="row">
+            <div class="col-md-5">
+                <strong>TRAJET :</strong><br>
+                {{departure.name}} > {{arrival.name}}
+            </div>
+            <div class="col-md-4">
+                <strong>Nombre de personne :</strong> {{nb_passengers}} voyageur{{nb_passengers|pluralize}}<br>
+                <strong>Date de départ :</strong> {{departure_date}}
+                {% if arrival_date %}
+                <br>
+                <strong>Date de retour :</strong> {{arrival_date}}
+                {% endif %}
+            </div>
+            <div class="col-md-3">
+                <button id="travel-change-btn" class="btn btn-lg btn-primary w-100" type="button" name="button">Modifier le trajet</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% addtoblock 'js' %}
+<script type="text/javascript">
+    $(document).ready(function(){
+        $("#travel-change-btn").click(function(){
+            $(".travel-control").toggleClass("d-none");
+        });
+    })
+</script>
+{% endaddtoblock %}

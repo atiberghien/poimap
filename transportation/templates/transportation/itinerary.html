@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% load sekizai_tags static %}
+
+{% block container_classes %}container  bg-light{% endblock %}
+
+{% block content %}
+{% include "transportation/partials/itinerary_form_results.html" %}
+<div class="row text-center my-5 travel-control d-none">
+    <div class="col-md-12">
+    {% include "transportation/search_form.html" %}
+    </div>
+</div>
+<div class="row text-center my-5">
+    <div class="col-md-12">
+        <h2 class="mb-3">Sélectionner votre trajet
+            {% if arrival_date %}
+                {% if direction == 1 %}
+                Aller
+                {% else %}
+                retour
+                {% endif %}
+            {% endif %}
+        </h2>
+        <div id="timetables">
+            <h3><i class="fas fa-cog fa-spin fa-2x"></i> Recherche en cours ...</h3>
+        </div>
+    </div>
+</div>
+{% addtoblock 'js' %}
+<script src="{% static 'handlebars/dist/handlebars.min.js' %}" charset="utf-8"></script>
+<script src="{% static 'pluralize/pluralize.js' %}" charset="utf-8"></script>
+<script src="{% static 'moment/min/moment.min.js' %}" charset="utf-8"></script>
+<script src="{% static 'moment/locale/fr.js' %}" charset="utf-8"></script>
+
+{% include "transportation/partials/timetable_template.hbs" %}
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        var timetables = null;
+        $.getJSON("{% url 'api-itinerary' %}", {
+            {% if direction == 1 %}
+            source : "{{departure.slug}}",
+            target : "{{arrival.slug}}",
+            travel_date : "{{departure_date|date:"d/m/y"}}",
+            {% else %}
+            target : "{{departure.slug}}",
+            source : "{{arrival.slug}}",
+            travel_date : "{{arrival_date|date:"d/m/y"}}",
+            {% endif %}
+            traveler_count : "{{nb_passengers}}",
+        }).done(function(data){
+            var templateSource   = document.getElementById("timetable-template").innerHTML;
+            var template = Handlebars.compile(templateSource);
+            if(data.success == "OK"){
+                $("#timetables").html("")
+                timetables = data.timetables;
+                $.each(timetables, function(i, timetable){
+                    {% if arrival_date %}
+                        timetable.booking_btn_text = "Choisir"
+                    {% else %}
+                        timetable.booking_btn_text = "Réserver"
+                    {% endif %}
+                    timetable.timetable_id = i;
+                    timetable.departure_date = "{{departure_date|date:"d/m/y"}}";
+                    timetable.arrival_date = "{{arrival_date|date:"d/m/y"}}";
+                    timetable.direction = {{direction}};
+                    timetable.total_time = moment.utc(timetable.total_time*1000).format('H[h]mm');
+                    timetable.max_wait = moment.utc(timetable.max_wait*1000).format('H[h]mm');
+                    timetable.connexion_info = timetable.connexion_count ? pluralize('changement', timetable.connexion_count, true) : "Trajet direct"
+                    timetable.traveler_info = pluralize('voyageur', timetable.traveler_count, false)
+                    timetable.travel_price = timetable.traveler_count * timetable.travel_unit_price
+                    $("#timetables").append(template(timetable));
+                })
+            } else {
+                $("#timetables").html("")
+            }
+            $(".btn-minus, .btn-plus").click(function(){
+                var form = $(this).parents("form");
+                var timetableId = form.find("input[name=timebable-id]").val()
+                var timetable = timetables[timetableId]
+
+                var countElmt = form.find(".traveler-count");
+                var infoElmt = form.find(".traveler-info");
+                var priceElmt = form.find(".travel-price");
+
+                var count = parseInt(countElmt.html());
+
+                if($(this).hasClass("btn-minus")){
+                    count--;
+                } else {
+                    count++;
+                }
+                if(count > 0){
+                    countElmt.html(count);
+                    timetable.traveler_count = count;
+                    priceElmt.html(timetable.travel_unit_price * count);
+                    infoElmt.html(pluralize('voyageur', count, false));
+                }
+            });
+            $(".timetable-form").submit(function(){
+                var timetableId = $(this).find("input[name=timebable-id]").val()
+                var timetable = timetables[timetableId]
+                $('<input />').attr('type', 'hidden')
+                    .attr('name', "timetable")
+                    .attr('value', JSON.stringify(timetable))
+                    .appendTo($(this));
+                {% if go %}
+                $('<input />').attr('type', 'hidden')
+                    .attr('name', "go")
+                    .attr('value', '{{go|safe}}')
+                    .appendTo($(this));
+                {% endif %}
+                return true;
+            });
+        })
+    })
+</script>
+{% endaddtoblock %}
+{% endblock %}

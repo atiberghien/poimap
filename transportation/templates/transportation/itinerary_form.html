@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% load sekizai_tags static %}
+
+{% block container_classes %}container  bg-light{% endblock %}
+
+{% block content %}
+<div class="row text-center my-5 travel-control">
+    <div class="col-md-12">
+    {% include "transportation/search_form.html" %}
+    </div>
+</div>
+{% endblock %}
