@@ -2,6 +2,7 @@
 from dal import autocomplete
 
 from django import forms
+from datetime import date
 from .models import TimeSlot, Stop
 
 class StopForm(forms.ModelForm):
@@ -28,5 +29,5 @@ class SearchServiceForm(forms.Form):
                                          })
     )
     nb_passengers = forms.IntegerField(min_value=1, initial=1)
-    departure_date = forms.DateField()
+    departure_date = forms.DateField(initial=date.today())
     arrival_date = forms.DateField(required=False)
