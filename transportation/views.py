@@ -1,8 +1,17 @@
 # -*- coding: utf-8 -*-
 from django.views.generic import TemplateView, DetailView, ListView
-from .models import Line, Stop, Route
-from poimap.models import Area
+from django.views.generic import View
+from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+
 from dal import autocomplete
+
+from poimap.models import Area
+
+from .models import Line, Stop, Route
+from .forms import SearchServiceForm
+import json
 
 class MapView(TemplateView):
     template_name = 'transportation/map.html'
@@ -50,3 +59,41 @@ class StopAutocomplete(autocomplete.Select2QuerySetView):
             qs = qs.filter(name__istartswith=self.q)
 
         return qs.order_by('name')
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class TransportationItinerary(View):
+
+    def get(self, request, *args, **kwargs):
+        context = {}
+        return render(request, 'transportation/itinerary_form.html', context)
+
+    def post(self, request, *args, **kwargs):
+        context = {}
+        template_name = 'transportation/itinerary.html'
+        if "timetable" in request.POST:
+            timetable = json.loads(request.POST.get('timetable'))
+            form_data = {
+                "departure" :  timetable["timeslots"][0]["stop_id"],
+                "arrival" : timetable["timeslots"][-1]["stop_id"],
+                "arrival_date" : timetable["arrival_date"],
+                "departure_date" : timetable["departure_date"],
+                "nb_passengers" : timetable["traveler_count"],
+            }
+            if "go" in request.POST:
+                context["go"] = request.POST.get('go')
+                context["return"] = request.POST.get('go')
+                template_name = 'transportation/itinerary_summary.html'
+            else:
+                context["direction"] = 2
+                context["go"] = request.POST.get('timetable')
+        else:
+            form_data = request.POST
+            context["direction"] = 1
+        form = SearchServiceForm(form_data)
+
+        if form.is_valid():
+            context.update(form.cleaned_data)
+
+        context["search_form"] = form
+        return render(request, template_name, context)
