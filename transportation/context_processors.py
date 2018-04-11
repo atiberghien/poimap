@@ -1,10 +1,10 @@
 from poimap.models import Area
 from .models import Line
-from .forms import SearchServiceForm1
+from .forms import SearchServiceForm
 
 def transportation(request):
     return {
         "area" : Area.objects.first(),
         "lines" : Line.objects.all(),
-        "form1" : SearchServiceForm1()
+        "search_form" : SearchServiceForm()
     }
