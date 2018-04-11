@@ -1,5 +1,5 @@
 from django.contrib import admin
-from models import Fare, TimeSlot, Stop, Service, RunningDay, Line, RouteStop, Route
+from models import Fare, TimeSlot, Stop, Service, RunningDay, Line, RouteStop, Route, GraphEdge
 from leaflet.admin import LeafletGeoAdmin
 from poimap.admin import POIAdminForm
 from grappelli.forms import GrappelliSortableHiddenMixin
@@ -67,6 +67,8 @@ class RouteAdmin(admin.ModelAdmin):
     list_editable = ("name", "direction", "path")
     inlines = (RouteStopInline,)
 
+class GraphEdgeAdmin(admin.ModelAdmin):
+    list_display = ("id", "stop1", "stop2", "distance")
 
 admin.site.register(Line)
 admin.site.register(Route, RouteAdmin)
@@ -74,3 +76,4 @@ admin.site.register(Fare, FareAdmin)
 admin.site.register(Stop, StopAdmin)
 admin.site.register(Service, ServiceAdmin)
 admin.site.register(RunningDay)
+admin.site.register(GraphEdge, GraphEdgeAdmin)

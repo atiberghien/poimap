@@ -107,6 +107,13 @@ class TimeSlot(models.Model):
     class Meta:
         ordering = ('order',)
 
+
+class GraphEdge(models.Model):
+    stop1 = models.ForeignKey(Stop, related_name="start_edges")
+    stop2 = models.ForeignKey(Stop, related_name="end_edges")
+    distance = models.PositiveIntegerField(default=0)
+    routes = models.ManyToManyField(Route)
+
 @receiver(post_save,  sender=Service)
 def autocreate_timeslot_for_service(sender, instance, created, **kwargs):
     if created:
