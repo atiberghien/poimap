@@ -10,7 +10,7 @@ setup(name='poimap',
       packages=find_packages(),
       include_package_data=True,
       install_requires=[
-           'psycopg2',
+           'psycopg2-binary',
            'Django<2.0',
            "django-compressor",
            "django-sekizai",
@@ -32,5 +32,8 @@ setup(name='poimap',
            'django-admin-sortable2',
            'pyowm',
            'django-easy-select2',
+           'django-recurrence',
+           'googlemaps',
+           'pandas==0.22.0'
       ],
       zip_safe=False)
