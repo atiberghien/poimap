@@ -81,12 +81,15 @@ class TransportationItinerary(View):
                 "nb_passengers" : timetable["traveler_count"],
             }
             if "go" in request.POST:
-                context["go"] = request.POST.get('go')
-                context["return"] = request.POST.get('go')
+                context["go"] = json.dumps(request.POST.get('go'))
+                context["return"] = json.dumps(request.POST.get('go'))
                 template_name = 'transportation/itinerary_summary.html'
             else:
-                context["direction"] = 2
-                context["go"] = request.POST.get('timetable')
+                if form_data["arrival_date"]:
+                    context["direction"] = 2
+                else:
+                    template_name = 'transportation/itinerary_summary.html'
+                context["go"] = json.dumps(request.POST.get('timetable'))
         else:
             form_data = request.POST
             context["direction"] = 1
@@ -96,4 +99,5 @@ class TransportationItinerary(View):
             context.update(form.cleaned_data)
 
         context["search_form"] = form
+        print template_name, context
         return render(request, template_name, context)

@@ -107,8 +107,9 @@
                 {% if go %}
                 $('<input />').attr('type', 'hidden')
                     .attr('name', "go")
-                    .attr('value', '{{go|safe}}')
+                    .attr('value', {{go|safe}})
                     .appendTo($(this));
+
                 {% endif %}
                 return true;
             });
