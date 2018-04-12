@@ -4,6 +4,9 @@ from django.db import models
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from autoslug import AutoSlugField
+from dateutil import rrule
+from dateutil.parser import parse
+from dateutil.rrule import rrulestr
 
 from poimap.models import POI, Path
 
@@ -88,6 +91,26 @@ class Service(models.Model):
     frequency_label = models.CharField(max_length=10)
     recurrences = models.TextField(null=True, blank=True)
     notes = models.TextField(null=True, blank=True)
+
+    @property
+    def rruleset(self):
+        res = rrule.rruleset()
+        rule_str = [r.strip("\n\r\t ").replace(" ", "") for r in self.recurrences.split("|")]
+        for r in rule_str:
+            if r:
+                if "RRULE" in r:
+                    rule = rrulestr(r)
+                    res.rrule(rule)
+                elif "EXRULE" in r:
+                    rule = rrulestr(r)
+                    res.exrule(rule)
+                elif "EXDATE" in r:
+                    d = r.split(":")[1]
+                    res.exdate(parse(d))
+                elif "RDATE" in r:
+                    d = r.split(":")[1]
+                    res.rdate(parse(d))
+        return res
 
     def __unicode__(self):
         return "%s - %s - %s" % (self.route.line.name, self.route.name, self.name)
