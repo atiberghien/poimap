@@ -121,8 +121,7 @@ def api_itinerary(request):
                         route = Route.objects.get(id=route_id)
                         available_route_services = []
                         for service in route.services.all():
-                            rruleset = rrulestr(service.recurrences)
-                            if travel_date is None or travel_date in rruleset:
+                            if travel_date is None or travel_date in service.rruleset:
                                 available_route_services.append(service)
                         all_services.append(available_route_services)
                     service_combinaisons = itertools.product(*all_services)
