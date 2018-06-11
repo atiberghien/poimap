@@ -105,7 +105,7 @@ class TransportationItinerary(View):
                 for x in range(int(go["traveler_count"])):
                     travel["travellers"][x] = {}
 
-                if "travels" in request.session.keys():
+                if "travels" in request.session:
                     travels = request.session["travels"]
                     travels.append(travel)
                     request.session["travels"] = travels
@@ -138,7 +138,7 @@ class TransportationCart(TemplateView):
     template_name = "transportation/itinerary_summary.html"
 
     def dispatch(self, request, *args, **kwargs):
-        if "travels" not in self.request.session.keys():
+        if "travels" not in request.session:
             return redirect("transportation-itinerary")
         return TemplateView.dispatch(self, request, *args, **kwargs)
     
@@ -164,7 +164,7 @@ class TransportationCartDeleteItem(RedirectView):
 @method_decorator(csrf_exempt, name='dispatch')
 class TransportationCartSaveTravellers(View):
     def post(self, request, *args, **kwargs):
-        if "travels" in self.request.session.keys():
+        if "travels" not in request.session:
             travels = self.request.session["travels"]
             for key, value in request.POST.items():
                 fieldname, travel_id, traveller_id = key.split('-')
@@ -178,7 +178,7 @@ class TransportationCheckout(FormView):
     form_class = CustomerCreationForm
 
     def dispatch(self, request, *args, **kwargs):
-        if "travels" not in self.request.session.keys():
+        if "travels" not in request.session:
             return redirect("transportation-itinerary")
         self.order_num = kwargs.get("order_num", None)
         return FormView.dispatch(self, request, *args, **kwargs)
