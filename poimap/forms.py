@@ -4,9 +4,18 @@ from django import forms
 from .models import POI, POIRating
 
 class CustomItineraryForm(forms.Form):
-    start_point = forms.ModelChoiceField(label="Point de départ",queryset=POI.objects.filter(starred=True), empty_label=None, initial=POI.objects.filter(starred=True).first())
-    end_point = forms.ModelChoiceField(label="Point d'arrivée", queryset=POI.objects.filter(starred=True), empty_label=POI.objects.filter(starred=True).last())
+    start_point = forms.ModelChoiceField(label="Point de départ",queryset=POI.objects.all())
+    end_point = forms.ModelChoiceField(label="Point d'arrivée", queryset=POI.objects.all())
     step = forms.IntegerField(label="Nombre de km/jour", widget=forms.NumberInput(attrs={'type':'range', 'min': 10, 'max': 40 , 'step':5}))
+
+    def __init__(self, *args, **kwargs):
+        super(CustomItineraryForm, self).__init__(*args, **kwargs)
+
+        self.fields['start_point'].queryset = POI.objects.filter(starred=True)
+        self.fields['end_point'].queryset = POI.objects.filter(starred=True)
+
+        self.fields['start_point'].empty_label = POI.objects.filter(starred=True).first()
+        self.fields['end_point'].empty_label = POI.objects.filter(starred=True).first()
 
     class Media:
         css = {
