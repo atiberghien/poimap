@@ -35,21 +35,24 @@
 {% include "transportation/partials/timetable_template.hbs" %}
 
 <script type="text/javascript">
+    var timetables = []
     $(document).ready(function(){
         var templateSource   = document.getElementById("timetable-template").innerHTML;
         var template = Handlebars.compile(templateSource);
 
         {% if go %}
         goTimetable = JSON.parse({{go|safe}});
+        console.log(goTimetable);
         goTimetable.summary = true;
         $("#timetable-go").html(template(goTimetable));
         {% endif %}
         {% if return %}
         returnTimetable =JSON.parse({{return|safe}});
         returnTimetable.summary = true;
+        timetables.push(returnTimetable);
         $("#timetable-return").html(template(returnTimetable));
         {% endif %}
-
+        $(document).trigger("transportation:timetables-ready");
     })
 </script>
 {% endaddtoblock %}

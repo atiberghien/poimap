@@ -10,6 +10,9 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     ...
     'django.contrib.gis',
+    'menus',
+    'cms',
+    'filer',
     'rest_framework',
     'rest_framework_gis',
     'treebeard',
@@ -18,6 +21,7 @@ INSTALLED_APPS = [
     'easy_thumbnails',
     "compressor",
     'bootstrap4',
+    'ckeditor',
     'poimap',
     ...
 ]

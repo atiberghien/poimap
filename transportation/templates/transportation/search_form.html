@@ -1,0 +1,69 @@
+{% load cms_tags static sekizai_tags bootstrap4%}
+<form action="{% page_url 'reserver' %}" method="post">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-6">
+            {% bootstrap_field search_form.departure show_label=False placeholder="Ville de départ" size="large"%}
+        </div>
+        <div class="col-6">
+        {% bootstrap_field search_form.arrival  show_label=False placeholder="Ville d'arrivée" size="large"%}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-3">
+             {% bootstrap_label "Nombre de passagers" %}
+            {% bootstrap_field search_form.nb_passengers show_label=False size="large" %}
+        </div>
+        <div class="col-3">
+            {% bootstrap_label "Date de départ" %}
+            {% bootstrap_field search_form.departure_date show_label=False placeholder="" size="large"  %}
+        </div>
+        <div class="col-3">
+            {% bootstrap_label "Date de retour" %}
+            {% bootstrap_field search_form.arrival_date show_label=False placeholder="" size="large" %}
+        </div>
+        <div class="col-3">
+            {% bootstrap_button "Rechercher" id="travel-search-btn" button_type="submit" button_class="btn-primary mt-auto mb-0 btn-lg w-100" %}
+        </div>
+    </div>
+    {% addtoblock 'css'%}
+    {{ search_form.media.css }}
+    <link rel="stylesheet" href="{% static 'select2-bootstrap4-theme/dist/select2-bootstrap4.min.css'%}">
+    <link rel="stylesheet" href="{% static 'bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css'%}">
+    <style media="screen">
+        .select2-container--bootstrap4 .select2-selection--single {
+            height: calc(2.7rem + 2px);
+            line-height: 1.5;
+            padding: .4rem 0.125rem 0.75rem 0.375rem;
+        }
+        .select2-container--bootstrap4 .select2-selection {
+            color: #495057;
+            font-size: 1.25rem;
+        }
+        .select2-container--bootstrap4 .select2-selection--single .select2-selection__placeholder {
+            color: #495057;
+        }
+    </style>
+    {% endaddtoblock%}
+    {% addtoblock 'js'%}
+    {{ search_form.media.js }}
+    <script src="{% static 'bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js' %}" charset="utf-8"></script>
+    <script src="{% static 'bootstrap-datepicker/dist/locales/bootstrap-datepicker.fr.min.js' %}" charset="utf-8"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            var pickerOptions = {
+                autoclose : true,
+                format: "dd/mm/yy",
+                language : "fr",
+                orientation : "bottom",
+                startDate : new Date(),
+                defaultViewDate : new Date(),
+            }
+            var arrivalDatePicker = $('#id_arrival_date').datepicker(pickerOptions);
+            $('#id_departure_date').datepicker(pickerOptions).on("changeDate", function(e) {
+                $('#id_arrival_date').datepicker('setStartDate', e.date);
+            });;
+        })
+    </script>
+    {% endaddtoblock%}
+</form>

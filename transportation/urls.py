@@ -1,14 +1,17 @@
 from django.conf.urls import url, include
 from django.views.generic import TemplateView
-from .views import MapView, LineDetailView, LineListView, StopListView, StopAutocomplete
+from .views import StopAutocomplete, bus_blueprint
+from .views import TransportationTicketRecovery, TransportationTicket
+from .views import TransportationTicketPrintView, TransportationTicketValidation
+from .views import TransportationOrderInvoice, TransportationOrderInvoicePrintView
 
 urlpatterns = [
-    url(r'^$', TemplateView.as_view(template_name="transportation/base.html"), name='map'),
-    url(r'^carte/$', MapView.as_view(), name='map'),
-    url(r'^lignes/$', LineListView.as_view(), name="line-list"),
-    url(r'^arrets/$', StopListView.as_view(), name="stop-list"),
     url(r'^arrets/autocomplete/$', StopAutocomplete.as_view(), name="stop-autocomplete"),
-    url(r'^ligne/(?P<slug>[\w-]+)/$', LineDetailView.as_view(), name="line-detail"),
-
-
+    url(r'^bus/blueprint/$', bus_blueprint, name='bus-blueprint'),
+    url(r'^ticket/recovery/$', TransportationTicketRecovery.as_view(), name='ticket-recovery'),
+    url(r'^order/(?P<num>[\w-]+)/invoice/$', TransportationOrderInvoice.as_view(), name='ticket-order-invoice'),
+    url(r'^order/(?P<num>[\w-]+)/invoice/pdf/$', TransportationOrderInvoicePrintView.as_view(), name='ticket-order-invoice-pdf'),
+    url(r'^ticket/(?P<num>[\w-]+)/$', TransportationTicket.as_view(), name='ticket'),
+    url(r'^ticket/(?P<num>[\w-]+)/pdf/$', TransportationTicketPrintView.as_view(), name='ticket-pdf'),
+    url(r'^ticket/(?P<num>[\w-]+)/validate/$', TransportationTicketValidation.as_view(), name='ticket-validation'),
 ]

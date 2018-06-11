@@ -2,11 +2,34 @@
 
 {% addtoblock 'css' %}
 <link rel="stylesheet" href="{% static 'transportation/css/timeline.css'%}">
+<style media="screen">
+    .seat {
+        cursor: pointer
+    }
+    .seat.checked {
+        fill : #ccc;
+    }
+    .seat.checked .st1{
+        fill : inherit!important;
+    }
+</style>
 {% endaddtoblock %}
+
+<div class="modal fade" id="placeModal" tabindex="-1" role="dialog" aria-labelledby="PlaceModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-body"></div>
+            <div class="modal-footer">
+                Nombre(s) de places à choisir : <span class="place-count">1</span>
+            </div>
+        </div>
+      </div>
+    </div>
+</div>
 
 {% verbatim %}
 <script id="timetable-template" type="text/x-handlebars-template">
-<div class="row">
+<div class="row timetable">
     <div class="col-md-12">
         <div class="row mb-5 pt-2 border">
             <div class="col-md-4 border-right">
@@ -15,7 +38,22 @@
                     <div class="entry text-left">
                         <div class="title m-0 float-left text-right">{{hour}}</div>
                         <div class="body float-right mb-3">
-                            {{stop_name}}{{#if service_name}}<br /><i class="fas fa-bus"></i> {{service_name}}{{/if}}
+                            {{stop_name}}
+                            {{#if service_name}}<br /><i class="fas fa-bus"></i> {{service_name}}
+                                {{#if ../summary}}
+                                    {{#if seats}}
+                                        Siège : {{seats}}
+                                    {{/if}}
+                                {{else}}
+                                <a class="place-picker" href="#"
+                                   data-timetable-id="{{../timetable_id}}"
+                                   data-timeslot-id="{{@index}}"
+                                   data-service-slug="{{service_slug}}"
+                                   data-place-count="{{../traveler_count}}">
+                                    Choisir une place
+                                </a>
+                                {{/if}}
+                            {{/if}}
                         </div>
                     </div>
                     {{/each}}
@@ -24,7 +62,9 @@
             <div class="col-md-3 border-right">
                 <ul class="list-unstyled">
                     <li>Durée : {{total_time}}</li>
+                    {{#if connexion_count}}
                     <li>Attente max : {{max_wait}}</li>
+                    {{/if}}
                     <li>{{connexion_info}}</li>
                 </ul>
             </div>
@@ -64,3 +104,74 @@
 </div>
 </script>
 {% endverbatim %}
+
+{% addtoblock 'js'%}
+<script type="text/javascript">
+    $(document).on("transportation:timetables-ready", function(){
+        $(".timetable-form").submit(function(){
+            var timetableId = $(this).find("input[name=timebable-id]").val()
+            var timetable = timetables[timetableId]
+            $('<input />').attr('type', 'hidden')
+                .attr('name', "timetable")
+                .attr('value', JSON.stringify(timetable))
+                .appendTo($(this));
+            {% if go %}
+            $('<input />').attr('type', 'hidden')
+                .attr('name', "go")
+                .attr('value', {{go|safe}})
+                .appendTo($(this));
+
+            {% endif %}
+            return true;
+        });
+        // $(".place-picker").click(function(){
+        //     var placePicker = $(this);
+        //     var serviceSlug = placePicker.data("service-slug");
+        //     var timeslotId = parseInt(placePicker.data("timeslot-id"));
+        //     var timetableId = parseInt(placePicker.data("timetable-id"));
+        //     var placeCount = parseInt(placePicker.data("place-count"));
+        //     $("#placeModal").find(".modal-body").load(`{% url 'bus-blueprint'%}?service_slug=${serviceSlug}`, function(){
+        //         $("#placeModal").find(".place-count").html(placeCount);
+        //         if(timetables[timetableId].timeslots[timeslotId].hasOwnProperty("seats")){
+        //             for (let seat of timetables[timetableId].timeslots[timeslotId].seats) {
+        //                 $(`#seat-${seat}`).addClass("checked")
+        //             }
+        //         }
+        //         // $(".modal-content .seat").click(function(e){
+        //         //
+        //         //     var seatNb = e.currentTarget.id.replace("seat-","");
+        //         //     var seats = null
+        //         //     if(timetables[timetableId].timeslots[timeslotId].hasOwnProperty("seats")){
+        //         //         seats = timetables[timetableId].timeslots[timeslotId].seats ;
+        //         //     } else {
+        //         //         timetables[timetableId].timeslots[timeslotId].seats = seats = [] ;
+        //         //     }
+        //         //     var index = seats.indexOf(seatNb);
+        //         //     if(placeCount > 0) {
+        //         //         if(index == -1) {
+        //         //             seats.push(seatNb)
+        //         //             placeCount--;
+        //         //         } else {
+        //         //             seats.splice(index, 1)
+        //         //              placeCount++;
+        //         //         }
+        //         //         $(this).toggleClass("checked");
+        //         //     } else {
+        //         //         if(index != -1) {
+        //         //             seats.splice(index, 1)
+        //         //             placeCount++;
+        //         //             $(this).toggleClass("checked");
+        //         //         }
+        //         //     }
+        //         //     var seatLabel = seats.join(", ")
+        //         //     placePicker.attr("data-place-count", placeCount);
+        //         //     placePicker.data("place-count", placeCount);
+        //         //     placePicker.html(`Siège : ${seatLabel}`)
+        //         //     $("#placeModal").find(".place-count").html(placeCount);
+        //         // });
+        //         // $("#placeModal").modal('toggle');
+        //     });
+        // });
+    })
+</script>
+{% endaddtoblock %}

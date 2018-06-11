@@ -10,3 +10,11 @@ class TransportationItineraryApp(CMSApp):
 
     def get_urls(self, page=None, language=None, **kwargs):
         return ['transportation.itinerary_hook_urls']
+
+
+@apphook_pool.register
+class TransportationFleetApp(CMSApp):
+    name = _('Transportation Fleet')
+
+    def get_urls(self, page=None, language=None, **kwargs):
+        return ['transportation.fleet_hook_urls']

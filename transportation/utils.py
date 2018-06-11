@@ -1,5 +1,5 @@
 from datetime import datetime, date
-from .models import GraphEdge
+from .models import Travel
 
 def has_all_stop(timetable):
     for timeslot in timetable:
@@ -45,12 +45,26 @@ def get_route_length(timetable):
     for timeslot in timetable:
         if prev_slot:
             try:
-                edge = GraphEdge.objects.get(stop1=prev_slot.stop, stop2=timeslot.stop)
+                edge = Travel.objects.get(stop1=prev_slot.stop, stop2=timeslot.stop)
                 length += edge.distance
-            except GraphEdge.DoesNotExist:
+            except Travel.DoesNotExist:
                 pass
         prev_slot = timeslot
     return length
+
+def get_travel_price(timetable):
+    prev_slot = None
+    total_price = 0
+    for timeslot in timetable:
+        if prev_slot:
+            try:
+                edge = Travel.objects.get(stop1=prev_slot.stop, stop2=timeslot.stop)
+                total_price += edge.price
+            except Travel.DoesNotExist:
+                pass
+        prev_slot = timeslot
+    return total_price
+
 
 
 def timetable_sort_func(timetable):

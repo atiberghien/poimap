@@ -9,8 +9,8 @@ from dateutil.tz import tzutc
 from networkx.algorithms.shortest_paths.generic import all_shortest_paths
 
 from .serializers import StopSerializer, LineSerializer
-from .models import Stop, Line, Route, Service, GraphEdge
-from .utils import has_all_stop, get_route_length, get_total_time, increasing_hours, timetable_sort_func, get_max_wait
+from .models import Stop, Line, Route, Service, Travel
+from .utils import has_all_stop, get_route_length, get_total_time, increasing_hours, timetable_sort_func, get_max_wait, get_travel_price
 
 import pandas as pd
 import networkx as nx
@@ -85,7 +85,6 @@ def api_itinerary(request):
     target = request.GET.get("target", None)
     travel_date = request.GET.get("travel_date", None)
     traveler_count = request.GET.get("traveler_count", 1)
-    travel_unit_price = 1
 
     result = {
         "success" : "OK",
@@ -106,14 +105,14 @@ def api_itinerary(request):
                             edges[edge].append(route.id)
                         else:
                             edges[edge] = [route.id]
-                            distance = GraphEdge.objects.get(stop1__slug=stop1, stop2__slug=stop2)
+                            distance = Travel.objects.get(stop1__slug=stop1, stop2__slug=stop2).distance
                             g.add_edge(stop1, stop2, weight=distance)
         try:
             timetables = []
             for path in all_shortest_paths(g, source, target):
                 connections = []
                 for i in range(len(path)-1):
-                    connections.append(list(GraphEdge.objects.get(stop1__slug=path[i], stop2__slug=path[i+1]).routes.values_list('id', flat=True)))
+                    connections.append(list(Travel.objects.get(stop1__slug=path[i], stop2__slug=path[i+1]).routes.values_list('id', flat=True)))
                 connections = itertools.product(*connections)
                 for connection in connections:
                     all_services = []
@@ -150,7 +149,7 @@ def api_itinerary(request):
                     timetable_data["length"] = get_route_length(timetable)
                     timetable_data["connexion_count"] = len(timetable)/2 - 1
                     timetable_data["traveler_count"] = traveler_count
-                    timetable_data["travel_unit_price"] = travel_unit_price
+                    timetable_data["travel_unit_price"] = get_travel_price(timetable)
                     timetable_data["timeslots"] = []
                 current_service_name = None
                 for timeslot in timetable:
@@ -161,6 +160,7 @@ def api_itinerary(request):
                     }
                     if timeslot.service.name != current_service_name:
                         timeslot_data["service_name"] = timeslot.service.name
+                        timeslot_data["service_slug"] = timeslot.service.slug
                         current_service_name = timeslot.service.name
 
                     timetable_data["timeslots"].append(timeslot_data)

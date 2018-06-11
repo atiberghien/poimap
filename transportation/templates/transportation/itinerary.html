@@ -26,25 +26,25 @@
         </div>
     </div>
 </div>
+
 {% addtoblock 'js' %}
 <script src="{% static 'handlebars/dist/handlebars.min.js' %}" charset="utf-8"></script>
 <script src="{% static 'pluralize/pluralize.js' %}" charset="utf-8"></script>
 <script src="{% static 'moment/min/moment.min.js' %}" charset="utf-8"></script>
 <script src="{% static 'moment/locale/fr.js' %}" charset="utf-8"></script>
-
 {% include "transportation/partials/timetable_template.hbs" %}
 
 <script type="text/javascript">
+    var timetables = null;
     $(document).ready(function(){
-        var timetables = null;
         $.getJSON("{% url 'api-itinerary' %}", {
             {% if direction == 1 %}
             source : "{{departure.slug}}",
             target : "{{arrival.slug}}",
             travel_date : "{{departure_date|date:"d/m/y"}}",
             {% else %}
-            target : "{{departure.slug}}",
             source : "{{arrival.slug}}",
+            target : "{{departure.slug}}",
             travel_date : "{{arrival_date|date:"d/m/y"}}",
             {% endif %}
             traveler_count : "{{nb_passengers}}",
@@ -67,22 +67,24 @@
                     timetable.total_time = moment.utc(timetable.total_time*1000).format('H[h]mm');
                     timetable.max_wait = moment.utc(timetable.max_wait*1000).format('H[h]mm');
                     timetable.connexion_info = timetable.connexion_count ? pluralize('changement', timetable.connexion_count, true) : "Trajet direct"
-                    timetable.traveler_info = pluralize('voyageur', timetable.traveler_count, false)
-                    timetable.travel_price = timetable.traveler_count * timetable.travel_unit_price
+                    timetable.traveler_info = pluralize('voyageur', parseInt(timetable.traveler_count), false)
+                    timetable.travel_price = (timetable.traveler_count * timetable.travel_unit_price).toFixed(2)
                     $("#timetables").append(template(timetable));
                 })
             } else {
                 $("#timetables").html("")
             }
             $(".btn-minus, .btn-plus").click(function(){
-                var form = $(this).parents("form");
-                var timetableId = form.find("input[name=timebable-id]").val()
+                var timetableDiv = $(this).parents(".row.timetable");
+                var timetableId = timetableDiv.find("input[name=timebable-id]").val()
                 var timetable = timetables[timetableId]
 
-                var countElmt = form.find(".traveler-count");
-                var infoElmt = form.find(".traveler-info");
-                var priceElmt = form.find(".travel-price");
+                var countElmt = timetableDiv.find(".traveler-count");
+                var infoElmt = timetableDiv.find(".traveler-info");
+                var priceElmt = timetableDiv.find(".travel-price");
+                var placePicker = timetableDiv.find(".place-picker");
 
+                var timeslotId = parseInt(placePicker.data("timeslot-id"));
                 var count = parseInt(countElmt.html());
 
                 if($(this).hasClass("btn-minus")){
@@ -93,26 +95,26 @@
                 if(count > 0){
                     countElmt.html(count);
                     timetable.traveler_count = count;
-                    priceElmt.html(timetable.travel_unit_price * count);
+                    priceElmt.html((timetable.travel_unit_price * count).toFixed(2));
                     infoElmt.html(pluralize('voyageur', count, false));
+                    if(timetables[timetableId].timeslots[timeslotId].hasOwnProperty("seats")){
+                        if(count > timetables[timetableId].timeslots[timeslotId].seats.length) {
+                            count -= timetables[timetableId].timeslots[timeslotId].seats.length
+                        } else {
+                            diff = timetables[timetableId].timeslots[timeslotId].seats.length - count
+                            for(var i=0; i<diff;i++){
+                                timetables[timetableId].timeslots[timeslotId].seats.pop();
+                            }
+                            var seatLabel = timetables[timetableId].timeslots[timeslotId].seats.join(", ")
+                            placePicker.html(`Siège : ${seatLabel}`)
+                            count = 0
+                        }
+                    }
+                    placePicker.attr("data-place-count", count)
+                    placePicker.data("place-count", count);
                 }
             });
-            $(".timetable-form").submit(function(){
-                var timetableId = $(this).find("input[name=timebable-id]").val()
-                var timetable = timetables[timetableId]
-                $('<input />').attr('type', 'hidden')
-                    .attr('name', "timetable")
-                    .attr('value', JSON.stringify(timetable))
-                    .appendTo($(this));
-                {% if go %}
-                $('<input />').attr('type', 'hidden')
-                    .attr('name', "go")
-                    .attr('value', {{go|safe}})
-                    .appendTo($(this));
-
-                {% endif %}
-                return true;
-            });
+            $(document).trigger("transportation:timetables-ready");
         })
     })
 </script>

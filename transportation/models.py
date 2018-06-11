@@ -4,46 +4,24 @@ from django.db import models
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from autoslug import AutoSlugField
+from filer.fields.file import FilerFileField
 from dateutil import rrule
 from dateutil.parser import parse
 from dateutil.rrule import rrulestr
 
 from poimap.models import POI, Path
 
-class Fare(models.Model):
-    FARE_TYPE_CHOICES = (
-        ('A', 'Abonnement'),
-        ('T', 'Ticket'),
-    )
-    type = models.CharField(max_length=1, choices=FARE_TYPE_CHOICES)
-    price = models.FloatField()
-    valid_for = models.TextField()
-    description = models.TextField(null=True, blank=True)
-
-    def __unicode__(self):
-        return "%s, %s" % (self.type, self.price)
-
-class RunningDay(models.Model):
-    PERIOD_CHOICES = (
-        ('1', 'Lundi'),
-        ('2', 'Mardi'),
-        ('3', 'Mercredi'),
-        ('4', 'Jeudi'),
-        ('5', 'Vendredi'),
-        ('6', 'Samedi'),
-        ('7', 'Dimanche ou jours feries'),
-        ('8', 'Vacances Scolaire'),
-        ('9', 'Hors Vacances'),
-    )
-    period = models.CharField(max_length=1, choices=PERIOD_CHOICES, unique=True)
-
-    def __unicode__(self):
-        return "%s " % (self.get_period_display())
-
 class Line(models.Model):
     name = models.CharField(max_length=150)
     slug = AutoSlugField(populate_from='name', always_update=True)
 
+    def get_bus(self):
+        bus_list = []
+        for route in self.routes.all():
+            for service in route.services.all():
+                bus_list.extend(list(service.bus_set.all()))
+        return set(bus_list)
+                    
     def __unicode__(self):
         return "%s " % self.name
 
@@ -131,13 +109,59 @@ class TimeSlot(models.Model):
         ordering = ('order',)
 
 
-class GraphEdge(models.Model):
+class Travel(models.Model):
     stop1 = models.ForeignKey(Stop, related_name="start_edges")
     stop2 = models.ForeignKey(Stop, related_name="end_edges")
     distance = models.PositiveIntegerField(default=0)
+    price = models.FloatField(null=True, blank=True)
     routes = models.ManyToManyField(Route)
 
-@receiver(post_save,  sender=Service)
+
+class Bus(models.Model):
+    name = models.CharField(max_length=64)
+    slug = AutoSlugField(populate_from='name', always_update=True)
+    blueprint = FilerFileField(null=True, blank=True)
+    services = models.ManyToManyField(Service)
+
+
+class Customer(models.Model):
+    first_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255)
+    email = models.EmailField(unique=True)
+
+    terms = models.BooleanField()
+    privacy = models.BooleanField()
+    optin = models.BooleanField()
+
+
+class Order(models.Model):
+    num = models.CharField(max_length=500, unique=True)
+    customer = models.ForeignKey(Customer)
+    created_at = models.DateTimeField(auto_now_add=True)
+    paid_at = models.DateTimeField(null=True, blank=True)
+
+    def total_amount(self):
+        return sum(list(self.ticket_set.values_list("price", flat=True)))
+    total_amount.description = "Total Amount"
+
+
+class Ticket(models.Model):
+    num = models.CharField(max_length=500, unique=True)
+    order = models.ForeignKey(Order)
+    traveller_first_name = models.CharField(max_length=255)
+    traveller_last_name = models.CharField(max_length=255)
+    date = models.DateField()
+    departure_stop = models.ForeignKey(Stop, related_name="ticket_arrival_stops")
+    arrival_stop = models.ForeignKey(Stop, related_name="ticket_departure_stops")
+    departure_hour = models.TimeField()
+    arrival_hour = models.TimeField()
+    seat_number = models.IntegerField(null=True, blank=True)
+    price = models.FloatField()
+
+    is_validated = models.BooleanField(default=False)
+
+
+@receiver(post_save, sender=Service)
 def autocreate_timeslot_for_service(sender, instance, created, **kwargs):
     if created:
         i = 0

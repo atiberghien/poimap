@@ -1,5 +1,7 @@
 from django.contrib import admin
-from models import Fare, TimeSlot, Stop, Service, RunningDay, Line, RouteStop, Route, GraphEdge
+from django.contrib.admin.widgets import FilteredSelectMultiple
+from django import forms
+from models import TimeSlot, Stop, Service, Line, RouteStop, Route, Travel, Bus, Customer, Order, Ticket
 from leaflet.admin import LeafletGeoAdmin
 from poimap.admin import POIAdminForm
 from grappelli.forms import GrappelliSortableHiddenMixin
@@ -25,11 +27,6 @@ class ServiceAdmin(admin.ModelAdmin):
     inlines = [
         TimeSlotInlineAdmin
     ]
-
-class FareAdmin(admin.ModelAdmin):
-    model = Fare
-    list_display = ['type', 'price', 'valid_for', 'description']
-
 
 class StopAdminForm(POIAdminForm):
     class Meta(POIAdminForm.Meta):
@@ -67,13 +64,39 @@ class RouteAdmin(admin.ModelAdmin):
     list_editable = ("name", "direction", "path")
     inlines = (RouteStopInline,)
 
-class GraphEdgeAdmin(admin.ModelAdmin):
-    list_display = ("id", "stop1", "stop2", "distance")
+class TravelAdmin(admin.ModelAdmin):
+    list_display = ("id", "stop1", "stop2", "distance", "price")
+    list_editable = ("price",)
 
+class BusAdminForm(forms.ModelForm):
+    services = forms.ModelMultipleChoiceField(queryset=Service.objects.all(), widget=FilteredSelectMultiple("Service", is_stacked=False))
+
+    class Meta:
+        model = Bus
+        fields = "__all__"
+
+class BusAdmin(admin.ModelAdmin):
+    list_display = ("name",)
+    form = BusAdminForm
+
+
+class TimeSlotInlineAdmin(admin.TabularInline):
+    model = Ticket
+    extra = 0
+    can_delete = True
+
+class OrderAdmin(admin.ModelAdmin):
+    def ticket_number(self, obj):
+        return obj.ticket_set.count()
+
+    list_display = ("num", "ticket_number", "total_amount")
+    inlines = [TimeSlotInlineAdmin]
+
+admin.site.register(Customer)
+admin.site.register(Order, OrderAdmin)
+admin.site.register(Bus, BusAdmin)
 admin.site.register(Line)
 admin.site.register(Route, RouteAdmin)
-admin.site.register(Fare, FareAdmin)
 admin.site.register(Stop, StopAdmin)
 admin.site.register(Service, ServiceAdmin)
-admin.site.register(RunningDay)
-admin.site.register(GraphEdge, GraphEdgeAdmin)
+admin.site.register(Travel, TravelAdmin)

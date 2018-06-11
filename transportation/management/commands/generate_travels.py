@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.core.management.base import BaseCommand
-from transportation.models import Route, GraphEdge
+from transportation.models import Route, Travel
 import googlemaps
 
 
@@ -17,9 +17,9 @@ class Command(BaseCommand):
                     if stop_slugs.index(stop2_slug) > stop_slugs.index(stop1_slug):
                         stop1 = stops.get(slug=stop1_slug)
                         stop2 = stops.get(slug=stop2_slug)
-                        edge, created = GraphEdge.objects.get_or_create(stop1=stop1, stop2=stop2)
+                        travel, created = Travel.objects.get_or_create(stop1=stop1, stop2=stop2)
                         if created:
                             matrix = gmaps.distance_matrix(stop1.coords, stop2.coords)
-                            edge.distance = int(matrix["rows"][0]["elements"][0]["distance"]["value"])
-                            edge.save()
-                        edge.routes.add(route)
+                            travel.distance = int(matrix["rows"][0]["elements"][0]["distance"]["value"])
+                            travel.save()
+                        travel.routes.add(route)
