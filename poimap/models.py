@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
+from django.db.models.signals import post_save
+from django.db.models import Avg
 from django.contrib.auth.models import User
 from django.contrib.gis.db import models as gismodels
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import JSONField
 from django.dispatch import receiver
-from django.db.models.signals import post_save
-from cms.models import CMSPlugin, Page
-from django.db.models import Avg
+
 from django_countries.fields import CountryField
 from treebeard.mp_tree import MP_Node
 from polymorphic.models import PolymorphicModel
@@ -74,19 +73,19 @@ class POI(PolymorphicModel):
     zipcode = models.CharField(max_length=10, blank=True, null=True)
     city = models.CharField(max_length=300, blank=True, null=True)
     country = CountryField(default="FR")
-    geom = gismodels.PointField(dim=3)
+    geom = gismodels.GeometryField(dim=3)
 
     starred = models.BooleanField(default=False)
 
-    distance = models.PositiveIntegerField(default=0)
+    distance = models.PositiveIntegerField(default=0, blank=True, null=True)
 
-    extra_data = JSONField(default=dict({}), blank=True)
+    extra_data = JSONField(default=list([dict({})]), blank=True, null=True)
 
     @property
     def coords(self):
         return {
-            "lat" : self.geom.coords[1],
-            "lng" : self.geom.coords[0],
+            "lat" : self.geom.centroid.coords[1],
+            "lng" : self.geom.centroid.coords[0],
         }
 
     @property

@@ -1,27 +1,48 @@
 {% load leaflet_tags static sekizai_tags compress%}
 
 <div class="row">
-    <div class="col-12">
-        <p>Distance totale de votre randonnée : {{total_length|floatformat:2}} km</p>
+    <div class="col-md-12">
+        <h5 class="">DÉPART : {{start_point.name}}</h5>
+        <h6>Distance totale de votre randonnée : {{total_length|floatformat:2}} km</h6>
     </div>
 </div>
 <div class="row">
     <div class="col-md-12">
         {% for poi in poi_list %}
-        <div class="row">
-            {%if poi.type.slug == 'hebergement' %}
+        <div class="row border-bottom mt-2">
             <div class="col-md-12">
-                <h2>{{poi.distance|floatformat:2}} m - {{poi.name}}</h2>
-                <div class="form-group">
-                    <label for="path-step-{{poi.id}}-comment">Commentaire</label>
-                    <textarea class="form-control" name="path-step-{{poi.id}}-comment" rows="8"></textarea>
+                <div class="row">
+                    <div class="col-md-9">
+                        <h5>
+                            {%if poi.type.slug == 'hebergement' %}
+                            <i class="fas fa-home"></i>
+                            {% else %}
+                            <i class="fas fa-star"></i>
+                            {% endif %}
+                            {{poi.distance|floatformat:2}} m - {{poi.name}} </h5>
+                    </div>
+                    <div class="col-md-3">
+                        <div id="rate-{{poi.slug}}" class="float-left"></div> <span class="float-left">({{poi.vote_count}})</span>
+                    </div>
                 </div>
+                {%if poi.type.slug == 'hebergement' %}
+                <div class="row">
+                    <div class="col-md-12">
+                        <strong>Paul Dupont</strong> -
+                        {{poi.address|default:'42, rue du chemin'}}, {{poi.zipcode|default:'48xxx'}} {{poi.city|default:'Lozère'}} -
+                        <i class="fas fa-phone"></i> <a class="ml-2"  href="tel:+33400000000">04 00 00 00 00 </a>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="path-step-{{poi.id}}-comment">Commentaire</label>
+                            <textarea class="form-control" name="path-step-{{poi.id}}-comment" rows="8"></textarea>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
             </div>
-            {% else %}
-            <div class="col-md-12">
-                <h5>{{poi.distance}} - {{poi.name}}</h5>
-            </div>
-            {% endif %}
 
         </div>
         {% endfor %}
@@ -33,25 +54,39 @@
         </ul>
     </div> -->
 </div>
+<div class="row">
+    <div class="col-md-12">
+        <h5>ARRIVÉE : {{end_point.name}}</h5>
+    </div>
+</div>
 
 
 {% addtoblock "css" %}
 <link rel="stylesheet" href="{% static 'poimap/css/path_step.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/rateYo/2.3.2/jquery.rateyo.min.css">
 {% endaddtoblock %}
 
 {% addtoblock "js" %}
-{% comment %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/rateYo/2.3.2/jquery.rateyo.min.js"></script>
 <script type="text/javascript">
-$("#generate-pdf").click(function(){
-    event.preventDefault();
-    var pdf = new jsPDF('p','pt','a4');
-
-    var doc = $(document.body).clone();
-    $(doc).find(".leaflet-container").remove();
-    pdf.addHTML(doc[0],function() {
-        pdf.save('a4.pdf')
-    });
-});
+// $("#generate-pdf").click(function(){
+//     event.preventDefault();
+//     var pdf = new jsPDF('p','pt','a4');
+//
+//     var doc = $(document.body).clone();
+//     $(doc).find(".leaflet-container").remove();
+//     pdf.addHTML(doc[0],function() {
+//         pdf.save('a4.pdf')
+//     });
+// });
+    $(document).ready(function(){
+        {% for poi in poi_list %}
+        $("#rate-{{poi.slug}}").rateYo({
+            rating: {{poi.rating_score|stringformat:"f"}},
+            readOnly: true,
+            starWidth: "20px",
+        });
+        {% endfor %}
+    })
 </script>
-{% endcomment %}
 {% endaddtoblock%}
