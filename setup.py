@@ -34,6 +34,8 @@ setup(name='poimap',
            'django-easy-select2',
            'django-recurrence',
            'googlemaps',
-           'pandas==0.22.0'
+           'pandas==0.22.0',
+           'xhtml2pdf',
+           'reportlab',
       ],
       zip_safe=False)
