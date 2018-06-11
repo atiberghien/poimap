@@ -164,8 +164,8 @@ class TransportationCartDeleteItem(RedirectView):
 @method_decorator(csrf_exempt, name='dispatch')
 class TransportationCartSaveTravellers(View):
     def post(self, request, *args, **kwargs):
-        if "travels" not in request.session:
-            travels = self.request.session["travels"]
+        if "travels" in request.session:
+            travels = request.session["travels"]
             for key, value in request.POST.items():
                 fieldname, travel_id, traveller_id = key.split('-')
                 travels[int(travel_id)]["travellers"][int(traveller_id)][fieldname] = value
