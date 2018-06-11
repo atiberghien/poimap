@@ -18,6 +18,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='poilisting',
             name='extra_placeholder',
-            field=cms.models.fields.PlaceholderField(editable=False, null=True, on_delete=django.db.models.deletion.CASCADE, slotname=b'extra_placeholder', to='cms.Placeholder'),
+            field=cms.models.fields.PlaceholderField(editable=False, null=True, on_delete=django.db.models.deletion.CASCADE, slotname='extra_placeholder', to='cms.Placeholder'),
         ),
     ]
