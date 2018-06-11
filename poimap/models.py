@@ -152,33 +152,3 @@ class POIMedia(models.Model):
         ordering = ["order"]
         verbose_name = "Photo"
         verbose_name_plural = "Gallerie"
-
-POI_LISTING_TEMPLATES = (
-  ('poimap/partial/poi_map_listing.html', 'Map'),
-  ('poimap/partial/poi_listing.html', 'List'),
-  ('poimap/partial/itinerary.html', 'Itinerary'),
-)
-
-class POIListing(CMSPlugin):
-    area_display = models.ForeignKey(Area, null=True, blank=True, verbose_name="Zone à afficher")
-    path_display = models.ForeignKey(Path, null=True, blank=True, verbose_name="Chemin à afficher")
-    type_display = models.ManyToManyField(POIType, verbose_name="Type de POI à afficher")
-    template = models.CharField('Template', max_length=255, choices=POI_LISTING_TEMPLATES, default="poimap/partial/poi_map_listing.html")
-    hide_control = models.BooleanField(default=True)
-
-    def copy_relations(self, oldinstance):
-        self.type_display = oldinstance.type_display.all()
-
-class CustomItineraryFormPlugin(CMSPlugin):
-    custom_link = models.CharField(
-        verbose_name=_('Custom link'),
-        blank=True,
-        max_length=2040,
-    )
-    internal_link = models.ForeignKey(
-        Page,
-        verbose_name=_('Internal link'),
-        blank=True,
-        null=True,
-        on_delete=models.SET_NULL,
-    )

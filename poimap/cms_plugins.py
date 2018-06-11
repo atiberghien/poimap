@@ -3,7 +3,7 @@ from django.utils.translation import ugettext_lazy as _
 from cms.plugin_base import CMSPluginBase
 from cms.models.pluginmodel import CMSPlugin
 from cms.plugin_pool import plugin_pool
-from .models import POIListing, CustomItineraryFormPlugin, POI_LISTING_TEMPLATES
+from .cms_models import POIListing, CustomItineraryFormPlugin, POI_LISTING_TEMPLATES
 from .forms import CustomItineraryForm
 
 from django.conf import settings
