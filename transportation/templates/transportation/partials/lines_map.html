@@ -37,6 +37,7 @@ function main_map_init(map, options) {
     map.doubleClickZoom.disable();
     map.keyboard.disable();
     map.options.minZoom = 8;
+    map.scrollWheelZoom.disable();
     $(".leaflet-control-zoom-out.leaflet-bar-part").parent().css("visibility", "hidden");
     $(document).ready(function(){
         overlays = {}
