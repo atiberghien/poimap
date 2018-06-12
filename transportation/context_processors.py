@@ -3,8 +3,10 @@ from .models import Line
 from .forms import SearchServiceForm
 
 def transportation(request):
-    return {
-        "area" : Area.objects.first(),
-        "lines" : Line.objects.all(),
-        "search_form" : SearchServiceForm()
-    }
+    context = {}
+    if "travels" in request.session:
+        context["cart_size"] = len(request.session["travels"])
+    else:
+        context["cart_size"] = 0
+    context["search_form"] = SearchServiceForm()
+    return context
