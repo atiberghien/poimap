@@ -54,7 +54,7 @@ class StopForm(forms.ModelForm):
 class SearchServiceForm(forms.Form):
     departure = forms.ModelChoiceField(
         queryset=Stop.objects.all(),
-        widget=autocomplete.ModelSelect2(url='stop-autocomplete', attrs={'data-theme': "bootstrap4",})
+        widget=autocomplete.ModelSelect2(url='stop-autocomplete', attrs={'data-theme': "bootstrap4", 'data-placeholder' : u"  Ville de départ"})
     )
     arrival = forms.ModelChoiceField(
         queryset=Stop.objects.all(),
@@ -62,6 +62,7 @@ class SearchServiceForm(forms.Form):
                                          forward=('departure',),
                                          attrs={
                                             'data-theme': "bootstrap4",
+                                            'data-placeholder' : u"  Ville d'arrivée"
                                          })
     )
     nb_passengers = forms.IntegerField(min_value=1, initial=1)
