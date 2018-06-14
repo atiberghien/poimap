@@ -299,7 +299,7 @@ class TransportationCheckout(FormView):
                     ticket = Ticket.objects.create(
                         num=id_gen(),
                         order=self.order,
-                        traveller_first_name=traveller["name"],
+                        traveller_first_name=traveller["first_name"],
                         traveller_last_name=traveller["last_name"],
                         departure_stop=Stop.objects.get(id=travel["return"]["timeslots"][0]["stop_id"]),
                         arrival_stop=Stop.objects.get(id=travel["return"]["timeslots"][-1]["stop_id"]),
