@@ -155,6 +155,7 @@ class Ticket(models.Model):
     arrival_stop = models.ForeignKey(Stop, related_name="ticket_departure_stops")
     departure_hour = models.TimeField()
     arrival_hour = models.TimeField()
+    service = models.ForeignKey(Service)
     seat_number = models.IntegerField(null=True, blank=True)
     price = models.FloatField()
 

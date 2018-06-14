@@ -81,12 +81,29 @@ class StopAutocomplete(autocomplete.Select2QuerySetView):
 
         return qs.order_by('name')
 
+def _init_travel_info(travel):
+    travel["travellers"] = []
+    for x in range(int(travel["traveler_count"])):
+        travel["travellers"].append({})
+    
+    travel["services"] = []
+    for timeslot in travel["timeslots"]:
+        if "service_slug" in timeslot:
+            travel["services"].append({
+                "service_slug" : timeslot["service_slug"],
+                "stops" : [timeslot["stop_name"]],
+            })
+        else:
+            travel["services"][-1]["stops"].append(timeslot["stop_name"])
+
+
 @method_decorator(csrf_exempt, name='dispatch')
 class TransportationItinerary(View):
 
     def get(self, request, *args, **kwargs):
         context = {}
         return render(request, 'transportation/itinerary_form.html', context)
+
 
     def post(self, request, *args, **kwargs):
         context = {}
@@ -100,10 +117,15 @@ class TransportationItinerary(View):
                 travel = {
                     "go" : go,
                     "return" : ret,
-                    "travellers" : {}
                 }
-                for x in range(int(go["traveler_count"])):
-                    travel["travellers"][x] = {}
+                
+                _init_travel_info(travel["go"])
+
+                if ret:
+                    _init_travel_info(travel["return"])
+                    travel["go"]["has_return"] = True
+                    travel["return"]["is_return"] = True
+                
 
                 if "travels" in request.session:
                     travels = request.session["travels"]
@@ -152,10 +174,25 @@ class TransportationCartDeleteItem(RedirectView):
     pattern_name = "transportation-summary"
 
     def get(self, request, *args, **kwargs):
+        delete_all = request.GET.get("delete_all", None)
         travel_id = request.GET.get("travel_id", None)
-        if travel_id:
+        travel_way = request.GET.get("travel_way", None)
+        if delete_all:
+            request.session["travels"] = []
+            return RedirectView.get(self, request, *args, **kwargs)
+        elif travel_id and travel_way:
             travels = request.session["travels"]
-            travels.pop(int(travel_id))
+            if travel_way == "return":
+                travels[int(travel_id)]["go"]["has_return"] = False
+                travels[int(travel_id)]["return"] = {}
+            elif travel_way == "go" and travels[int(travel_id)]["return"]:
+                travels[int(travel_id)]["go"] = travels[int(travel_id)]["return"]
+                travels[int(travel_id)]["go"]["has_return"] = False
+                del travels[int(travel_id)]["go"]["is_return"]
+                travels[int(travel_id)]["return"] = {}
+            else:
+                travels.pop(int(travel_id))
+
             request.session["travels"] = travels
             return RedirectView.get(self, request, *args, **kwargs)
         return redirect("transportation-itinerary")
@@ -166,12 +203,18 @@ class TransportationCartSaveTravellers(View):
     def post(self, request, *args, **kwargs):
         if "travels" in request.session:
             travels = request.session["travels"]
-            for key, value in request.POST.items():
-                fieldname, travel_id, traveller_id = key.split('-')
-                travels[int(travel_id)]["travellers"][int(traveller_id)][fieldname] = value
+            data = request.POST
+            if data["fieldname"] == "seat_nb":
+                if "seats" in travels[int(data["travelId"])][data["way"]]["travellers"][int(data["travellerId"])]:
+                    travels[int(data["travelId"])][data["way"]]["travellers"][int(data["travellerId"])]["seats"][data["serviceSlug"]] = data["value"]
+                else:
+                    travels[int(data["travelId"])][data["way"]]["travellers"][int(data["travellerId"])]["seats"] = {
+                        data["serviceSlug"] : data["value"]
+                    }
+            else:
+                travels[int(data["travelId"])][data["way"]]["travellers"][int(data["travellerId"])][data["fieldname"]] = data["value"]
             request.session["travels"] = travels
-            return redirect("transportation-checkout")
-        return redirect("transportation-itinerary")
+        return HttpResponse()
 
 class TransportationCheckout(FormView):
     template_name = "transportation/checkout.html"
@@ -331,20 +374,6 @@ class TransportationOrderInvoice(DetailView):
 
 class  TransportationOrderInvoicePrintView(PDFRenderingMixin, TransportationOrderInvoice):
     pass
-
-
-def bus_blueprint(request):
-    service_slug = request.GET.get("service_slug", None)
-
-    try:
-        service = Service.objects.get(slug=service_slug)
-        bus = service.bus_set.first()
-        result = open(bus.blueprint.path).read()
-        content_type = "image/svg+xml"
-    except:
-        result = { "success" : "KO" }
-        content_type = "application/json"
-    return HttpResponse(result, content_type=content_type)
 
 
 class TransportationFleet(ListView):

@@ -9,7 +9,7 @@ from dateutil.tz import tzutc
 from networkx.algorithms.shortest_paths.generic import all_shortest_paths
 
 from .serializers import StopSerializer, LineSerializer
-from .models import Stop, Line, Route, Service, Travel
+from .models import Stop, Line, Route, Service, Travel, Ticket
 from .utils import has_all_stop, get_route_length, get_total_time, increasing_hours, timetable_sort_func, get_max_wait, get_travel_price
 
 import pandas as pd
@@ -172,4 +172,37 @@ def api_itinerary(request):
     else:
         result["success"] = "KO"
         result["msg"] = "Missing input data"
+    return Response(result)
+
+
+def _find_booked_seats(service, travel_date, travel_info):
+    seats = []
+    if travel_info["departure_date"] == travel_date.strftime("%d/%m/%y"):
+        for traveller in travel_info["travellers"]:
+            if "seats" in traveller:
+                for service_slug, seat_nb in traveller["seats"].iteritems():
+                    if service_slug == service.slug:
+                        seats.append(seat_nb)
+    return seats
+
+@api_view(http_method_names=['GET'])
+def api_bus_blueprint(request):
+    travel_date = request.GET.get("travel_date", None)
+    service_slug = request.GET.get("service_slug", None)
+    result = {}
+    if travel_date and service_slug:
+        travel_date = datetime.strptime(travel_date, "%d/%m/%y").replace(tzinfo=tzutc())
+        service = Service.objects.get(slug=service_slug)
+        bus = service.bus_set.first()
+        result["blueprint"] = open(bus.blueprint.path).read()
+
+        booked_seats = list(Ticket.objects.filter(date=travel_date.date(), service=service).values_list('seat_number', flat=True))
+
+        if "travels" in request.session:
+            travels = request.session["travels"]
+            for travel in travels:
+                booked_seats.extend(_find_booked_seats(service, travel_date, travel["go"]))
+                if travel["return"]:
+                    booked_seats.extend(_find_booked_seats(service, travel_date, travel["return"]))
+        result["booked_seats"] = booked_seats
     return Response(result)
