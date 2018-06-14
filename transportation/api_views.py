@@ -9,7 +9,7 @@ from dateutil.tz import tzutc
 from networkx.algorithms.shortest_paths.generic import all_shortest_paths
 
 from .serializers import StopSerializer, LineSerializer
-from .models import Stop, Line, Route, Service, Travel, Ticket
+from .models import Stop, Line, Route, Service, Travel, Ticket, Connection
 from .utils import has_all_stop, get_route_length, get_total_time, increasing_hours, timetable_sort_func, get_max_wait, get_travel_price
 
 import pandas as pd
@@ -196,7 +196,7 @@ def api_bus_blueprint(request):
         bus = service.bus_set.first()
         result["blueprint"] = open(bus.blueprint.path).read()
 
-        booked_seats = list(Ticket.objects.filter(date=travel_date.date(), service=service).values_list('seat_number', flat=True))
+        booked_seats = list(Connection.objects.filter(ticket__date=travel_date.date(), service=service).values_list('seat', flat=True))
 
         if "travels" in request.session:
             travels = request.session["travels"]

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django import forms
-from models import TimeSlot, Stop, Service, Line, RouteStop, Route, Travel, Bus, Customer, Order, Ticket
+from models import TimeSlot, Stop, Service, Line, RouteStop, Route, Travel, Bus, Customer, Order, Ticket, Connection
 from leaflet.admin import LeafletGeoAdmin
 from poimap.admin import POIAdminForm
 from grappelli.forms import GrappelliSortableHiddenMixin
@@ -92,7 +92,16 @@ class OrderAdmin(admin.ModelAdmin):
     list_display = ("num", "ticket_number", "total_amount")
     inlines = [TimeSlotInlineAdmin]
 
+class ConnectionInlineAdmin(admin.TabularInline):
+    model = Connection
+    can_delete = True
+
+class TicketAdmin(admin.ModelAdmin):
+    inlines = [ConnectionInlineAdmin]
+
+
 admin.site.register(Customer)
+admin.site.register(Ticket, TicketAdmin)
 admin.site.register(Order, OrderAdmin)
 admin.site.register(Bus, BusAdmin)
 admin.site.register(Line)

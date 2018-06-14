@@ -12,7 +12,7 @@ from dal import autocomplete
 
 from poimap.models import Area
 
-from .models import Line, Stop, Route, Service, Customer, Ticket, Order, Bus, Order
+from .models import Line, Stop, Route, Service, Customer, Ticket, Order, Bus, Order, Connection
 from .forms import SearchServiceForm, CustomerCreationForm
 import json
 import time
@@ -273,8 +273,8 @@ class TransportationCheckout(FormView):
         self.order = Order.objects.create(num=id_gen(), customer=customer)
         travels = self.request.session["travels"]
         for travel in travels:
-            for idx, traveller in travel["travellers"].iteritems():
-                Ticket.objects.create(
+            for traveller in travel["go"]["travellers"]:
+                ticket = Ticket.objects.create(
                     num=id_gen(),
                     order=self.order,
                     traveller_first_name=traveller["first_name"],
@@ -286,8 +286,17 @@ class TransportationCheckout(FormView):
                     date=datetime.strptime(travel["go"]['departure_date'], "%d/%m/%y"),
                     price=travel["go"]['travel_unit_price'],
                 )
-                if "return" in travel and travel["return"]:
-                    Ticket.objects.create(
+                for service in travel["go"]["services"]:
+                    Connection.objects.create(
+                        ticket=ticket,
+                        service=Service.objects.get(slug=service["service_slug"]),
+                        from_stop=Stop.objects.get(name=service["stops"][0]),
+                        to_stop=Stop.objects.get(name=service["stops"][1]),
+                        seat=traveller["seats"][service["service_slug"]]
+                    )
+            if "return" in travel and travel["return"]:
+                for traveller in travel["return"]["travellers"]:
+                    ticket = Ticket.objects.create(
                         num=id_gen(),
                         order=self.order,
                         traveller_first_name=traveller["name"],
@@ -299,6 +308,15 @@ class TransportationCheckout(FormView):
                         date=datetime.strptime(travel["return"]['departure_date'], "%d/%m/%y"),
                         price=travel["return"]['travel_unit_price'],
                     )
+                    for service in travel["return"]["services"]:
+                        Connection.objects.create(
+                            ticket=ticket,
+                            service=Service.objects.get(slug=service["service_slug"]),
+                            from_stop=Stop.objects.get(name=service["stops"][0]),
+                            to_stop=Stop.objects.get(name=service["stops"][1]),
+                            seat=traveller["seats"][service["service_slug"]]
+                        )
+
         return FormView.form_valid(self, form)
    
     def get_success_url(self):
