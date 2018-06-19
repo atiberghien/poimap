@@ -219,10 +219,8 @@ def api_driver_service(request):
     service_ids = set(connections.values_list("service__id", flat=True))
     for service_id in service_ids:
         service = Service.objects.get(id=service_id)
-        dates = list(connections.filter(service=service).values_list("ticket__date",flat=True))
-        dates.sort()
-        dates = [d.strftime("%d/%m/%y") for d in set(dates)]
-
+        dates = list(connections.filter(service=service).order_by('ticket__date').values_list("ticket__date", flat=True))
+        dates = [d.strftime("%d/%m/%y") for d in dates]
         result.append({
             "name" : service.name,
             "description" : str(service.route).decode("utf-8"),
