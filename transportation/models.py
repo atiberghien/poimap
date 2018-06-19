@@ -2,9 +2,12 @@
 from __future__ import unicode_literals
 from django.db import models
 from django.db.models.signals import post_save, post_delete
+from django.contrib.postgres.fields import JSONField
 from django.dispatch import receiver
 from autoslug import AutoSlugField
 from filer.fields.file import FilerFileField
+from filer.fields.image import FilerImageField
+from filer.fields.folder import FilerFolderField
 from dateutil import rrule
 from dateutil.parser import parse
 from dateutil.rrule import rrulestr
@@ -144,7 +147,6 @@ class Order(models.Model):
         return sum(list(self.ticket_set.values_list("price", flat=True)))
     total_amount.description = "Total Amount"
 
-from django.contrib.postgres.fields import JSONField
 
 
 class Ticket(models.Model):
