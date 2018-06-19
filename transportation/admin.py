@@ -3,7 +3,7 @@ from django.contrib.admin.widgets import FilteredSelectMultiple
 from django import forms
 from models import TimeSlot, Stop, Service, Line, RouteStop, Route, Travel, Bus, Customer, Order, Ticket, Connection
 from leaflet.admin import LeafletGeoAdmin
-from poimap.admin import POIAdminForm
+from poimap.admin import POIAdminForm, POIMediaInline
 from grappelli.forms import GrappelliSortableHiddenMixin
 from .forms import StopForm
 
@@ -34,7 +34,7 @@ class StopAdminForm(POIAdminForm):
 
 class StopAdmin(LeafletGeoAdmin):
     search_fields = ('name',)
-
+    inlines = [POIMediaInline]
     form = StopAdminForm
 
     fieldsets = (
