@@ -206,3 +206,26 @@ def api_bus_blueprint(request):
                     booked_seats.extend(_find_booked_seats(service, travel_date, travel["return"]))
         result["booked_seats"] = booked_seats
     return Response(result)
+
+@api_view(http_method_names=['GET'])
+def api_driver_service(request):
+    service_name = request.GET.get("service_name", None)
+    result = []
+    today = date.today()
+    connections = Connection.objects.filter(ticket__date__gte=today, ticket__order__paid_at__isnull=False)
+    if service_name:
+        connections = connections.filter(service__name__icontains=service_name)
+    
+    service_ids = set(connections.values_list("service__id", flat=True))
+    for service_id in service_ids:
+        service = Service.objects.get(id=service_id)
+        dates = list(connections.filter(service=service).values_list("ticket__date",flat=True))
+        dates.sort()
+        dates = [d.strftime("%d/%m/%y") for d in set(dates)]
+
+        result.append({
+            "name" : service.name,
+            "description" : str(service.route).decode("utf-8"),
+            "dates" : dates
+        })
+    return Response(result)

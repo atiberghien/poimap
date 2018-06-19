@@ -3,7 +3,7 @@ from django.views.generic import TemplateView
 from .views import StopAutocomplete
 from .views import TransportationTicketRecovery, TransportationTicket
 from .views import TransportationTicketPrintView, TransportationTicketValidation
-from .views import TransportationOrderInvoice, TransportationOrderInvoicePrintView
+from .views import TransportationOrderInvoice, TransportationOrderInvoicePrintView, DriverView
 
 urlpatterns = [
     url(r'^stops/autocomplete/$', StopAutocomplete.as_view(), name="stop-autocomplete"),
@@ -14,4 +14,5 @@ urlpatterns = [
     url(r'^ticket/(?P<num>[\w-]+)/$', TransportationTicket.as_view(), name='ticket'),
     url(r'^ticket/(?P<num>[\w-]+)/pdf/$', TransportationTicketPrintView.as_view(), name='ticket-pdf'),
     url(r'^ticket/(?P<num>[\w-]+)/validate/$', TransportationTicketValidation.as_view(), name='ticket-validation'),
+    url(r'^driver/$', DriverView.as_view(), name='driver'),
 ]

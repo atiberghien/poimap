@@ -1,5 +1,5 @@
 from django.conf.urls import url
-from .api_views import StopListView, LineListView, api_route_timetable, api_itinerary, api_bus_blueprint
+from .api_views import StopListView, LineListView, api_route_timetable, api_itinerary, api_bus_blueprint, api_driver_service
 
 urlpatterns = [
     url(r'^stop/list$', StopListView.as_view(), name='api-stop-list'),
@@ -7,4 +7,5 @@ urlpatterns = [
     url(r'^service/list$', api_route_timetable, name='api-route-timetable'),
     url(r'^itinerary$', api_itinerary, name='api-itinerary'),
     url(r'^bus/blueprint$', api_bus_blueprint, name='api-bus-blueprint'),
+    url(r'^driver/services$', api_driver_service, name='api-driver-services'),
 ]
