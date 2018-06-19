@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 from django.views.generic import TemplateView, DetailView, ListView, RedirectView, View, FormView
 from django.views.generic.edit import ModelFormMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, reverse
 from django.http import HttpResponse
 from django.conf import settings
+from django.contrib.auth import authenticate, login
 
 from dal import autocomplete
 
@@ -403,7 +406,6 @@ class TransportationFleetVehicule(DetailView):
     template_name = "transportation/fleet_vehicule_detail.html"
 
 
-from django.contrib.auth import authenticate, login
 class DriverView(View):
 
     def get_context_data(self):
@@ -422,3 +424,34 @@ class DriverView(View):
             login(request, user)
         return redirect("driver")
         
+
+class DriverDailyService(TemplateView):
+    login_url = "driver"
+    redirect_field_name = 'redirect_to'
+    template_name = "transportation/driver_daily_service.html"
+
+    def get_context_data(self, **kwargs):
+        context = TemplateView.get_context_data(self, **kwargs)
+        service_name = self.request.GET.get("service_name", None)
+        travel_date = self.request.GET.get("travel_date", None)
+
+        if service_name and travel_date:
+            service = Service.objects.get(name=service_name)
+            travel_date = datetime.strptime(travel_date, "%d/%m/%y")
+            connections = Connection.objects.filter(ticket__date=travel_date, 
+                                                    ticket__order__paid_at__isnull=False,
+                                                    service=service)
+
+            context.update({
+                "service" : service,
+                "tickets" : Ticket.objects.filter(id__in=connections.values_list("ticket", flat=True)),
+                "travel_date" : travel_date,
+            })
+        
+        return context
+
+
+class  DriverDailyServicePrintView(LoginRequiredMixin, PDFRenderingMixin, DriverDailyService):
+    login_url = "driver"
+    redirect_field_name = 'redirect_to'
+    pass
