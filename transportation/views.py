@@ -339,7 +339,7 @@ class TransportationCheckoutConfirmation(DetailView):
         order.paid_at = datetime.now().replace(tzinfo=tzutc())
         order.save()
         subject = render_to_string("transportation/email/order_confirmation_email_subject.html", {"order" : order})
-        message = render_to_string("transportation/email/order_confirmation_email_message.html", {"order" : order})
+        message = render_to_string("transportation/email/order_confirmation_email_message.html", {"order" : order, "request" : request})
         from_email = settings.EMAIL_NOTIFICATION_FROM_EMAIL
         to = order.customer.email
         msg = EmailMessage(subject, message, from_email, [to])
