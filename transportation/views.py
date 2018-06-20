@@ -348,7 +348,7 @@ class TransportationCheckoutConfirmation(DetailView):
             context = {
                 "ticket" : ticket
             }
-            validation_url = request.build_absolute_uri(reverse('ticket-validation', args=(self.get_object().num,)))
+            validation_url = request.build_absolute_uri(reverse('ticket-validation', args=(ticket.num,)))
             img = qrcode.make(validation_url)
             buffer = StringIO.StringIO()
             img.save(buffer, "PNG")
