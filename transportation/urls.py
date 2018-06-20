@@ -9,7 +9,6 @@ from .views import DriverView, DriverDailyService, DriverDailyServicePrintView
 urlpatterns = [
     url(r'^stops/autocomplete/$', StopAutocomplete.as_view(), name="stop-autocomplete"),
     url(r'^ticket/recovery/$', TransportationTicketRecovery.as_view(), name='ticket-recovery'),
-    url(r'^ticket/recovery/$', TransportationTicketRecovery.as_view(), name='ticket-recovery'),
     url(r'^order/(?P<num>[\w-]+)/invoice/$', TransportationOrderInvoice.as_view(), name='ticket-order-invoice'),
     url(r'^order/(?P<num>[\w-]+)/invoice/pdf/$', TransportationOrderInvoicePrintView.as_view(), name='ticket-order-invoice-pdf'),
     url(r'^ticket/(?P<num>[\w-]+)/$', TransportationTicket.as_view(), name='ticket'),
