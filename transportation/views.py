@@ -3,14 +3,16 @@ from django.views.generic import TemplateView, DetailView, ListView, RedirectVie
 from django.views.generic.edit import ModelFormMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
+from django.core.mail import EmailMessage
 from django.views.decorators.csrf import csrf_exempt
+from django.template.loader import render_to_string
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, reverse
 from django.http import HttpResponse
 from django.conf import settings
 from django.contrib.auth import authenticate, login
-
+from dateutil.tz import tzutc
 from dal import autocomplete
 
 from poimap.models import Area
@@ -331,6 +333,37 @@ class TransportationCheckoutConfirmation(DetailView):
     template_name = "transportation/checkout_confirmation.html"
     slug_field = 'num'
     slug_url_kwarg = 'order_num'
+
+    def get(self, request, *args, **kwargs):
+        order = self.get_object()
+        order.paid_at = datetime.now().replace(tzinfo=tzutc())
+        order.save()
+        subject = render_to_string("transportation/email/order_confirmation_email_subject.html", {"order" : order})
+        message = render_to_string("transportation/email/order_confirmation_email_message.html", {"order" : order})
+        from_email = settings.EMAIL_NOTIFICATION_FROM_EMAIL
+        to = order.customer.email
+        msg = EmailMessage(subject, message, from_email, [to])
+        msg.content_subtype = "html"
+        for ticket in order.ticket_set.all():
+            context = {
+                "ticket" : ticket
+            }
+            validation_url = request.build_absolute_uri(reverse('ticket-validation', args=(self.get_object().num,)))
+            img = qrcode.make(validation_url)
+            buffer = StringIO.StringIO()
+            img.save(buffer, "PNG")
+            img_str = base64.b64encode(buffer.getvalue())
+            context["qrcode"] = img_str
+            context["today"] = datetime.today()
+            template = get_template("transportation/ticket.html")
+            ticket_html = template.render(context)
+            ticket_pdf = StringIO.StringIO()
+            pisa.pisaDocument(StringIO.StringIO(ticket_html.encode("UTF-*")), ticket_pdf)
+            msg.attach("Ticket #%s" % ticket.num, ticket_pdf.getvalue(), 'application/pdf')
+        msg.send()
+        if "travels" in request.session:
+            request.session["travels"] = []
+        return DetailView.get(self, request, *args, **kwargs)
 
 
 class TransportationTicketRecovery(TemplateView):
