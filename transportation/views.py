@@ -360,14 +360,57 @@ class TransportationCheckoutConfirmation(DetailView):
             ticket_pdf = StringIO.StringIO()
             pisa.pisaDocument(StringIO.StringIO(ticket_html.encode("UTF-*")), ticket_pdf)
             msg.attach("Ticket #%s" % ticket.num, ticket_pdf.getvalue(), 'application/pdf')
+        template = get_template("transportation/order_invoice.html")
+        order_html = template.render(context)
+        order_pdf = StringIO.StringIO()
+        pisa.pisaDocument(StringIO.StringIO(order_html.encode("UTF-*")), order_pdf)
+        msg.attach("Commande #%s" % order.num, order_pdf.getvalue(), 'application/pdf')
         msg.send()
         if "travels" in request.session:
             request.session["travels"] = []
         return DetailView.get(self, request, *args, **kwargs)
 
 
-class TransportationTicketRecovery(TemplateView):
-    template_name = "transportation/ticket_recovery.html"
+class TransportationTicketRecovery(View):
+
+    def get(self, request, *args, **kwargs):
+        return render(request, 'transportation/ticket_recovery.html', {})
+
+    def post(self, request, *args, **kwargs):
+        recovery_mail = request.POST.get("recovery_email", None)
+        if recovery_mail:
+            try:
+                customer = Customer.objects.get(email=recovery_mail)
+            except Customer.DoesNotExist:
+                return render(request, 'transportation/ticket_recovery.html', {"error" : "unknown_customer"})
+            
+            tickets = Ticket.objects.filter(order__customer__email=recovery_mail, date__gte=datetime.now(), order__paid_at__isnull=False)
+            if tickets.count() == 0:
+                return render(request, 'transportation/ticket_recovery.html', {"error" : "no_ticket"})
+            subject = render_to_string("transportation/email/tickets_recovery_email_subject.html")
+            message = render_to_string("transportation/email/tickets_recovery_email_message.html", {"tickets" : tickets, "request" : request})
+            from_email = settings.EMAIL_NOTIFICATION_FROM_EMAIL
+            to = customer.email
+            msg = EmailMessage(subject, message, from_email, [to])
+            msg.content_subtype = "html"
+            for ticket in tickets:
+                context = {
+                    "ticket" : ticket
+                }
+                validation_url = request.build_absolute_uri(reverse('ticket-validation', args=(ticket.num,)))
+                img = qrcode.make(validation_url)
+                buffer = StringIO.StringIO()
+                img.save(buffer, "PNG")
+                img_str = base64.b64encode(buffer.getvalue())
+                context["qrcode"] = img_str
+                context["today"] = datetime.today()
+                template = get_template("transportation/ticket.html")
+                ticket_html = template.render(context)
+                ticket_pdf = StringIO.StringIO()
+                pisa.pisaDocument(StringIO.StringIO(ticket_html.encode("UTF-*")), ticket_pdf)
+                msg.attach("Ticket #%s" % ticket.num, ticket_pdf.getvalue(), 'application/pdf')
+            msg.send()
+            return render(request, 'transportation/ticket_recovery.html', {"success" : True})
 
 
 class PDFRenderingMixin(object):
