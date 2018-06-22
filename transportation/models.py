@@ -124,7 +124,13 @@ class Bus(models.Model):
     name = models.CharField(max_length=64)
     slug = AutoSlugField(populate_from='name', always_update=True)
     blueprint = FilerFileField(null=True, blank=True)
+    nb_seats = models.PositiveIntegerField(default=0)
     services = models.ManyToManyField(Service)
+    picture = FilerImageField(null=True, blank=True, related_name="+")
+    cover = FilerImageField(null=True, blank=True, related_name="+")
+    gallery = FilerFolderField(null=True, blank=True, related_name="+")
+    index_eco = models.PositiveIntegerField(default=0)
+
 
 
 class Customer(models.Model):

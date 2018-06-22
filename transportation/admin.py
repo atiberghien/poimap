@@ -76,8 +76,16 @@ class BusAdminForm(forms.ModelForm):
         fields = "__all__"
 
 class BusAdmin(admin.ModelAdmin):
-    list_display = ("name",)
+    def line(self, obj):
+        line_ids = list(obj.services.all().values_list("route__line", flat=True))
+        lines = Line.objects.filter(id__in=set(line_ids))
+        lines = ", ".join([l.name for l in lines])
+        return lines
+
+    line.short_description = "Line(s)"
+    list_display = ("name", "line")
     form = BusAdminForm
+    save_as = True
 
 
 class TimeSlotInlineAdmin(admin.TabularInline):
