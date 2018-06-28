@@ -184,7 +184,6 @@ class TransportationCartDeleteItem(RedirectView):
         travel_way = request.GET.get("travel_way", None)
         if delete_all:
             request.session["travels"] = []
-            return RedirectView.get(self, request, *args, **kwargs)
         elif travel_id and travel_way:
             travels = request.session["travels"]
             if travel_way == "return":
@@ -198,9 +197,9 @@ class TransportationCartDeleteItem(RedirectView):
             else:
                 travels.pop(int(travel_id))
             request.session["travels"] = travels
+
         if(len(request.session["travels"])):
             return RedirectView.get(self, request, *args, **kwargs)
-        
         return redirect("transportation-itinerary")
 
 
