@@ -213,17 +213,25 @@ class TransportationCartSaveTravellers(View):
     def post(self, request, *args, **kwargs):
         if "travels" in request.session:
             travels = request.session["travels"]
+            
             data = request.POST
-            if data["fieldname"] == "seat_nb":
-                if "seats" in travels[int(data["travelId"])][data["way"]]["travellers"][int(data["travellerId"])]:
-                    travels[int(data["travelId"])][data["way"]]["travellers"][int(data["travellerId"])]["seats"][data["serviceSlug"]] = data["value"]
-                else:
-                    travels[int(data["travelId"])][data["way"]]["travellers"][int(data["travellerId"])]["seats"] = {
-                        data["serviceSlug"] : data["value"]
-                    }
+            fieldname = data["fieldname"]
+            travel_id = int(data["travelId"])
+            traveller_id = int(data["travellerId"])
+            way = data["way"]
+            value = data["value"]
+
+            print data
+            print travels[travel_id][way]["travellers"][traveller_id], fieldname
+
+            if fieldname == "seat_nb":
+                service_slug = data["serviceSlug"]
+                travels[travel_id][way]["travellers"][traveller_id]["seats"][service_slug] = value
             else:
-                travels[int(data["travelId"])][data["way"]]["travellers"][int(data["travellerId"])][data["fieldname"]] = data["value"]
+                travels[travel_id][way]["travellers"][traveller_id][fieldname] = value
             request.session["travels"] = travels
+            print travels[travel_id][way]["travellers"][traveller_id]
+            print "*"*20
         return HttpResponse()
 
 class TransportationCheckout(FormView):
