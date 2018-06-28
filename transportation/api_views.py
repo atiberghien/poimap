@@ -26,15 +26,7 @@ class LineListView(generics.ListAPIView):
     serializer_class = LineSerializer
 
 
-@api_view(http_method_names=['GET'])
-def api_route_timetable(request):
-    route_id = request.GET.get('route_id', None)
-    freq_re = request.GET.get('freq_re', None)
-    date = request.GET.get('date', None)
-
-    if not route_id:
-        return Response({"message": "Route ID is mandatory"})
-
+def compute_timetable(route_id, freq_re=None, date=None):
     result = {
         "columns" : [],
         "rows" : [],
@@ -77,7 +69,19 @@ def api_route_timetable(request):
             "label" : index,
             "values" : list(row.values)
         })
-    return Response(result)
+    return result
+
+@api_view(http_method_names=['GET'])
+def api_route_timetable(request):
+    route_id = request.GET.get('route_id', None)
+    freq_re = request.GET.get('freq_re', None)
+    date = request.GET.get('date', None)
+
+    if not route_id:
+        return Response({"message": "Route ID is mandatory"})
+
+    
+    return Response(compute_timetable(route_id, freq_re=freq_re, date=date))
 
 @api_view(http_method_names=['GET'])
 def api_itinerary(request):

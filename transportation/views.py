@@ -14,6 +14,7 @@ from django.conf import settings
 from django.contrib.auth import authenticate, login
 from dateutil.tz import tzutc
 from dal import autocomplete
+from .api_views import compute_timetable
 
 from poimap.models import Area
 
@@ -530,4 +531,20 @@ class DriverDailyService(TemplateView):
 class  DriverDailyServicePrintView(LoginRequiredMixin, PDFRenderingMixin, DriverDailyService):
     login_url = "driver"
     redirect_field_name = 'redirect_to'
+    pass
+
+
+class ServiceTimeTableView(TemplateView):
+    template_name = "transportation/timetable.html"
+
+    def get_context_data(self, **kwargs):
+        context = TemplateView.get_context_data(self, **kwargs)
+        route_id = self.request.GET.get('route_id', None)
+        freq_re = self.request.GET.get('freq_re', None)
+        date = self.request.GET.get('date', None)
+        context["route"] = Route.objects.get(id=route_id)
+        context["timetable"] = compute_timetable(route_id, freq_re=freq_re, date=date)
+        return context
+
+class  ServiceTimeTablePrintView(PDFRenderingMixin, ServiceTimeTableView):
     pass

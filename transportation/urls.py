@@ -5,9 +5,11 @@ from .views import TransportationTicketRecovery, TransportationTicket
 from .views import TransportationTicketPrintView, TransportationTicketValidation
 from .views import TransportationOrderInvoice, TransportationOrderInvoicePrintView 
 from .views import DriverView, DriverDailyService, DriverDailyServicePrintView
+from .views import ServiceTimeTablePrintView
 
 urlpatterns = [
     url(r'^stops/autocomplete/$', StopAutocomplete.as_view(), name="stop-autocomplete"),
+    url(r'^service/pdf$', ServiceTimeTablePrintView.as_view(), name='route-timetable'),
     url(r'^ticket/recovery/$', TransportationTicketRecovery.as_view(), name='ticket-recovery'),
     url(r'^order/(?P<num>[\w-]+)/invoice/$', TransportationOrderInvoice.as_view(), name='ticket-order-invoice'),
     url(r'^order/(?P<num>[\w-]+)/invoice/pdf/$', TransportationOrderInvoicePrintView.as_view(), name='ticket-order-invoice-pdf'),
