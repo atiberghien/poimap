@@ -172,10 +172,13 @@ def api_itinerary(request):
 
         except:
             result["success"] = "KO"
-            result["msg"] = "Errors during algorith execution"
+            result["msg"] = "ALGO_ERROR"
     else:
         result["success"] = "KO"
-        result["msg"] = "Missing input data"
+        result["msg"] = "MISSING_INPUT_DATA"
+    if len(result["timetables"])== 0 :
+        result["success"] = "KO"
+        result["msg"] = "NO_RESULT"
     return Response(result)
 
 
