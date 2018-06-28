@@ -90,7 +90,11 @@ class StopAutocomplete(autocomplete.Select2QuerySetView):
 def _init_travel_info(travel):
     travel["travellers"] = []
     for x in range(int(travel["traveler_count"])):
-        travel["travellers"].append({})
+        travel["travellers"].append({
+            "first_name" : "",
+            "last_name" : "",
+            "seats" : {}
+        })
     
     travel["services"] = []
     for timeslot in travel["timeslots"]:
