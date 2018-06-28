@@ -231,3 +231,8 @@ def api_driver_service(request):
             "dates" : dates
         })
     return Response(result)
+
+
+@api_view(http_method_names=['GET'])
+def api_session(request):
+    return Response(request.session["travels"])
