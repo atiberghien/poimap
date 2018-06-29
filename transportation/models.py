@@ -8,6 +8,7 @@ from autoslug import AutoSlugField
 from filer.fields.file import FilerFileField
 from filer.fields.image import FilerImageField
 from filer.fields.folder import FilerFolderField
+from ckeditor.fields import RichTextField
 from dateutil import rrule
 from dateutil.parser import parse
 from dateutil.rrule import rrulestr
@@ -17,6 +18,8 @@ from poimap.models import POI, Path
 class Line(models.Model):
     name = models.CharField(max_length=150)
     slug = AutoSlugField(populate_from='name', always_update=True)
+
+    connection_info = RichTextField(null=True, blank=True)
 
     def get_bus(self):
         bus_list = []
