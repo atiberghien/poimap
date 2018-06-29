@@ -40,11 +40,10 @@ def compute_timetable(route_id, freq_re=None, date=None):
     services = Service.objects.filter(route=route)
     if date:
         service_ids = []
-        for s in services.filter(recurrences__isnull=False):
-            rruleset = rrulestr(s.recurrences)
-            dt = datetime.strptime(date, "%d/%m/%y").replace(tzinfo=tzutc())
-            if dt in rruleset:
-                service_ids.append(s.id)
+        for service in services.filter(recurrences__isnull=False):
+            dt = datetime.strptime(date, "%d/%m/%Y").replace(tzinfo=tzutc())
+            if dt in service.rruleset:
+                service_ids.append(service.id)
         if service_ids:
             services = Service.objects.filter(id__in=service_ids)
     elif freq_re:
