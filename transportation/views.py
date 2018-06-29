@@ -205,7 +205,7 @@ class TransportationCartDeleteItem(RedirectView):
 
         if(len(request.session["travels"])):
             return RedirectView.get(self, request, *args, **kwargs)
-        return redirect("transportation-itinerary")
+        return redirect("/")
 
 
 @method_decorator(csrf_exempt, name='dispatch')
