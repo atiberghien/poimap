@@ -305,12 +305,17 @@ class TransportationCheckout(FormView):
                     price=travel["go"]['travel_unit_price'],
                 )
                 for service in travel["go"]["services"]:
+                    try:
+                        seat = traveller["seats"][service["service_slug"]]
+                    except:
+                        seat = None
+
                     Connection.objects.create(
                         ticket=ticket,
                         service=Service.objects.get(slug=service["service_slug"]),
                         from_stop=Stop.objects.get(name=service["stops"][0]),
                         to_stop=Stop.objects.get(name=service["stops"][1]),
-                        seat=traveller["seats"][service["service_slug"]]
+                        seat=seat
                     )
             if "return" in travel and travel["return"]:
                 for traveller in travel["return"]["travellers"]:
@@ -327,12 +332,17 @@ class TransportationCheckout(FormView):
                         price=travel["return"]['travel_unit_price'],
                     )
                     for service in travel["return"]["services"]:
+                        try:
+                            seat = traveller["seats"][service["service_slug"]]
+                        except:
+                            seat = None
+                        
                         Connection.objects.create(
                             ticket=ticket,
                             service=Service.objects.get(slug=service["service_slug"]),
                             from_stop=Stop.objects.get(name=service["stops"][0]),
                             to_stop=Stop.objects.get(name=service["stops"][1]),
-                            seat=traveller["seats"][service["service_slug"]]
+                            seat=seat
                         )
 
         return FormView.form_valid(self, form)
