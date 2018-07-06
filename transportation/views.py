@@ -221,17 +221,12 @@ class TransportationCartSaveTravellers(View):
             way = data["way"]
             value = data["value"]
 
-            print data
-            print travels[travel_id][way]["travellers"][traveller_id], fieldname
-
             if fieldname == "seat_nb":
                 service_slug = data["serviceSlug"]
                 travels[travel_id][way]["travellers"][traveller_id]["seats"][service_slug] = value
             else:
                 travels[travel_id][way]["travellers"][traveller_id][fieldname] = value
             request.session["travels"] = travels
-            print travels[travel_id][way]["travellers"][traveller_id]
-            print "*"*20
         return HttpResponse()
 
 class TransportationCheckout(FormView):

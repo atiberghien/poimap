@@ -31,7 +31,6 @@ class CustomerCreationForm(forms.ModelForm):
         return email2
 
     def save(self, commit=True):
-        print "PLOP", commit
         try:
             customer = Customer.objects.get(email=self.cleaned_data["email1"])
         except Customer.DoesNotExist:
