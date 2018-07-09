@@ -15,6 +15,7 @@ from .utils import has_all_stop, get_route_length, get_total_time, increasing_ho
 import pandas as pd
 import networkx as nx
 import itertools
+import time
 
 class StopListView(generics.ListAPIView):
     queryset = Stop.objects.all()
@@ -88,7 +89,13 @@ def api_itinerary(request):
     target = request.GET.get("target", None)
     travel_date = request.GET.get("travel_date", None)
     traveler_count = request.GET.get("traveler_count", 1)
-
+    from_time = request.GET.get("from_time", None)
+    if from_time:
+        from_time = datetime.strptime(from_time, "%H:%M").time()
+    go_date = request.GET.get("go_date", None)
+    if go_date:
+        go_date = datetime.strptime(go_date, "%d/%m/%y").date()
+    
     result = {
         "success" : "OK",
         "timetables" : []
@@ -145,6 +152,9 @@ def api_itinerary(request):
 
 
             for timetable in timetables:
+                if go_date and from_time:
+                    if travel_date.date() == go_date and from_time > timetable[0].hour:
+                        continue
                 timetable_data = {}
                 if len(timetable):
                     timetable_data["total_time"] = timedelta(seconds=get_total_time(timetable)).seconds
