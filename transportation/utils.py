@@ -68,4 +68,4 @@ def get_travel_price(timetable):
 
 
 def timetable_sort_func(timetable):
-    return (get_total_time(timetable), get_max_wait(timetable), get_route_length(timetable))
+    return (timetable[0].hour, get_total_time(timetable), get_max_wait(timetable), get_route_length(timetable))
