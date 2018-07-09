@@ -154,7 +154,7 @@ class TransportationItinerary(View):
                 "nb_passengers" : go["traveler_count"],
             }
             context.update({
-                "go" : json.dumps(go),
+                "go" : json.dumps(go).replace("'", "\\'"),
                 "direction" : 2,
             })
 
