@@ -244,16 +244,17 @@ class TransportationCheckout(FormView):
         context["travels"] = self.request.session["travels"]
         total = 0
         for travel in context["travels"]:
-            total += float(travel["go"]["travel_price"])
+            print  travel["go"]["traveler_count"]
+            total += float(travel["go"]["travel_price"]) * int(travel["go"]["traveler_count"])
             if "return" in travel and travel["return"]:
-                total += float(travel["return"]["travel_price"])
+                total += float(travel["return"]["travel_price"]) * int(travel["return"]["traveler_count"])
         context["total"] = total
 
         if self.order_num:    
             try:
                 order = Order.objects.get(num=self.order_num)
                 payplug.set_secret_key(settings.PAYPLUG_KEY)
-                order_amount = int(sum(list(order.ticket_set.values_list('price', flat=True))) * 100)
+                order_amount = total * 100
                 cancel_url = self.request.build_absolute_uri(reverse('transportation-checkout'))
                 return_url = self.request.build_absolute_uri(reverse('transportation-checkout-confirmation', args=(order.num,)))
                 payment_data = {
