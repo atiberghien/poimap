@@ -18,7 +18,7 @@ from .api_views import compute_timetable
 
 from poimap.models import Area
 
-from .models import Line, Stop, Route, Service, Customer, Ticket, Order, Bus, Order, Connection
+from .models import Line, Stop, Route, Service, Customer, Ticket, Order, Bus, Order, Connection, PartnerSearch
 from .forms import SearchServiceForm, CustomerCreationForm
 import json
 import time
@@ -566,3 +566,38 @@ class ServiceTimeTableView(TemplateView):
 
 class  ServiceTimeTablePrintView(PDFRenderingMixin, ServiceTimeTableView):
     pass
+
+
+class TransportationPartnerView(View):
+
+    def get(self, request, *args, **kwargs):
+        departure_stop_slug = kwargs.get("departure_stop_slug")
+        arrival_stop_slug = kwargs.get("arrival_stop_slug")
+        
+        departure_stop = None
+        arrival_stop = None
+        travel_date = None
+        source = ""
+        try:
+            departure_stop = Stop.objects.get(slug=departure_stop_slug)
+            arrival_stop = Stop.objects.get(slug=arrival_stop_slug)
+            travel_date = request.GET.get("dateAller")  # 2018-07-04_00_00_00
+            travel_date = datetime.strptime(travel_date, "%Y-%m-%d_%H_%M_%S")
+            source = request.GET.get("utm_source")
+            PartnerSearch.objects.create(
+                departure_stop=departure_stop,
+                arrival_stop=arrival_stop,
+                travel_date=travel_date,
+                partner=source
+            )
+        except:
+            return redirect("/")
+
+        form = SearchServiceForm(initial={
+            "departure" : departure_stop,
+            "arrival" : arrival_stop,
+            "departure_date" : travel_date,
+            "source" : source
+        })
+
+        return render(request, 'transportation/partner.html', {"search_form" : form})

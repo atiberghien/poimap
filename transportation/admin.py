@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django import forms
-from models import TimeSlot, Stop, Service, Line, RouteStop, Route, Travel, Bus, Customer, Order, Ticket, Connection
+from models import TimeSlot, Stop, Service, Line, RouteStop, Route, Travel, Bus, Customer, Order, Ticket, Connection, PartnerSearch
 from leaflet.admin import LeafletGeoAdmin
 from poimap.admin import POIAdminForm, POIMediaInline
 from grappelli.forms import GrappelliSortableHiddenMixin
@@ -117,3 +117,4 @@ admin.site.register(Route, RouteAdmin)
 admin.site.register(Stop, StopAdmin)
 admin.site.register(Service, ServiceAdmin)
 admin.site.register(Travel, TravelAdmin)
+admin.site.register(PartnerSearch)

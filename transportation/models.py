@@ -181,6 +181,13 @@ class Connection(models.Model):
     seat = models.IntegerField(null=True, blank=True)
 
 
+class PartnerSearch(models.Model):
+    departure_stop = models.ForeignKey(Stop, related_name="+")
+    arrival_stop = models.ForeignKey(Stop, related_name="+")
+    travel_date = models.DateTimeField()
+    partner = models.CharField(max_length=200)
+    search_date = models.DateTimeField(auto_now_add=True)
+
 
 @receiver(post_save, sender=Service)
 def autocreate_timeslot_for_service(sender, instance, created, **kwargs):

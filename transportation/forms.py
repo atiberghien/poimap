@@ -67,3 +67,4 @@ class SearchServiceForm(forms.Form):
     nb_passengers = forms.IntegerField(min_value=1, initial=1)
     departure_date = forms.DateField()
     arrival_date = forms.DateField(required=False)
+    source = forms.CharField(widget=forms.HiddenInput(), initial="internal", required=False)
