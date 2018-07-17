@@ -205,6 +205,7 @@ class TransportationCartDeleteItem(RedirectView):
 
         if(len(request.session["travels"])):
             return RedirectView.get(self, request, *args, **kwargs)
+        request.session.flush()
         return redirect("/")
 
 
@@ -391,6 +392,7 @@ class TransportationCheckoutConfirmation(DetailView):
         msg.send()
         if "travels" in request.session:
             request.session["travels"] = []
+        request.session.flush()
         return DetailView.get(self, request, *args, **kwargs)
 
 
