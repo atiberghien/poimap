@@ -254,7 +254,7 @@ class TransportationCheckout(FormView):
             try:
                 order = Order.objects.get(num=self.order_num)
                 payplug.set_secret_key(settings.PAYPLUG_KEY)
-                order_amount = total * 100
+                order_amount = int(total * 100)
                 cancel_url = self.request.build_absolute_uri(reverse('transportation-checkout'))
                 return_url = self.request.build_absolute_uri(reverse('transportation-checkout-confirmation', args=(order.num,)))
                 payment_data = {
