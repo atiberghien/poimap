@@ -284,7 +284,11 @@ class TransportationCheckout(FormView):
 
     def form_valid(self, form):
         customer = form.save()
-        self.order = Order.objects.create(num=id_gen(), customer=customer)
+        if "utm_source" in self.request.session:
+            source = self.request.session["utm_source"]
+        else:
+            source = "internal"
+        self.order = Order.objects.create(num=id_gen(), customer=customer, source=source)
         travels = self.request.session["travels"]
         for travel in travels:
             for traveller in travel["go"]["travellers"]:
@@ -590,6 +594,7 @@ class TransportationPartnerView(View):
                 travel_date=travel_date,
                 partner=source
             )
+            request.session["utm_source"] = source
         except:
             return redirect("/")
 

@@ -152,7 +152,8 @@ class Order(models.Model):
     customer = models.ForeignKey(Customer)
     created_at = models.DateTimeField(auto_now_add=True)
     paid_at = models.DateTimeField(null=True, blank=True)
-
+    source = models.CharField(max_length=50, null=True, blank=True)
+    
     def total_amount(self):
         return sum(list(self.ticket_set.values_list("price", flat=True)))
     total_amount.description = "Total Amount"
