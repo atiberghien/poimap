@@ -37,5 +37,6 @@ setup(name='poimap',
            'pandas==0.22.0',
            'xhtml2pdf',
            'reportlab',
+           'networkx',
       ],
       zip_safe=False)
