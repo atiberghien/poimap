@@ -65,7 +65,7 @@ class RouteStop(models.Model):
 class Stop(POI):
 
     def __unicode__(self):
-        return self.name
+        return u"%s" % self.name
 
 
 class Service(models.Model):
@@ -109,7 +109,9 @@ class TimeSlot(models.Model):
     order = models.PositiveIntegerField(default=0)
 
     def __unicode__(self):
-        return "%s - %s - %s " % (self.service, self.stop, self.hour)
+        # return "%s - %s - %s " % (self.service, self.stop, self.hour)
+        return "%s" % self.stop
+
 
     class Meta:
         ordering = ('order',)
