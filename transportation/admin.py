@@ -4,7 +4,6 @@ from django import forms
 from models import TimeSlot, Stop, Service, Line, RouteStop, Route, Travel, Bus, Customer, Order, Ticket, Connection, PartnerSearch
 from leaflet.admin import LeafletGeoAdmin
 from poimap.admin import POIAdminForm, POIMediaInline
-from grappelli.forms import GrappelliSortableHiddenMixin
 from .forms import StopForm
 
 class TimeSlotInlineAdmin(admin.TabularInline):
@@ -53,7 +52,7 @@ class StopAdmin(LeafletGeoAdmin):
     )
 
 
-class RouteStopInline(GrappelliSortableHiddenMixin, admin.TabularInline):
+class RouteStopInline(admin.TabularInline):
     model = RouteStop
     extra = 0
     sortable_field_name = "order"
