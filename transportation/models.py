@@ -127,7 +127,7 @@ class Travel(models.Model):
 
 class Bus(models.Model):
     name = models.CharField(max_length=64)
-    slug = AutoSlugField(populate_from='name', always_update=True, unique_with=('id',))
+    slug = AutoSlugField(populate_from='name', always_update=True, unique=True, unique_with=('id',))
     blueprint = FilerFileField(null=True, blank=True)
     nb_seats = models.PositiveIntegerField(default=0)
     services = models.ManyToManyField(Service)
