@@ -385,7 +385,7 @@ class TransportationCheckoutConfirmation(DetailView):
             pisa.pisaDocument(StringIO.StringIO(ticket_html.encode("UTF-*")), ticket_pdf)
             msg.attach("Ticket #%s" % ticket.num, ticket_pdf.getvalue(), 'application/pdf')
         template = get_template("transportation/order_invoice.html")
-        order_html = template.render(context)
+        order_html = template.render({"order" : order})
         order_pdf = StringIO.StringIO()
         pisa.pisaDocument(StringIO.StringIO(order_html.encode("UTF-*")), order_pdf)
         msg.attach("Commande #%s" % order.num, order_pdf.getvalue(), 'application/pdf')
