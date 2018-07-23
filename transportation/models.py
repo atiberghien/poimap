@@ -97,7 +97,7 @@ class Service(models.Model):
         return res
 
     def __unicode__(self):
-        return "%s - %s - %s" % (self.route.line.name, self.route.name, self.name)
+        return "%s - %s - %s" % (self.name, self.route.line.name, self.route.name)
 
     class Meta:
         ordering = ('name',)
