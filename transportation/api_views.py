@@ -1,6 +1,9 @@
-from rest_framework import generics
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework import generics
 
 from datetime import datetime, date, timedelta
 from dateutil.rrule import rrulestr
@@ -25,6 +28,10 @@ class StopListView(generics.ListAPIView):
 class LineListView(generics.ListAPIView):
     queryset = Line.objects.all()
     serializer_class = LineSerializer
+
+    @method_decorator(cache_page(60*60))
+    def dispatch(self, *args, **kwargs):
+        return super(LineListView, self).dispatch(*args, **kwargs)
 
 
 def compute_timetable(route_id, freq_re=None, date=None):
