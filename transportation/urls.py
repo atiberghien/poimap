@@ -9,7 +9,7 @@ from .views import ServiceTimeTablePrintView, ServiceTimeTableView
 
 urlpatterns = [
     url(r'^stops/autocomplete/$', StopAutocomplete.as_view(), name="stop-autocomplete"),
-    url(r'^service/pdf/$', ServiceTimeTablePrintView.as_view(), name='route-timetable'),
+    url(r'^service/pdf/$', ServiceTimeTablePrintView.as_view(), name='route-timetable-pdf'),
     url(r'^service/$', ServiceTimeTableView.as_view(), name='route-timetable'),
     url(r'^ticket/recovery/$', TransportationTicketRecovery.as_view(), name='ticket-recovery'),
     url(r'^order/(?P<num>[\w-]+)/invoice/$', TransportationOrderInvoice.as_view(), name='ticket-order-invoice'),
