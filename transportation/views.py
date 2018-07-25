@@ -363,8 +363,12 @@ class TransportationCheckoutConfirmation(DetailView):
         subject = render_to_string("transportation/email/order_confirmation_email_subject.html", {"order" : order})
         message = render_to_string("transportation/email/order_confirmation_email_message.html", {"order" : order, "request" : request})
         from_email = settings.EMAIL_NOTIFICATION_FROM_EMAIL
+        try:
+            cc_email = settings.EMAIL_NOTIFICATION_CC_EMAIL
+        except:
+            cc_email = []
         to = order.customer.email
-        msg = EmailMessage(subject, message, from_email, [to])
+        msg = EmailMessage(subject, message, from_email, [to], bcc=cc_email)
         msg.content_subtype = "html"
         for ticket in order.ticket_set.all():
             context = {
