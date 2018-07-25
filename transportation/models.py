@@ -148,6 +148,9 @@ class Customer(models.Model):
     privacy = models.BooleanField()
     optin = models.BooleanField()
 
+    def __unicode__(self):
+        return "%s %s (%s)" % (self.first_name, self.last_name, self.email)
+
 
 class Order(models.Model):
     num = models.CharField(max_length=500, unique=True)

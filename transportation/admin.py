@@ -98,7 +98,7 @@ class OrderAdmin(admin.ModelAdmin):
     def ticket_number(self, obj):
         return obj.ticket_set.count()
 
-    list_display = ("num", "ticket_number", "total_amount")
+    list_display = ("num", "ticket_number", 'customer', "total_amount", "paid_at")
     inlines = [TimeSlotInlineAdmin]
 
 class ConnectionInlineAdmin(admin.TabularInline):
