@@ -216,3 +216,18 @@ def update_service_timeslot(sender, instance, created, update_fields, **kwargs):
 def delete_service_timeslot(sender, instance, **kwargs):
     for service in instance.route.services.all():
         TimeSlot.objects.filter(stop=instance.stop, service=service).delete()
+
+
+@receiver(post_save, sender=Line)
+@receiver(post_save, sender=Route)
+@receiver(post_save, sender=Stop)
+@receiver(post_save, sender=Path)
+@receiver(post_save, sender=Service)
+@receiver(post_save, sender=TimeSlot)
+def flush_cache(sender, instance, created, **kwargs):
+    try:
+        from django_redis import get_redis_connection
+        get_redis_connection("default").flushall()
+    except:
+        pass
+
