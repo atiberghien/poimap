@@ -385,13 +385,13 @@ class TransportationCheckoutConfirmation(DetailView):
             ticket_html = template.render(context)
             ticket_pdf = StringIO.StringIO()
             pisa.pisaDocument(StringIO.StringIO(ticket_html.encode("UTF-*")), ticket_pdf)
-            msg.attach("Ticket #%s" % ticket.num, ticket_pdf.getvalue(), 'application/pdf')
+            msg.attach("Ticket #%s.pdf" % ticket.num, ticket_pdf.getvalue(), 'application/pdf')
         template = get_template("transportation/order_invoice.html")
         order_html = template.render({"order" : order})
         order_pdf = StringIO.StringIO()
         pisa.pisaDocument(StringIO.StringIO(order_html.encode("UTF-*")), order_pdf)
-        msg.attach("Commande #%s" % order.num, order_pdf.getvalue(), 'application/pdf')
-        msg.send()
+        msg.attach("Commande #%s.pdf" % order.num, order_pdf.getvalue(), 'application/pdf')
+        # msg.send()
         if "travels" in request.session:
             request.session["travels"] = []
         request.session.flush()
@@ -435,7 +435,7 @@ class TransportationTicketRecovery(View):
                 ticket_html = template.render(context)
                 ticket_pdf = StringIO.StringIO()
                 pisa.pisaDocument(StringIO.StringIO(ticket_html.encode("UTF-*")), ticket_pdf)
-                msg.attach("Ticket #%s" % ticket.num, ticket_pdf.getvalue(), 'application/pdf')
+                msg.attach("Ticket #%s.pdf" % ticket.num, ticket_pdf.getvalue(), 'application/pdf')
             msg.send()
             return render(request, 'transportation/ticket_recovery.html', {"success" : True})
 
