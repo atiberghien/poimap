@@ -391,7 +391,7 @@ class TransportationCheckoutConfirmation(DetailView):
         order_pdf = StringIO.StringIO()
         pisa.pisaDocument(StringIO.StringIO(order_html.encode("UTF-*")), order_pdf)
         msg.attach("Commande #%s.pdf" % order.num, order_pdf.getvalue(), 'application/pdf')
-        # msg.send()
+        msg.send()
         if "travels" in request.session:
             request.session["travels"] = []
         request.session.flush()
