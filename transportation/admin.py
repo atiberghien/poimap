@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django import forms
+from django.urls import reverse
+from django.utils.safestring import mark_safe
 from models import TimeSlot, Stop, Service, Line, RouteStop, Route, Travel, Bus, Customer, Order, Ticket, Connection, PartnerSearch
 from leaflet.admin import LeafletGeoAdmin
 from poimap.admin import POIAdminForm, POIMediaInline
@@ -88,8 +90,8 @@ class BusAdmin(admin.ModelAdmin):
     form = BusAdminForm
     save_as = True
 
+class TicketInlineAdmin(admin.TabularInline):
 
-class TimeSlotInlineAdmin(admin.TabularInline):
     model = Ticket
     extra = 0
     can_delete = True
@@ -97,9 +99,12 @@ class TimeSlotInlineAdmin(admin.TabularInline):
 class OrderAdmin(admin.ModelAdmin):
     def ticket_number(self, obj):
         return obj.ticket_set.count()
+    
+    def confirmation_link(self, obj):
+        return mark_safe("<a href='%s'>%s</a>" % (reverse('transportation-checkout-confirmation', args=[obj.num]), "Lien de confirmation"))
 
-    list_display = ("num", "ticket_number", 'customer', "total_amount", "paid_at")
-    inlines = [TimeSlotInlineAdmin]
+    list_display = ("num", 'customer', "ticket_number", "total_amount", "created_at", "paid_at", "confirmation_link")
+    inlines = [TicketInlineAdmin]
 
 class ConnectionInlineAdmin(admin.TabularInline):
     model = Connection
