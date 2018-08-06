@@ -101,7 +101,9 @@ class OrderAdmin(admin.ModelAdmin):
         return obj.ticket_set.count()
     
     def confirmation_link(self, obj):
-        return mark_safe("<a href='%s'>%s</a>" % (reverse('transportation-checkout-confirmation', args=[obj.num]), "Lien de confirmation"))
+        if obj.paid_at:
+            return mark_safe("<a href='%s'>%s</a>" % (reverse('transportation-checkout-confirmation', args=[obj.num]), "Lien de confirmation"))
+        return "-"
 
     list_display = ("num", 'customer', "ticket_number", "total_amount", "created_at", "paid_at", "confirmation_link")
     inlines = [TicketInlineAdmin]
