@@ -54,9 +54,10 @@ def compute_timetable(route_id, freq_re=None, date=None):
                 service_ids.append(service.id)
         if service_ids:
             services = Service.objects.filter(id__in=service_ids)
+        else:
+            services = []
     elif freq_re:
         services = services.filter(frequency_label__regex=freq_re)
-
     note_nb = 1
     for service in services:
         col_data = {
