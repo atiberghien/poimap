@@ -630,8 +630,12 @@ def travels_csv(request):
 
     writer = csv.writer(response)
     writer.writerow(["Departure stop name", "Departure stop slug", "Arrival stop name", "Arrival stop slug"])
-    for travel in Travel.objects.all():
-        writer.writerow([travel.stop1.name.encode("utf-8"), travel.stop1.slug, travel.stop2.name.encode("utf-8"), travel.stop2.slug])
+    # for travel in Travel.objects.all():
+    #     writer.writerow([travel.stop1.name.encode("utf-8"), travel.stop1.slug, travel.stop2.name.encode("utf-8"), travel.stop2.slug])
+    for stop1 in Stop.objects.all():
+        for stop2 in Stop.objects.all():
+            if stop1 != stop2:
+                writer.writerow([stop1.name.encode("utf-8"), stop1.slug, stop2.name.encode("utf-8"), stop2.slug])
 
     return response
 

@@ -6,7 +6,8 @@ from .views import TransportationTicketPrintView, TransportationTicketValidation
 from .views import TransportationOrderInvoice, TransportationOrderInvoicePrintView 
 from .views import DriverView, DriverDailyService, DriverDailyServicePrintView
 from .views import ServiceTimeTablePrintView, ServiceTimeTableView
-from .views import TestRecurrenceView, travels_csv, stops_csv
+from .views import travels_csv, stops_csv
+
 
 urlpatterns = [
     url(r'^stops/autocomplete/$', StopAutocomplete.as_view(), name="stop-autocomplete"),
