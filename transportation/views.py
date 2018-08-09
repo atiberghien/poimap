@@ -18,10 +18,12 @@ from .api_views import compute_timetable
 
 from poimap.models import Area
 
-from .models import Line, Stop, Route, Service, Customer, Ticket, Order, Bus, Order, Connection, PartnerSearch
+from .models import Line, Stop, Route, Service, Customer, Ticket, Order, Bus, Order, Connection, PartnerSearch, Travel
 from .forms import SearchServiceForm, CustomerCreationForm
 import json
 import time
+import csv
+
 from datetime import datetime
 
 import payplug
@@ -610,3 +612,29 @@ class TransportationPartnerView(View):
         })
 
         return render(request, 'transportation/partner.html', {"search_form" : form})
+
+def stops_csv(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="stops.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(["Stop name", "Stop slug", "Latitude", "Longitude"])
+    for stop in Stop.objects.all():
+        writer.writerow([stop.name.encode("utf-8"),stop.slug, stop.coords["lat"], stop.coords["lng"]])
+
+    return response
+
+def travels_csv(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="travels.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(["Departure stop name", "Departure stop slug", "Arrival stop name", "Arrival stop slug"])
+    for travel in Travel.objects.all():
+        writer.writerow([travel.stop1.name.encode("utf-8"), travel.stop1.slug, travel.stop2.name.encode("utf-8"), travel.stop2.slug])
+
+    return response
+
+
+
+

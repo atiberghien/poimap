@@ -6,6 +6,7 @@ from .views import TransportationTicketPrintView, TransportationTicketValidation
 from .views import TransportationOrderInvoice, TransportationOrderInvoicePrintView 
 from .views import DriverView, DriverDailyService, DriverDailyServicePrintView
 from .views import ServiceTimeTablePrintView, ServiceTimeTableView
+from .views import TestRecurrenceView, travels_csv, stops_csv
 
 urlpatterns = [
     url(r'^stops/autocomplete/$', StopAutocomplete.as_view(), name="stop-autocomplete"),
@@ -19,4 +20,7 @@ urlpatterns = [
     url(r'^ticket/(?P<num>[\w-]+)/validate/$', TransportationTicketValidation.as_view(), name='ticket-validation'),
     url(r'^driver/$', DriverView.as_view(), name='driver'),
     url(r'^driver/service/pdf/$', DriverDailyServicePrintView.as_view(), name='driver-daily-service-pdf'),
+
+    url(r'^travels\.csv$', travels_csv, name='travels-csv'),
+    url(r'^stops\.csv$', stops_csv, name='stops-csv'),
 ]
