@@ -67,6 +67,9 @@ class Stop(POI):
     def __unicode__(self):
         return u"%s" % self.name
 
+    class Meta:
+        ordering = ('name',)
+
 
 class Service(models.Model):
     name = models.CharField(max_length=64)
@@ -124,6 +127,8 @@ class Travel(models.Model):
     price = models.FloatField(null=True, blank=True)
     routes = models.ManyToManyField(Route)
 
+    class Meta:
+        ordering = ('stop1__name', 'stop2__name')
 
 class Bus(models.Model):
     name = models.CharField(max_length=64)
