@@ -140,6 +140,7 @@ class Bus(models.Model):
     cover = FilerImageField(null=True, blank=True, related_name="+")
     gallery = FilerFolderField(null=True, blank=True, related_name="+")
     index_eco = models.PositiveIntegerField(default=0)
+    description = RichTextField(blank=True, null=True)
     equipments = RichTextField(blank=True, null=True, config_name='only_bullet_point')
 
 
