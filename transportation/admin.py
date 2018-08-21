@@ -86,7 +86,7 @@ class BusAdmin(admin.ModelAdmin):
         return lines
 
     line.short_description = "Line(s)"
-    list_display = ("name", "line")
+    list_display = ("name", "slug", "line")
     form = BusAdminForm
     save_as = True
 

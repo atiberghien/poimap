@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 from django.db import models
 from django.db.models.signals import post_save, post_delete
+from django.shortcuts import reverse
 from django.contrib.postgres.fields import JSONField
 from django.dispatch import receiver
 from autoslug import AutoSlugField
@@ -132,7 +133,7 @@ class Travel(models.Model):
 
 class Bus(models.Model):
     name = models.CharField(max_length=64)
-    slug = AutoSlugField(populate_from='name', always_update=True, unique=True, unique_with=('id',))
+    slug = AutoSlugField(populate_from='name', always_update=True, unique=True)
     blueprint = FilerFileField(null=True, blank=True)
     nb_seats = models.PositiveIntegerField(default=0)
     services = models.ManyToManyField(Service)
@@ -143,6 +144,8 @@ class Bus(models.Model):
     description = RichTextField(blank=True, null=True)
     equipments = RichTextField(blank=True, null=True, config_name='only_bullet_point')
 
+    def get_absolute_url(self):
+        return reverse("transportation-fleet-vehicule", args=[self.slug])
 
 
 class Customer(models.Model):
