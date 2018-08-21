@@ -203,6 +203,9 @@ class PartnerSearch(models.Model):
     partner = models.CharField(max_length=200)
     search_date = models.DateTimeField(auto_now_add=True)
 
+    def get_absolute_url(self):
+        return reverse("deeplink-partner", args=[self.departure_stop.slug, self.arrival_stop.slug])
+
 
 @receiver(post_save, sender=Service)
 def autocreate_timeslot_for_service(sender, instance, created, **kwargs):

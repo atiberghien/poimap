@@ -24,7 +24,7 @@ import json
 import time
 import csv
 
-from datetime import datetime
+from datetime import datetime, date, timedelta
 
 import payplug
 import qrcode
@@ -588,12 +588,17 @@ class TransportationPartnerView(View):
         arrival_stop = None
         travel_date = None
         source = ""
+
+        today = date.today()
+        tomorrow = today + timedelta(days=1)
+        tomorrow = tomorrow.strftime("%Y-%m-%d_00_00_00")
+
         try:
             departure_stop = Stop.objects.get(slug=departure_stop_slug)
             arrival_stop = Stop.objects.get(slug=arrival_stop_slug)
-            travel_date = request.GET.get("dateAller")  # 2018-07-04_00_00_00
+            travel_date = request.GET.get("dateAller", tomorrow)  # 2018-07-04_00_00_00
             travel_date = datetime.strptime(travel_date, "%Y-%m-%d_%H_%M_%S")
-            source = request.GET.get("utm_source")
+            source = request.GET.get("utm_source", "external")
             PartnerSearch.objects.create(
                 departure_stop=departure_stop,
                 arrival_stop=arrival_stop,
