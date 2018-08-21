@@ -15,7 +15,7 @@ from django.contrib.auth import authenticate, login
 from dateutil.tz import tzutc
 from dal import autocomplete
 from .api_views import compute_timetable
-
+from django.contrib.sites.shortcuts import get_current_site
 from poimap.models import Area
 
 from .models import Line, Stop, Route, Service, Customer, Ticket, Order, Bus, Order, Connection, PartnerSearch, Travel
@@ -629,13 +629,15 @@ def travels_csv(request):
     response['Content-Disposition'] = 'attachment; filename="travels.csv"'
 
     writer = csv.writer(response)
-    writer.writerow(["Departure stop name", "Departure stop slug", "Arrival stop name", "Arrival stop slug"])
+    writer.writerow(["Departure stop name", "Departure stop slug", "Arrival stop name", "Arrival stop slug", "Deeplink"])
     # for travel in Travel.objects.all():
     #     writer.writerow([travel.stop1.name.encode("utf-8"), travel.stop1.slug, travel.stop2.name.encode("utf-8"), travel.stop2.slug])
     for stop1 in Stop.objects.all():
         for stop2 in Stop.objects.all():
             if stop1 != stop2:
-                writer.writerow([stop1.name.encode("utf-8"), stop1.slug, stop2.name.encode("utf-8"), stop2.slug])
+                site = get_current_site(request)
+                deeplink = "https://"+site.domain+reverse("deeplink-partner", args=[stop1.slug, stop2.slug])
+                writer.writerow([stop1.name.encode("utf-8"), stop1.slug, stop2.name.encode("utf-8"), stop2.slug, deeplink])
 
     return response
 
