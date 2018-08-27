@@ -74,7 +74,7 @@ class Stop(POI):
 
 class Service(models.Model):
     name = models.CharField(max_length=64)
-    slug = AutoSlugField(populate_from='name', always_update=True)
+    slug = AutoSlugField(populate_from='name', always_update=True, unique=True)
     route = models.ForeignKey(Route, related_name="services")
     frequency_label = models.CharField(max_length=10)
     recurrences = models.TextField(null=True, blank=True)
