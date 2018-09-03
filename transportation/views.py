@@ -370,7 +370,7 @@ class TransportationCheckoutConfirmation(DetailView):
         except:
             cc_email = []
         to = order.customer.email
-        msg = EmailMessage(subject, message, from_email, [to], bcc=cc_email)
+        msg = EmailMessage(subject, message, from_email, [to], bcc=cc_email, html_message=message)
         msg.content_subtype = "html"
         for ticket in order.ticket_set.all():
             context = {
@@ -420,7 +420,7 @@ class TransportationTicketRecovery(View):
             message = render_to_string("transportation/email/tickets_recovery_email_message.html", {"tickets" : tickets, "request" : request})
             from_email = settings.EMAIL_NOTIFICATION_FROM_EMAIL
             to = customer.email
-            msg = EmailMessage(subject, message, from_email, [to])
+            msg = EmailMessage(subject, message, from_email, [to], html_message=message)
             msg.content_subtype = "html"
             for ticket in tickets:
                 context = {
