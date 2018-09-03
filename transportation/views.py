@@ -3,7 +3,7 @@ from django.views.generic import TemplateView, DetailView, ListView, RedirectVie
 from django.views.generic.edit import ModelFormMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
-from django.core.mail import EmailMessage
+from django.core.mail import EmailMultiAlternatives
 from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string
 from django.utils.decorators import method_decorator
@@ -370,8 +370,8 @@ class TransportationCheckoutConfirmation(DetailView):
         except:
             cc_email = []
         to = order.customer.email
-        msg = EmailMessage(subject, message, from_email, [to], bcc=cc_email, html_message=message)
-        msg.content_subtype = "html"
+        msg = EmailMultiAlternatives(subject, message, from_email, [to], bcc=cc_email)
+        msg.attach_alternative(message, "text/html")
         for ticket in order.ticket_set.all():
             context = {
                 "ticket" : ticket
@@ -420,8 +420,8 @@ class TransportationTicketRecovery(View):
             message = render_to_string("transportation/email/tickets_recovery_email_message.html", {"tickets" : tickets, "request" : request})
             from_email = settings.EMAIL_NOTIFICATION_FROM_EMAIL
             to = customer.email
-            msg = EmailMessage(subject, message, from_email, [to], html_message=message)
-            msg.content_subtype = "html"
+            msg = EmailMultiAlternatives(subject, message, from_email, [to])
+            msg.attach_alternative(message, "text/html")
             for ticket in tickets:
                 context = {
                     "ticket" : ticket
