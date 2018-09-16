@@ -360,40 +360,43 @@ class TransportationCheckoutConfirmation(DetailView):
 
     def get(self, request, *args, **kwargs):
         order = self.get_object()
-        order.paid_at = datetime.now().replace(tzinfo=tzutc())
-        order.save()
-        subject = render_to_string("transportation/email/order_confirmation_email_subject.html", {"order" : order})
-        message = render_to_string("transportation/email/order_confirmation_email_message.html", {"order" : order, "request" : request})
-        from_email = settings.EMAIL_NOTIFICATION_FROM_EMAIL
-        try:
-            cc_email = settings.EMAIL_NOTIFICATION_CC_EMAIL
-        except:
-            cc_email = []
-        to = order.customer.email
-        msg = EmailMultiAlternatives(subject, message, from_email, [to], bcc=cc_email)
-        msg.attach_alternative(message, "text/html")
-        for ticket in order.ticket_set.all():
-            context = {
-                "ticket" : ticket
-            }
-            validation_url = request.build_absolute_uri(reverse('ticket-validation', args=(ticket.num,)))
-            img = qrcode.make(validation_url)
-            buffer = StringIO.StringIO()
-            img.save(buffer, "PNG")
-            img_str = base64.b64encode(buffer.getvalue())
-            context["qrcode"] = img_str
-            context["today"] = datetime.today()
-            template = get_template("transportation/ticket.html")
-            ticket_html = template.render(context)
-            ticket_pdf = StringIO.StringIO()
-            pisa.pisaDocument(StringIO.StringIO(ticket_html.encode("UTF-*")), ticket_pdf)
-            msg.attach("Ticket #%s.pdf" % ticket.num, ticket_pdf.getvalue(), 'application/pdf')
-        template = get_template("transportation/order_invoice.html")
-        order_html = template.render({"order" : order})
-        order_pdf = StringIO.StringIO()
-        pisa.pisaDocument(StringIO.StringIO(order_html.encode("UTF-*")), order_pdf)
-        msg.attach("Commande #%s.pdf" % order.num, order_pdf.getvalue(), 'application/pdf')
-        msg.send()
+        if not order.paid_at:
+            order.paid_at = datetime.now().replace(tzinfo=tzutc())
+            order.save()
+            subject = render_to_string("transportation/email/order_confirmation_email_subject.html", {"order" : order})
+            message = render_to_string("transportation/email/order_confirmation_email_message.html", {"order" : order, "request" : request})
+            from_email = settings.EMAIL_NOTIFICATION_FROM_EMAIL
+            recipients = [order.customer.email]
+            try:
+                recipients.extend(settings.EMAIL_NOTIFICATION_CC_EMAIL)
+            except:
+                #In case of these is no CC email
+                pass
+            for to in recipients:
+                msg = EmailMultiAlternatives(subject, message, from_email, [to])
+                msg.attach_alternative(message, "text/html")
+                for ticket in order.ticket_set.all():
+                    context = {
+                        "ticket" : ticket
+                    }
+                    validation_url = request.build_absolute_uri(reverse('ticket-validation', args=(ticket.num,)))
+                    img = qrcode.make(validation_url)
+                    buffer = StringIO.StringIO()
+                    img.save(buffer, "PNG")
+                    img_str = base64.b64encode(buffer.getvalue())
+                    context["qrcode"] = img_str
+                    context["today"] = datetime.today()
+                    template = get_template("transportation/ticket.html")
+                    ticket_html = template.render(context)
+                    ticket_pdf = StringIO.StringIO()
+                    pisa.pisaDocument(StringIO.StringIO(ticket_html.encode("UTF-*")), ticket_pdf)
+                    msg.attach("Ticket #%s.pdf" % ticket.num, ticket_pdf.getvalue(), 'application/pdf')
+                template = get_template("transportation/order_invoice.html")
+                order_html = template.render({"order" : order})
+                order_pdf = StringIO.StringIO()
+                pisa.pisaDocument(StringIO.StringIO(order_html.encode("UTF-*")), order_pdf)
+                msg.attach("Commande #%s.pdf" % order.num, order_pdf.getvalue(), 'application/pdf')
+                msg.send()
         if "travels" in request.session:
             request.session["travels"] = []
         request.session.flush()
