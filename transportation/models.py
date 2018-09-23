@@ -80,6 +80,9 @@ class Service(models.Model):
     recurrences = models.TextField(null=True, blank=True)
     notes = models.TextField(null=True, blank=True)
 
+    is_active = models.BooleanField(default=True)
+    is_temporary = models.BooleanField(default=False)
+
     @property
     def rruleset(self):
         res = rrule.rruleset()
