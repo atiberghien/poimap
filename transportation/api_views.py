@@ -45,7 +45,7 @@ def compute_timetable(route_id, freq_re=None, date=None):
 
     route = Route.objects.get(id=route_id)
     stop_names = list(route.get_stops().values_list('name', flat=True))
-    services = Service.objects.filter(route=route)
+    services = Service.objects.filter(is_active=True, route=route)
     if date:
         service_ids = []
         for service in services.filter(recurrences__isnull=False):
@@ -58,6 +58,8 @@ def compute_timetable(route_id, freq_re=None, date=None):
             services = []
     elif freq_re:
         services = services.filter(frequency_label__regex=freq_re)
+    else:
+        services = services.filter(is_temporary=False)
     note_nb = 1
     for service in services:
         col_data = {
