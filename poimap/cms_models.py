@@ -12,9 +12,9 @@ POI_LISTING_TEMPLATES = (
 
 
 class POIListing(CMSPlugin):
-    area_display = models.ForeignKey(Area, null=True, blank=True, verbose_name="Zone à afficher")
-    path_display = models.ForeignKey(Path, null=True, blank=True, verbose_name="Chemin à afficher")
-    type_display = models.ManyToManyField(POIType, verbose_name="Type de POI à afficher")
+    area_display = models.ForeignKey(Area, null=True, blank=True, verbose_name=u"Zone à afficher")
+    path_display = models.ForeignKey(Path, null=True, blank=True, verbose_name=u"Chemin à afficher")
+    type_display = models.ManyToManyField(POIType, verbose_name=u"Type de POI à afficher")
     template = models.CharField('Template', max_length=255, choices=POI_LISTING_TEMPLATES, default="poimap/partial/poi_map_listing.html")
     hide_control = models.BooleanField(default=True)
 
