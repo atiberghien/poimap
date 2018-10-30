@@ -104,6 +104,7 @@ function createPOIMarker(poi) {
             layer.setIcon(L.AwesomeMarkers.icon({
                 icon: feature.properties.type.icon,
                 prefix : 'fa',
+                extraClasses: 'fas',
             }));
             layer.bindPopup(feature.properties.marker_popup, {'className':'custom-poimap-popup' });
             layer.on("click", function(){
