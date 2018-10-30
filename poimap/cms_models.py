@@ -22,6 +22,14 @@ class POIListing(CMSPlugin):
         self.type_display = oldinstance.type_display.all()
 
 
+
+class POIFilters(CMSPlugin):
+    type_filters = models.ManyToManyField(POIType, verbose_name=u"Type de POI à filter")
+
+    def copy_relations(self, oldinstance):
+        self.type_filters = oldinstance.type_filters.all()
+
+
 class CustomItineraryFormPlugin(CMSPlugin):
     custom_link = models.CharField(
         verbose_name=_('Custom link'),

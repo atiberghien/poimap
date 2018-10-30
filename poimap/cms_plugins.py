@@ -3,7 +3,7 @@ from django.utils.translation import ugettext_lazy as _
 from cms.plugin_base import CMSPluginBase
 from cms.models.pluginmodel import CMSPlugin
 from cms.plugin_pool import plugin_pool
-from .cms_models import POIListing, CustomItineraryFormPlugin, POI_LISTING_TEMPLATES
+from .cms_models import POIListing, POIFilters, CustomItineraryFormPlugin, POI_LISTING_TEMPLATES
 from .forms import CustomItineraryForm
 
 from django.conf import settings
@@ -61,8 +61,20 @@ class POIListingPlugin(CMSPluginBase):
                 "total_length" : length,
             })
 
-        context["poi_type_slugs"] = instance.type_display.all().values_list('slug', flat=True)
+        # context["poi_type_slugs"] = instance.type_display.all().values_list('slug', flat=True)
         self.render_template = instance.template
+        return context
+
+@plugin_pool.register_plugin
+class POIFiltersPlugin(CMSPluginBase):
+    model = POIFilters
+    name = _("POI Filters Plugin")
+    render_template = "poimap/partial/poi_filters.html"
+    cache = False
+
+    def render(self, context, instance, placeholder):
+        context = CMSPluginBase.render(self, context, instance, placeholder)
+        print(context["instance"].type_filters.all())
         return context
 
 

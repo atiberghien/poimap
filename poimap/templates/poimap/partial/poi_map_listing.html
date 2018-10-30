@@ -51,7 +51,7 @@
                 });
             });
             {% endif %}
-            $(document).on("poimap:fetch-secondary-data", function(evt, bboxCoords){
+            $(document).on("poimap:fetch-secondary-data", function(evt, map, bboxCoords){
                 $.getJSON("{% url 'api-subpath-list' instance.area_display.slug %}?bbox="+bboxCoords.join(',')).done(function(data){
                     $.each(data.features, function(index, path){
                         var subpath = L.geoJSON(path);

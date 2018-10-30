@@ -39,6 +39,6 @@ function fetchPOI(map, pathPK) {
                 layer.addTo(map);
             });
         {% endif %}
-        $(document).trigger("poimap:fetch-secondary-data", [bboxCoords]);
+        $(document).trigger("poimap:fetch-secondary-data", [map, bboxCoords]);
     });
 }
