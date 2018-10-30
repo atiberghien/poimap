@@ -1,12 +1,19 @@
+# -*- coding: utf-8 -*-
 from django.contrib import admin
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django import forms
 from django.urls import reverse
 from django.utils.safestring import mark_safe
-from models import TimeSlot, Stop, Service, Line, RouteStop, Route, Travel, Bus, Customer, Order, Ticket, Connection, PartnerSearch
+from django.http import HttpResponse
+from django.contrib.admin import SimpleListFilter
+
 from leaflet.admin import LeafletGeoAdmin
 from poimap.admin import POIAdminForm, POIMediaInline
+
+from .models import TimeSlot, Stop, Service, Line, RouteStop, Route, Travel, Bus, Customer, Order, Ticket, Connection, PartnerSearch
 from .forms import StopForm
+import types
+import csv
 
 class TimeSlotInlineAdmin(admin.TabularInline):
     model = TimeSlot
@@ -97,7 +104,46 @@ class TicketInlineAdmin(admin.TabularInline):
     extra = 0
     can_delete = True
 
+
+def export_as_csv(modeladmin, request, queryset):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="export_order.csv"'
+    writer = csv.writer(response)
+    writer.writerow(modeladmin.csv_fields)
+    for obj in queryset:
+        row = []
+        for field in modeladmin.csv_fields:
+            if hasattr(obj, field):
+                attr = getattr(obj, field)
+                if isinstance(attr, types.MethodType):
+                    attr = attr()
+            if hasattr(modeladmin, field):
+                attr = getattr(modeladmin, field)
+                if isinstance(attr, types.MethodType):
+                    attr = attr(obj)
+            row.append(attr)
+        writer.writerow(row)
+    return response
+export_as_csv.short_description = "Export CSV"
+
+
+class paidOrderFilter(SimpleListFilter):
+    title = 'Paiement'
+    parameter_name = 'paid_at'
+    
+    def lookups(self, request, model_admin):
+        return [("NOT_PAID", "Non Payée"), ("PAID", "Payée")]
+
+    def queryset(self, request, queryset):
+        if self.value():
+            if self.value() == "NOT_PAID":
+                return queryset.filter(paid_at__isnull=True)
+            elif self.value() == "PAID":
+                return queryset.filter(paid_at__isnull=False)                
+        return queryset
+
 class OrderAdmin(admin.ModelAdmin):
+
     def ticket_number(self, obj):
         return obj.ticket_set.count()
     
@@ -106,8 +152,12 @@ class OrderAdmin(admin.ModelAdmin):
             return mark_safe("<a href='%s'>%s</a>" % (reverse('transportation-checkout-confirmation', args=[obj.num]), "Lien de confirmation"))
         return "-"
 
-    list_display = ("num", 'customer', "ticket_number", "total_amount", "created_at", "paid_at", "confirmation_link")
+    list_display = ("num", 'customer', "ticket_number", "total_amount", "created_at", "paid_at", "source", "confirmation_link")
+    csv_fields = ("num", "customer", "ticket_number", "source", "total_amount", "created_at", "paid_at")
     inlines = [TicketInlineAdmin]
+
+    actions = [export_as_csv]
+    list_filter = (paidOrderFilter, 'source')
 
 class ConnectionInlineAdmin(admin.TabularInline):
     model = Connection
