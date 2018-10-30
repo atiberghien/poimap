@@ -161,7 +161,7 @@ class Customer(models.Model):
     optin = models.BooleanField()
 
     def __unicode__(self):
-        return "%s %s (%s)" % (self.first_name, self.last_name, self.email)
+        return "%s %s" % (self.first_name, self.last_name)
 
 
 class Order(models.Model):
