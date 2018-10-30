@@ -58,7 +58,7 @@ class POIType(models.Model):
     def get_typed_poi_count(self):
         return self.poi_set.count()
 
-    def __str__(self):
+    def __unicode__(self):
         return "%s (%s)" % (self.label, self.get_typed_poi_count())
 
 class POI(PolymorphicModel):
