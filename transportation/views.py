@@ -1,41 +1,41 @@
 # -*- coding: utf-8 -*-
-from django.views.generic import TemplateView, DetailView, ListView, RedirectView, View, FormView
-from django.views.generic.edit import ModelFormMixin
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render
-from django.core.mail import EmailMultiAlternatives
-from django.views.decorators.csrf import csrf_exempt
-from django.template.loader import render_to_string
-from django.utils.decorators import method_decorator
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect, reverse
-from django.http import HttpResponse
 from django.conf import settings
 from django.contrib.auth import authenticate, login
-from dateutil.tz import tzutc
-from dal import autocomplete
-from .api_views import compute_timetable
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.sites.shortcuts import get_current_site
+from django.core.mail import EmailMultiAlternatives
+from django.http import FileResponse, Http404, HttpResponse
+from django.shortcuts import render, redirect, reverse, get_object_or_404
+from django.template.loader import render_to_string, get_template
+from django.utils.decorators import method_decorator
+from django.views.generic import TemplateView, DetailView, ListView, RedirectView, View, FormView
+from django.views.generic.edit import ModelFormMixin
+from django.views.decorators.csrf import csrf_exempt
+
+from dal import autocomplete
+from dateutil.tz import tzutc
+from datetime import datetime, date, timedelta
+from xhtml2pdf import pisa
+from cgi import escape
+
 from poimap.models import Area
 
-from .models import Line, Stop, Route, Service, Customer, Ticket, Order, Bus, Order, Connection, PartnerSearch, Travel
+from .models import Line, Stop, Route, Service, Customer, Ticket, Order 
+from .models import Bus, Order, Connection, PartnerSearch, Travel
+from .api_views import compute_timetable
 from .forms import SearchServiceForm, CustomerCreationForm
+
+
 import json
 import time
 import csv
-
-from datetime import datetime, date, timedelta
-
 import payplug
 import qrcode
-
 import string
 import random
 import base64
 import cStringIO as StringIO
-from xhtml2pdf import pisa
-from django.template.loader import get_template
-from cgi import escape
 
 
 def id_gen(size=6, chars=string.ascii_uppercase):
