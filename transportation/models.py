@@ -22,6 +22,8 @@ class Line(models.Model):
 
     connection_info = RichTextField(null=True, blank=True)
 
+    prices = FilerFileField(null=True, blank=True)
+
     def get_bus(self):
         bus_list = []
         for route in self.routes.all():

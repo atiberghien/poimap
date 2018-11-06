@@ -565,6 +565,14 @@ class  DriverDailyServicePrintView(LoginRequiredMixin, PDFRenderingMixin, Driver
     pass
 
 
+def line_prices_pdf(request):
+    line_id = request.GET.get('line_id', None)
+    line = get_object_or_404(Line, id=line_id)
+    try:
+        return FileResponse(open(line.prices.path, 'rb'), content_type='application/pdf')
+    except FileNotFoundError:
+        raise Http404()
+
 class ServiceTimeTableView(TemplateView):
     template_name = "transportation/timetable.html"
 
