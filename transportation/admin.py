@@ -169,8 +169,17 @@ class ConnectionInlineAdmin(admin.TabularInline):
 class TicketAdmin(admin.ModelAdmin):
     inlines = [ConnectionInlineAdmin]
 
+class CustomerAdmin(admin.ModelAdmin):
+    def order_count(self, obj):       
+        return obj.order_set.count()
 
-admin.site.register(Customer)
+    list_display = ("last_name", "first_name", "email", "terms", "privacy", "optin", "order_count")
+    search_fields = ("last_name", "first_name", "email")
+    csv_fields = ("last_name", "first_name", "email", "terms", "privacy", "optin")
+    actions = [export_as_csv]
+
+
+admin.site.register(Customer, CustomerAdmin)
 admin.site.register(Ticket, TicketAdmin)
 admin.site.register(Order, OrderAdmin)
 admin.site.register(Bus, BusAdmin)
