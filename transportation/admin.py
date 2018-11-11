@@ -107,7 +107,7 @@ class TicketInlineAdmin(admin.TabularInline):
 
 def export_as_csv(modeladmin, request, queryset):
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="export_order.csv"'
+    response['Content-Disposition'] = 'attachment; filename="export_%s.csv"' % queryset.model.__name__.lower()
     writer = csv.writer(response)
     writer.writerow(modeladmin.csv_fields)
     for obj in queryset:
@@ -121,7 +121,10 @@ def export_as_csv(modeladmin, request, queryset):
                 attr = getattr(modeladmin, field)
                 if isinstance(attr, types.MethodType):
                     attr = attr(obj)
-            row.append(attr)
+            try:
+                row.append(attr.encode("utf-8"))
+            except:
+                row.append(str(attr))
         writer.writerow(row)
     return response
 export_as_csv.short_description = "Export CSV"
