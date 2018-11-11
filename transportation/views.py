@@ -581,8 +581,11 @@ class ServiceTimeTableView(TemplateView):
         route_id = self.request.GET.get('route_id', None)
         freq_re = self.request.GET.get('freq_re', None)
         date = self.request.GET.get('date', None)
-        context["route"] = Route.objects.get(id=route_id)
-        context["timetable"] = compute_timetable(route_id, freq_re=freq_re, date=date)
+        try:
+            context["route"] = Route.objects.get(id=route_id)
+            context["timetable"] = compute_timetable(route_id, freq_re=freq_re, date=date)
+        except:
+            pass
         return context
 
 class  ServiceTimeTablePrintView(PDFRenderingMixin, ServiceTimeTableView):
