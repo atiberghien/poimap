@@ -165,6 +165,9 @@ class Customer(models.Model):
     def __unicode__(self):
         return "%s %s" % (self.first_name, self.last_name)
 
+    class Meta:
+        ordering = ("last_name", "first_name", "email")
+
 
 class Order(models.Model):
     num = models.CharField(max_length=500, unique=True)
