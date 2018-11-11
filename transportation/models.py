@@ -139,6 +139,7 @@ class Travel(models.Model):
 class Bus(models.Model):
     name = models.CharField(max_length=64)
     slug = AutoSlugField(populate_from='name', always_update=True, unique=True)
+    license_plate = models.CharField(max_length=20, null=True, blank=True)
     blueprint = FilerFileField(null=True, blank=True)
     nb_seats = models.PositiveIntegerField(default=0)
     services = models.ManyToManyField(Service)
@@ -179,6 +180,7 @@ class Order(models.Model):
     def total_amount(self):
         return sum(list(self.ticket_set.values_list("price", flat=True)))
     total_amount.description = "Total Amount"
+
 
 
 

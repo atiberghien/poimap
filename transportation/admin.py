@@ -87,14 +87,19 @@ class BusAdminForm(forms.ModelForm):
         fields = "__all__"
 
 class BusAdmin(admin.ModelAdmin):
-    def line(self, obj):
+    def line_list(self, obj):
         line_ids = list(obj.services.all().values_list("route__line", flat=True))
         lines = Line.objects.filter(id__in=set(line_ids))
         lines = ", ".join([l.name for l in lines])
         return lines
+    line_list.short_description = "Line(s)"
 
-    line.short_description = "Line(s)"
-    list_display = ("name", "slug", "line")
+    def service_list(self, obj):
+        return ", ".join([s.name for s in obj.services.all()])
+    service_list.short_description = "Services"
+
+    list_display = ("name", "license_plate", "line_list", 'service_list')
+    list_editable = ('license_plate', )
     form = BusAdminForm
     save_as = True
 
