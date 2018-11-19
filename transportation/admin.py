@@ -176,13 +176,17 @@ class TicketAdmin(admin.ModelAdmin):
 
 class CustomerAdmin(admin.ModelAdmin):
     def order_count(self, obj):       
-        return obj.order_set.count()
+        return obj.order_set.filter(paid_at__isnull=False).count()
 
     list_display = ("last_name", "first_name", "email", "terms", "privacy", "optin", "order_count")
     search_fields = ("last_name", "first_name", "email")
     csv_fields = ("last_name", "first_name", "email", "terms", "privacy", "optin")
     actions = [export_as_csv]
 
+class PartnerSearchAdmin(admin.ModelAdmin):
+
+    list_display = ("search_date", "departure_stop", "arrival_stop", "travel_date", "partner")
+    list_filter = ("partner",)
 
 admin.site.register(Customer, CustomerAdmin)
 admin.site.register(Ticket, TicketAdmin)
@@ -193,4 +197,4 @@ admin.site.register(Route, RouteAdmin)
 admin.site.register(Stop, StopAdmin)
 admin.site.register(Service, ServiceAdmin)
 admin.site.register(Travel, TravelAdmin)
-admin.site.register(PartnerSearch)
+admin.site.register(PartnerSearch, PartnerSearchAdmin)
