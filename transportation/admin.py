@@ -31,7 +31,7 @@ class TimeSlotInlineAdmin(admin.TabularInline):
 class ServiceAdmin(admin.ModelAdmin):
     list_display = ('slug', 'name', 'is_active', 'is_temporary', 'route')
     search_fields = ('name',)
-    list_editable = ('name', 'is_active')
+    list_editable = ('name', 'is_active', 'is_temporary')
     list_filter = ('route',)
     ordering = ("name",)
     
