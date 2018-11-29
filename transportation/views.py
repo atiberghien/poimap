@@ -540,11 +540,11 @@ class DriverDailyService(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = TemplateView.get_context_data(self, **kwargs)
-        service_name = self.request.GET.get("service_name", None)
+        service_slug = self.request.GET.get("service_slug", None)
         travel_date = self.request.GET.get("travel_date", None)
 
-        if service_name and travel_date:
-            service = Service.objects.get(name=service_name)
+        if service_slug and travel_date:
+            service = Service.objects.get(slug=service_slug)
             travel_date = datetime.strptime(travel_date, "%d/%m/%y")
             connections = Connection.objects.filter(ticket__date=travel_date, 
                                                     ticket__order__paid_at__isnull=False,
