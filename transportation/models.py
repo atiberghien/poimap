@@ -216,9 +216,6 @@ class PartnerSearch(models.Model):
     def get_absolute_url(self):
         return reverse("deeplink-partner", args=[self.departure_stop.slug, self.arrival_stop.slug])
 
-    class Meta:
-        ordering = ('-search_date', )
-
 @receiver(post_save, sender=Service)
 def autocreate_timeslot_for_service(sender, instance, created, **kwargs):
     if created:
