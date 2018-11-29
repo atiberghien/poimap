@@ -29,7 +29,13 @@ class TimeSlotInlineAdmin(admin.TabularInline):
 
 
 class ServiceAdmin(admin.ModelAdmin):
-    list_display = ('slug', 'name', 'is_active', 'is_temporary', 'route')
+    def bus_list(self, obj):
+        bus_list = obj.bus_set.all().values_list('name', 'license_plate')
+        bus_list = ", ".join(["%s (%s)" % (name, plate) for name, plate in bus_list])
+        return bus_list
+    bus_list.short_description = "Bus"
+
+    list_display = ('slug', 'name', 'is_active', 'is_temporary', 'route', 'bus_list')
     search_fields = ('name',)
     list_editable = ('name', 'is_active', 'is_temporary')
     list_filter = ('route',)
