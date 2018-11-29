@@ -611,7 +611,7 @@ class TransportationPartnerView(View):
             departure_stop = Stop.objects.get(slug=departure_stop_slug)
             arrival_stop = Stop.objects.get(slug=arrival_stop_slug)
             travel_date = request.GET.get("dateAller", tomorrow)  # 2018-07-04_00_00_00
-            travel_date = datetime.strptime(travel_date, "%Y-%m-%d_%H_%M_%S")
+            travel_date = datetime.strptime(travel_date, "%Y-%m-%d")
             source = request.GET.get("utm_source", "external")
             PartnerSearch.objects.create(
                 departure_stop=departure_stop,
