@@ -212,6 +212,7 @@ class PartnerSearch(models.Model):
     travel_date = models.DateTimeField()
     partner = models.CharField(max_length=200)
     search_date = models.DateTimeField(auto_now_add=True)
+    info = models.CharField(max_length=500, blank=True)
 
     def get_absolute_url(self):
         return reverse("deeplink-partner", args=[self.departure_stop.slug, self.arrival_stop.slug])

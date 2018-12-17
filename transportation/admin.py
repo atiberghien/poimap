@@ -191,7 +191,7 @@ class CustomerAdmin(admin.ModelAdmin):
 
 class PartnerSearchAdmin(admin.ModelAdmin):
 
-    list_display = ("search_date", "departure_stop", "arrival_stop", "travel_date", "partner")
+    list_display = ("search_date", "departure_stop", "arrival_stop", "travel_date", "partner", "info")
     list_filter = ("partner",)
 
 admin.site.register(Customer, CustomerAdmin)
