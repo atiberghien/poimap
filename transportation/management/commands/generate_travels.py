@@ -7,6 +7,7 @@ import googlemaps
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
+        Travel.objects.all().delete()
         gmaps = googlemaps.Client("AIzaSyAAfExuSQBQ9uZ7zrvxKljLw8QnysvfBDs")
         routes = Route.objects.all()
         for route in routes:
