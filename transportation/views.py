@@ -21,7 +21,7 @@ from cgi import escape
 
 from poimap.models import Area
 
-from .models import Line, Stop, Route, Service, Customer, Ticket, Order 
+from .models import Line, Stop, Route, Service, Customer, Ticket, Order, RouteStop
 from .models import Bus, Order, Connection, PartnerSearch, Travel
 from .api_views import compute_timetable
 from .forms import SearchServiceForm, CustomerCreationForm
@@ -80,7 +80,8 @@ class StopListView(ListView):
 
 class StopAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
-        qs = Stop.objects.all()
+        stop_ids = RouteStop.objects.values_list('stop', flat=True).distinct()
+        qs = Stop.objects.filter(id__in=stop_ids)
         departure = self.forwarded.get('departure', None)
         if departure:
             qs = qs.exclude(id=departure)
