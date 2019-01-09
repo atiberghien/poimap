@@ -72,7 +72,7 @@ def compute_timetable(route_id, freq_re=None, date=None):
             result["notes"].append(service.notes)
         result["columns"].append(col_data)
 
-        dataset[service.name] = [t.strftime("%H:%M") if t else "-" for t in service.timeslots.values_list("hour", flat=True)]
+        dataset[service.slug] = [t.strftime("%H:%M") if t else "-" for t in service.timeslots.values_list("hour", flat=True)]
     df = pd.DataFrame(dataset, index=stop_names)
     for index, row in df.iterrows():
         result["rows"].append({
