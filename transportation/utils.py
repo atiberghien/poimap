@@ -11,7 +11,7 @@ def has_all_stop(timetable):
 def increasing_hours(timetable):
     prev_slot = None
     for timeslot in timetable:
-        if prev_slot and prev_slot.hour >= timeslot.hour:
+        if prev_slot and (prev_slot.hour >= timeslot.hour and not timeslot.is_next_day):
             return False
         prev_slot = timeslot
     return True

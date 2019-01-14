@@ -115,6 +115,7 @@ class TimeSlot(models.Model):
     hour = models.TimeField(null=True, blank=True)
     stop = models.ForeignKey(Stop)
     service = models.ForeignKey(Service, related_name='timeslots')
+    is_next_day = models.BooleanField(default=False)
     order = models.PositiveIntegerField(default=0)
 
     def __unicode__(self):
@@ -134,7 +135,7 @@ class Travel(models.Model):
     routes = models.ManyToManyField(Route)
 
     class Meta:
-        ordering = ('stop1__name', 'stop2__name')
+        ordering = ('stop1__name', 'distance')
 
 class Bus(models.Model):
     name = models.CharField(max_length=64)

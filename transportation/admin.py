@@ -18,7 +18,7 @@ import csv
 class TimeSlotInlineAdmin(admin.TabularInline):
     model = TimeSlot
     form = StopForm
-    fields = ('stop', "hour")
+    fields = ('stop', "hour", "is_next_day")
     readonly_fields = ('stop',)
     extra = 0
     can_delete = False
