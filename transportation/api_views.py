@@ -8,6 +8,7 @@ from rest_framework import generics
 from datetime import datetime, date, timedelta
 from dateutil.rrule import rrulestr
 from dateutil.tz import tzutc
+from collections import OrderedDict
 
 from networkx.algorithms.shortest_paths.generic import all_shortest_paths
 
@@ -38,7 +39,6 @@ def compute_timetable(route_id, freq_re=None, date=None):
     result = {
         "columns" : [],
         "rows" : [],
-        "values" : [],
         "notes" : [],
     }
     dataset = {}
@@ -46,6 +46,7 @@ def compute_timetable(route_id, freq_re=None, date=None):
     route = Route.objects.get(id=route_id)
     stop_names = list(route.get_stops().values_list('name', flat=True))
     services = Service.objects.filter(is_active=True, route=route)
+
     if date:
         service_ids = []
         for service in services.filter(recurrences__isnull=False):
@@ -60,8 +61,16 @@ def compute_timetable(route_id, freq_re=None, date=None):
         services = services.filter(frequency_label__regex=freq_re)
     else:
         services = services.filter(is_temporary=False)
-    note_nb = 1
+    
     for service in services:
+        dataset[service.slug] = [t.strftime("%H:%M") if t else "-" for t in service.timeslots.values_list("hour", flat=True)]
+
+    dataset = OrderedDict(sorted(dataset.items(), key=lambda data: data[1][0]))
+
+    note_nb = 1
+    df = pd.DataFrame(dataset, index=stop_names)
+    for service_slug in df.columns:
+        service = services.get(slug=service_slug)
         col_data = {
             "name" : service.name,
             "frequency_label" : service.frequency_label
@@ -71,9 +80,7 @@ def compute_timetable(route_id, freq_re=None, date=None):
             note_nb += 1
             result["notes"].append(service.notes)
         result["columns"].append(col_data)
-
-        dataset[service.slug] = [t.strftime("%H:%M") if t else "-" for t in service.timeslots.values_list("hour", flat=True)]
-    df = pd.DataFrame(dataset, index=stop_names)
+    
     for index, row in df.iterrows():
         result["rows"].append({
             "label" : index,
