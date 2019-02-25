@@ -101,10 +101,12 @@ function fetchArea(map, url){
 function createPOIMarker(poi) {
     return marker = L.geoJSON(poi, {
         onEachFeature: function (feature, layer) {
-            layer.setIcon(L.AwesomeMarkers.icon({
+            layer.setIcon(L.BeautifyIcon.icon({
                 icon: feature.properties.type.icon,
-                prefix : 'fa',
-                extraClasses: 'fas',
+                iconShape: 'circle',
+                backgroundColor: 'blue',
+                borderColor: 'blue',
+                textColor: 'white'
             }));
             layer.bindPopup(feature.properties.marker_popup, {'className':'custom-poimap-popup' });
             layer.on("click", function(){

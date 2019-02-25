@@ -51,10 +51,12 @@
         $(document).on("poimap:marker-added", function(evt, stop){
             var data = allPOI[stop.id]
             if(stop.properties.connection_count > 2){
-                data[1].setIcon(L.AwesomeMarkers.icon({
+                data[1].setIcon(L.BeautifyIcon.icon({
                     icon: stop.properties.type.icon,
-                    prefix : 'fa',
-                    markerColor : "red"
+                    iconShape: 'marker',
+                    backgroundColor: 'red',
+                    borderColor: 'red',
+                    textColor: 'white'
                 }));
             }
         });

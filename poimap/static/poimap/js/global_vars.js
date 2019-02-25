@@ -6,15 +6,20 @@ var path = null;
 var startPoint = null;
 var endPoint = null;
 
-var startIcon = L.AwesomeMarkers.icon({
-    icon: 'flag',
-    prefix : 'fa',
-    markerColor: 'green'
+var startIcon = L.BeautifyIcon.icon({
+    icon: "flag",
+    iconShape: 'circle',
+    backgroundColor: 'green',
+    borderColor: 'green',
+    textColor: 'white'
 });
-var endIcon = L.AwesomeMarkers.icon({
-    icon: 'flag',
-    prefix : 'fa',
-    markerColor: 'red'
+
+var endIcon = L.BeautifyIcon.icon({
+    icon: "flag",
+    iconShape: 'circle',
+    backgroundColor: 'red',
+    borderColor: 'red',
+    textColor: 'white'
 });
 
 var startPointOptions = {
