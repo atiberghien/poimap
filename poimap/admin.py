@@ -65,7 +65,7 @@ class PathAdminForm(CleanZDimensionMixin, MoveNodeForm):
 
 class PathAdmin(LeafletGeoAdminMixin, TreeAdmin):
     form = movenodeform_factory(Path, form=PathAdminForm)
-    list_display = ('name',)
+    list_display = ('name', 'slug')
 
     fieldsets = (
         (None, {
