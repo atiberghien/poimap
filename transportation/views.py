@@ -164,6 +164,9 @@ class TransportationItinerary(View):
         form = SearchServiceForm(form_data)
         if form.is_valid():
             context.update(form.cleaned_data)
+            utm_source = request.GET.get("utm_source", None)
+            if "utm_source" not in self.request.session and utm_source:
+                request.session["utm_source"] = utm_source
 
         context["search_form"] = form
         return render(request, 'transportation/itinerary.html', context)
@@ -607,23 +610,24 @@ class TransportationPartnerView(View):
         today = date.today()
         tomorrow = today + timedelta(days=1)
         tomorrow = tomorrow.strftime("%Y-%m-%d_00_00_00")
-
         try:
             departure_stop = Stop.objects.get(slug=departure_stop_slug)
             arrival_stop = Stop.objects.get(slug=arrival_stop_slug)
             travel_date = request.GET.get("dateAller", tomorrow)  # 2018-07-04_00_00_00
             travel_date = datetime.strptime(travel_date, "%Y-%m-%d")
             source = request.GET.get("utm_source", "external")
+            
             PartnerSearch.objects.create(
                 departure_stop=departure_stop,
                 arrival_stop=arrival_stop,
                 travel_date=travel_date,
-                partner=source
+                partner=source,
+                info=request.META.get("HTTP_REFERER", "direct")
             )
             request.session["utm_source"] = source
         except:
             return redirect("/")
-
+        
         form = SearchServiceForm(initial={
             "departure" : departure_stop,
             "arrival" : arrival_stop,
