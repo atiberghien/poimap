@@ -14,8 +14,8 @@ class CustomItineraryForm(forms.Form):
         self.fields['start_point'].queryset = POI.objects.filter(starred=True)
         self.fields['end_point'].queryset = POI.objects.filter(starred=True)
 
-        self.fields['start_point'].empty_label = POI.objects.filter(starred=True).first()
-        self.fields['end_point'].empty_label = POI.objects.filter(starred=True).first()
+        self.fields['start_point'].empty_label = self.fields['start_point'].empty_label = "Sélectionnez un point de départ"
+        self.fields['end_point'].empty_label = self.fields['end_point'].empty_label = "Sélectionnez un point d'arrivée"
 
     class Media:
         css = {
