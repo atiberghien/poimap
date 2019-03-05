@@ -11,6 +11,7 @@ except:
 from django.contrib.gis.gdal import OGRGeometry
 from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance
+from django.contrib.admin.widgets import FilteredSelectMultiple
 from adminsortable2.admin import SortableInlineAdminMixin
 
 from ckeditor.widgets import CKEditorWidget
@@ -88,6 +89,8 @@ class PathAdmin(LeafletGeoAdminMixin, TreeAdmin):
 
 class POIAdminForm(CleanZDimensionMixin, forms.ModelForm):
     description = forms.CharField(widget=CKEditorWidget())
+    types = forms.ModelMultipleChoiceField(queryset=POIType.objects.all(), widget=FilteredSelectMultiple("Types", is_stacked=False))
+    
     class Media:
         if "grappelli" in settings.INSTALLED_APPS:
             css = {
@@ -145,7 +148,7 @@ class POIAdmin(LeafletGeoAdmin):
 
     fieldsets = (
         (None, {
-            'fields': (('name', 'type', 'related_path'), 'description')
+            'fields': (('name', 'type', 'related_path'), 'types', 'description')
         }),
         (None, {
             'classes': ('address',),
@@ -162,7 +165,7 @@ class POIAdmin(LeafletGeoAdmin):
     )
 
 class POITypeAdmin(admin.ModelAdmin):
-    list_display = ('label', 'icon', 'get_typed_poi_count')
+    list_display = ('label', 'icon', 'icon_file', 'color', 'get_typed_poi_count')
     list_editable = ('icon', )
     class Meta:
         model = POIType

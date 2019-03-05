@@ -55,6 +55,9 @@ class POIType(models.Model):
     slug = AutoSlugField(populate_from="label", always_update=True)
     icon = IconField()
 
+    icon_file = FilerImageField(null=True, blank=True, on_delete=models.SET_NULL)
+    color = models.CharField(max_length=30, null=True, blank=True)
+
     def get_typed_poi_count(self):
         return self.poi_set.count()
 
@@ -66,7 +69,8 @@ class POI(PolymorphicModel):
     related_path = models.ForeignKey(Path, null=True, blank=True)
     slug = AutoSlugField(populate_from="name", always_update=True)
     description = RichTextField(blank=True, null=True)
-    type = models.ForeignKey(POIType)
+    type = models.ForeignKey(POIType, blank=True, null=True, on_delete=models.SET_NULL)
+    types = models.ManyToManyField(POIType, related_name="all_poi")
 
     address = models.CharField(max_length=250, blank=True, null=True)
     zipcode = models.CharField(max_length=10, blank=True, null=True)
