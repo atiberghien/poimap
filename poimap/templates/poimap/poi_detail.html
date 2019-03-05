@@ -175,14 +175,14 @@
 <link rel="stylesheet" href="{% static 'poimap/css/path_step.css' %}">
 {% leaflet_css %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/rateYo/2.3.2/jquery.rateyo.min.css">
-<link rel="stylesheet" href="{% static 'leaflet.awesome-markers/dist/leaflet.awesome-markers.css' %}">
+<link rel="stylesheet" href="{% static 'beautifymarker/leaflet-beautify-marker-icon.css' %}">
 {% endaddtoblock %}
 {% addtoblock "js" %}
 {% compress js %}
 {% leaflet_js %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/rateYo/2.3.2/jquery.rateyo.min.js"></script>
 <script src="{% static '@turf/turf/turf.min.js' %}" charset="utf-8"></script>
-<script src="{% static 'leaflet.awesome-markers/dist/leaflet.awesome-markers.min.js' %}" charset="utf-8"></script>
+<script src="{% static 'beautifymarker/leaflet-beautify-marker-icon.js' %}" charset="utf-8"></script>
 {% endcompress %}
 {# {% compress js inline %}#}
 <script type="text/javascript">

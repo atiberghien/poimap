@@ -19,7 +19,7 @@
 </div>
 {% addtoblock "css" %}
 {% leaflet_css %}
-<link rel="stylesheet" href="{% static 'leaflet.awesome-markers/dist/leaflet.awesome-markers.css' %}">
+<link rel="stylesheet" href="{% static 'beautifymarker/leaflet-beautify-marker-icon.css' %}">
 <style media="screen">
     .leaflet-container {
         height: 650px;
@@ -28,7 +28,7 @@
 {% endaddtoblock %}
 {% addtoblock 'js' %}
 {% leaflet_js %}
-<script src="{% static 'leaflet.awesome-markers/dist/leaflet.awesome-markers.min.js' %}" charset="utf-8"></script>
+<script src="{% static 'beautifymarker/leaflet-beautify-marker-icon.js' %}" charset="utf-8"></script>
 <script src="{% static 'poimap/js/global_vars.js' %}" charset="utf-8"></script>
 <script src="{% static 'poimap/js/poimap.utils.js' %}" charset="utf-8"></script>
 <script>
