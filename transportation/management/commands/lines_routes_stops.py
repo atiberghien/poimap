@@ -16,7 +16,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if options["import"] and options["export"]:
-            print "Only once of these arguments at a time : --import or --export"
+            print "Only one of these arguments at a time : --import or --export"
             return
         if options["import"]:
             bus_type = POIType.objects.get_or_create(label=u"Arrêt de bus", icon='bus')[0]
