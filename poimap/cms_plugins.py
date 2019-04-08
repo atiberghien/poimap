@@ -10,8 +10,6 @@ from django.conf import settings
 from shapely.geometry import box
 from shapely.affinity import scale
 from django.contrib.gis.geos import Polygon
-if "hostings" in settings.INSTALLED_APPS:
-    from hostings.models import Hostings
 from .models import Path, Area, POI
 
 @plugin_pool.register_plugin
@@ -44,8 +42,6 @@ class POIListingPlugin(CMSPluginBase):
             # step_cpt = 1
             # margin = 5000
             # qs = POI.objects.filter(geom__within=bbox)
-            # if "hostings" in settings.INSTALLED_APPS:
-            #     qs = qs.instance_of(Hostings)
             # # for poi in qs:
             # #     print step_cpt*step-margin, poi.distance ,step_cpt*step+margin
             # #     if poi.distance >= step_cpt*step-margin and poi.distance <= step_cpt*step+margin:

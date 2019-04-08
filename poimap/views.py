@@ -16,10 +16,6 @@ from .serializers import PathSerializer, POISerializer, AreaSerializer
 from .models import Path, POI, Area, POIRating
 from .forms import POIRatingForm
 
-if "hostings" in settings.INSTALLED_APPS:
-    from hostings.models import Hostings
-
-
 class AreaView(generics.RetrieveAPIView):
     queryset = Area.objects.all()
     lookup_field = 'slug'
