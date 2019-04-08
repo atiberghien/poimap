@@ -8,7 +8,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import JSONField
 from django.dispatch import receiver
-
+from django.utils.functional import lazy
 from django_countries.fields import CountryField
 from treebeard.mp_tree import MP_Node
 from polymorphic.models import PolymorphicModel
@@ -50,6 +50,8 @@ class Path(MP_Node):
     def __unicode__(self):
         return self.name
 
+
+
 class POIType(models.Model):
     label = models.CharField(max_length=30)
     slug = AutoSlugField(populate_from="label", always_update=True)
@@ -63,6 +65,18 @@ class POIType(models.Model):
 
     def __unicode__(self):
         return "%s (%s)" % (self.label, self.get_typed_poi_count())
+
+def TYPE_SLUG_CHOICES():
+    return [(t.slug, t.slug) for t in POIType.objects.all().order_by('slug')]
+
+class SpecificPOITypeTemplate(models.Model):
+
+    type_slug = models.CharField(max_length=500, choices=[])
+    template_name = models.CharField(max_length=500)
+
+    def __init__(self, *args, **kwargs):
+        super(SpecificPOITypeTemplate, self).__init__(*args, **kwargs)
+        self._meta.get_field('type_slug').choices = lazy(TYPE_SLUG_CHOICES, list)()
 
 class POI(PolymorphicModel):
     name = models.CharField(max_length=500)

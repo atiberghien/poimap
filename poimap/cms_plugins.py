@@ -57,7 +57,7 @@ class POIListingPlugin(CMSPluginBase):
                 "total_length" : length,
             })
 
-        # context["poi_type_slugs"] = instance.type_display.all().values_list('slug', flat=True)
+        context["poi_type_slugs"] = instance.type_display.all().values_list('slug', flat=True)
         self.render_template = instance.template
         return context
 

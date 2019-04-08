@@ -10,6 +10,6 @@ urlpatterns = [
 
     url(r'^poi/(?P<pk>\d+)/$', POIView.as_view(), name='poi-api-detail'),
 
-    url(r'^path/(?P<path_pk>\d+)/poi/list/$', POIList.as_view(), name='api-poi-list'),
+    # url(r'^path/(?P<path_pk>\d+)/poi/list/$', POIList.as_view(), name='api-poi-list'),
     url(r'^poi/list/$', POIList.as_view(), name='api-poi-list'),
 ]

@@ -13,7 +13,7 @@ from django.contrib.gis.geos import Polygon
 from django_filters.rest_framework import DjangoFilterBackend
 
 from .serializers import PathSerializer, POISerializer, AreaSerializer
-from .models import Path, POI, Area, POIRating
+from .models import Path, POI, Area, POIRating, SpecificPOITypeTemplate
 from .forms import POIRatingForm
 
 class AreaView(generics.RetrieveAPIView):
@@ -72,7 +72,13 @@ class POIDetailView(DetailView):
         return context
 
     def get_template_names(self):
-        return ["%s/%s_detail.html" % (self.get_object().polymorphic_ctype.app_label, self.get_object().polymorphic_ctype.model)]
+        for t in self.get_object().types.all():
+            try:
+                template = SpecificPOITypeTemplate.objects.get(type_slug=t.slug)
+                return [template.template_name]
+            except SpecificPOITypeTemplate.DoesNotExist:
+                pass
+        return DetailView.get_template_names(self)
 
 
 
@@ -90,14 +96,14 @@ class POIView(generics.RetrieveAPIView):
 
 class POIList(generics.ListAPIView):
     serializer_class = POISerializer
-    filter_backends = (DjangoFilterBackend,)
-    filter_fields = {
-        'type__slug': ['exact', 'in'],
-    }
 
     def get_queryset(self):
         queryset = POI.objects.all()
 
+        poi_type_slugs = self.request.query_params.get('poi_type_slugs', None)
+        if poi_type_slugs:
+            poi_type_slugs = poi_type_slugs.split(",")
+            queryset = queryset.filter(types__slug__in=poi_type_slugs)
         path_pk = self.request.query_params.get('path_pk', None)
         if path_pk:
             path = get_object_or_404(Path, id=path_pk)
@@ -112,6 +118,7 @@ class POIList(generics.ListAPIView):
                 ymax = bbox_param[3]
                 bbox = Polygon.from_bbox((xmin, ymin, xmax, ymax))
                 queryset = queryset.filter(geom__contained=bbox)
+        
 
         return queryset
 

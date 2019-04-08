@@ -18,9 +18,14 @@ class PathSerializer(GeoFeatureModelSerializer):
 
 
 class POITypeSerializer(ModelSerializer):
+    icon_file_url = SerializerMethodField()
+
+    def get_icon_file_url(self, obj):
+        return obj.icon_file.url if obj.icon_file else ""
+    
     class Meta:
         model = POIType
-        fields = ('label', 'slug', 'icon')
+        fields = ('label', 'slug', 'icon', 'icon_file_url', 'color')
 
 class POIMediaSerializer(ModelSerializer):
     class Meta:

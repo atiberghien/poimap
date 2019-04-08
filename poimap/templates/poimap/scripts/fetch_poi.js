@@ -15,7 +15,7 @@ function fetchPOI(map, pathPK) {
     } else {
         url = baseUrl+"?bbox="+bboxCoords.join(',');
         {% if poi_type_slugs %}
-        url+= "&type__slug__in={{poi_type_slugs|join:','}}"
+        url+= "&poi_type_slugs={{poi_type_slugs|join:','}}"
         {% endif %}
     }
     return $.getJSON(url).done(function(data){

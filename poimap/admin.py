@@ -116,6 +116,7 @@ class POIMediaInline(SortableInlineAdminMixin, admin.StackedInline):
     model = POIMedia
     extra = 2
 
+
 class POIAdmin(LeafletGeoAdmin):
 
     def __init__(self, *args, **kwargs):
@@ -164,6 +165,7 @@ class POIAdmin(LeafletGeoAdmin):
         }),
     )
 
+
 class POITypeAdmin(admin.ModelAdmin):
     list_display = ('label', 'icon', 'icon_file', 'color', 'get_typed_poi_count')
     list_editable = ('icon', )
@@ -175,3 +177,5 @@ admin.site.register(Area, AreaAdmin)
 admin.site.register(Path, PathAdmin)
 admin.site.register(POI, POIAdmin)
 admin.site.register(POIType, POITypeAdmin)
+admin.site.register(SpecificPOITypeTemplate)
+
