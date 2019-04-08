@@ -13,8 +13,21 @@ from ckeditor.fields import RichTextField
 from dateutil import rrule
 from dateutil.parser import parse
 from dateutil.rrule import rrulestr
+from django.contrib.postgres.fields import ArrayField
+
 
 from poimap.models import POI, Path
+
+class CustomPermissions(models.Model):
+
+    class Meta:
+
+        managed = False 
+
+        permissions = ( 
+            ('access_driver_infos', 'Access to driver infos'),  
+            ('access_sms_announcement', 'Access SMS announcement form'), 
+        )
 
 class Line(models.Model):
     name = models.CharField(max_length=150)
@@ -159,7 +172,9 @@ class Customer(models.Model):
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     email = models.EmailField(unique=True)
+    phone = models.CharField(max_length=255)
 
+    sms_notif = models.BooleanField(default=False)
     terms = models.BooleanField()
     privacy = models.BooleanField()
     optin = models.BooleanField()
@@ -181,8 +196,6 @@ class Order(models.Model):
     def total_amount(self):
         return sum(list(self.ticket_set.values_list("price", flat=True)))
     total_amount.description = "Total Amount"
-
-
 
 
 class Ticket(models.Model):
@@ -218,6 +231,18 @@ class PartnerSearch(models.Model):
     def get_absolute_url(self):
         return reverse("deeplink-partner", args=[self.departure_stop.slug, self.arrival_stop.slug])
 
+class SMSNotification(models.Model):
+    phone = models.CharField(max_length=255, unique=True)
+
+    future_sms = ArrayField(models.CharField(max_length=200), null=True, blank=True)
+
+class SMSAnnouncement(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    service = models.ForeignKey(Service)
+    departure_datetime = models.DateTimeField()
+    notification_datetime = models.DateTimeField()
+    message = models.TextField()
+
 @receiver(post_save, sender=Service)
 def autocreate_timeslot_for_service(sender, instance, created, **kwargs):
     if created:
@@ -225,7 +250,6 @@ def autocreate_timeslot_for_service(sender, instance, created, **kwargs):
         for stop in instance.route.get_stops():
             TimeSlot.objects.create(stop=stop, service=instance, order=i)
             i += 1
-
 
 @receiver(post_save, sender=RouteStop)
 def update_service_timeslot(sender, instance, created, update_fields, **kwargs):

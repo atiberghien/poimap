@@ -5,7 +5,7 @@ from dal import autocomplete
 
 from django import forms
 from datetime import date
-from .models import TimeSlot, Stop, Customer
+from .models import TimeSlot, Stop, Customer, Service, SMSNotification
 
 
 class CustomerCreationForm(forms.ModelForm):
@@ -18,7 +18,7 @@ class CustomerCreationForm(forms.ModelForm):
 
     class Meta:
         model = Customer
-        fields = ("first_name", 'last_name', 'terms', 'privacy', 'optin')
+        fields = ("first_name", 'last_name', 'phone', 'sms_notif', 'terms', 'privacy', 'optin')
 
     def clean_email2(self):
         email1 = self.cleaned_data.get("email1")
@@ -68,3 +68,30 @@ class SearchServiceForm(forms.Form):
     departure_date = forms.DateField()
     arrival_date = forms.DateField(required=False)
     source = forms.CharField(widget=forms.HiddenInput(), initial="internal", required=False)
+
+
+class SMSNotificationSubscriptionForm(forms.ModelForm):
+
+    error_messages = {
+        'phone_already_exists': _(u"Numéro déjà enregistré"),
+        'phone_wrong_format' : _(u"Mauvais format de numéro de téléphone")
+    }
+
+    def clean_phone(self):
+        phone = self.cleaned_data.get("phone")
+        email2 = self.cleaned_data.get("email2")
+        if SMSNotification.objects.filter(phone=phone).exists():
+            raise forms.ValidationError(
+                self.error_messages['phone_already_exists'],
+                code='phone_already_exists',
+            )
+        if len(phone) != 10 or phone[0:2] not in ['06', '07']:
+            raise forms.ValidationError(
+                self.error_messages['phone_wrong_format'],
+                code='phone_wrong_format',
+            )
+        return "+33"+phone[1:]
+    
+    class Meta:
+        model = SMSNotification
+        fields = ('phone', )

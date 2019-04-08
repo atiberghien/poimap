@@ -2,16 +2,19 @@
 from django.conf import settings
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import EmailMultiAlternatives
 from django.http import FileResponse, Http404, HttpResponse
-from django.shortcuts import render, redirect, reverse, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404 
 from django.template.loader import render_to_string, get_template
 from django.utils.decorators import method_decorator
-from django.views.generic import TemplateView, DetailView, ListView, RedirectView, View, FormView
+from django.views.generic import TemplateView, DetailView, ListView 
+from django.views.generic import RedirectView, View, FormView, CreateView
 from django.views.generic.edit import ModelFormMixin
+from django.contrib.auth.views import LoginView
 from django.views.decorators.csrf import csrf_exempt
+from django.urls import reverse_lazy, reverse
 
 from dal import autocomplete
 from dateutil.tz import tzutc
@@ -22,10 +25,10 @@ from cgi import escape
 from poimap.models import Area
 
 from .models import Line, Stop, Route, Service, Customer, Ticket, Order, RouteStop
-from .models import Bus, Order, Connection, PartnerSearch, Travel
+from .models import Bus, Order, Connection, PartnerSearch, Travel, SMSNotification, SMSAnnouncement
 from .api_views import compute_timetable
-from .forms import SearchServiceForm, CustomerCreationForm
-
+from .forms import SearchServiceForm, CustomerCreationForm, SMSNotificationSubscriptionForm
+from .signals import sms_notif_created, ticket_sms_notif_needed
 
 import json
 import time
@@ -401,6 +404,14 @@ class TransportationCheckoutConfirmation(DetailView):
                 pisa.pisaDocument(StringIO.StringIO(order_html.encode("UTF-*")), order_pdf)
                 msg.attach("Commande #%s.pdf" % order.num, order_pdf.getvalue(), 'application/pdf')
                 msg.send()
+            if order.customer.sms_notif:
+                sms_notif, notif_created = SMSNotification.objects.get_or_create(phone=order.customer.phone)
+                if notif_created:
+                    sms_notif_created.send(sender=Order, instance=order, sms_notif=sms_notif)
+                for ticket in order.ticket_set.all():
+                    ticket_sms_notif_needed.send(sender=Ticket, instance=ticket, sms_notif=sms_notif)
+
+
         if "travels" in request.session:
             request.session["travels"] = []
         request.session.flush()
@@ -517,30 +528,43 @@ class TransportationFleetVehicule(DetailView):
     model = Bus
     template_name = "transportation/fleet_vehicule_detail.html"
 
+class ProfessionnalLoginView(LoginView):
+    template_name = "transportation/login_pro.html"
 
-class DriverView(View):
-
-    def get_context_data(self):
-        context = {}
+class ProfessionnalAccessView(LoginRequiredMixin, TemplateView):
+    login_url = reverse_lazy('login-pro')
+    template_name = "transportation/pro_access.html"
+    def get_context_data(self, **kwargs):
+        context = TemplateView.get_context_data(self, **kwargs)
+        if self.request.user.is_superuser or self.request.user.has_perm('transportation.access_driver_infos'):
+            context["display_driver_infos"] = True
+        if self.request.user.is_superuser or self.request.user.has_perm('transportation.access_sms_announcement'):
+            context["display_sms_announcement"] = True
         return context
-    
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data()
-        return render(request, 'transportation/driver.html', context)
 
-    def post(self, request, *args, **kwargs):
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-        return redirect("driver")
-        
+class DriverView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView):
+    login_url = reverse_lazy('login-pro')
+    template_name = "transportation/driver.html"
+    permission_required = ("transportation.access_driver_infos",)
 
-class DriverDailyService(TemplateView):
-    login_url = "driver"
-    redirect_field_name = 'redirect_to'
+class SMSNotificationSubscription(CreateView):
+    model = SMSNotification
+    template_name = "transportation/sms_subscription_form.html"
+    form_class = SMSNotificationSubscriptionForm
+    success_url = reverse_lazy('sms-subscription')
+
+class SMSAnnouncementView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    login_url = reverse_lazy('login-pro')
+    model = SMSAnnouncement
+    permission_required = ("transportation.access_sms_announcement",)
+    template_name = "transportation/sms_announcement_form.html"
+    fields = "__all__"
+    success_url = reverse_lazy('sms-announcement')
+
+class DriverDailyService(LoginRequiredMixin, PermissionRequiredMixin, TemplateView):
+    login_url = reverse_lazy('login-pro')
     template_name = "transportation/driver_daily_service.html"
+    permission_required = ("transportation.access_driver_infos",)
 
     def get_context_data(self, **kwargs):
         context = TemplateView.get_context_data(self, **kwargs)
@@ -563,9 +587,7 @@ class DriverDailyService(TemplateView):
         return context
 
 
-class  DriverDailyServicePrintView(LoginRequiredMixin, PDFRenderingMixin, DriverDailyService):
-    login_url = "driver"
-    redirect_field_name = 'redirect_to'
+class  DriverDailyServicePrintView(PDFRenderingMixin, DriverDailyService):
     pass
 
 
@@ -574,7 +596,7 @@ def line_prices_pdf(request):
     line = get_object_or_404(Line, id=line_id)
     try:
         return FileResponse(open(line.prices.path, 'rb'), content_type='application/pdf')
-    except FileNotFoundError:
+    except:
         raise Http404()
 
 class ServiceTimeTableView(TemplateView):

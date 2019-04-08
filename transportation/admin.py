@@ -10,7 +10,8 @@ from django.contrib.admin import SimpleListFilter
 from leaflet.admin import LeafletGeoAdmin
 from poimap.admin import POIAdminForm, POIMediaInline
 
-from .models import TimeSlot, Stop, Service, Line, RouteStop, Route, Travel, Bus, Customer, Order, Ticket, Connection, PartnerSearch
+from .models import TimeSlot, Stop, Service, Line, RouteStop, Route, Travel, Bus
+from .models import Customer, Order, Ticket, Connection, PartnerSearch, SMSNotification, SMSAnnouncement
 from .forms import StopForm
 import types
 import csv
@@ -192,7 +193,15 @@ class CustomerAdmin(admin.ModelAdmin):
 class PartnerSearchAdmin(admin.ModelAdmin):
 
     list_display = ("search_date", "departure_stop", "arrival_stop", "travel_date", "partner", "info")
-    list_filter = ("partner",)
+    list_filter = ("partner", 'info')
+
+
+class SMSNotificationAdmin(admin.ModelAdmin):
+    pass
+
+
+class SMSAnnouncementAdmin(admin.ModelAdmin):
+    pass
 
 admin.site.register(Customer, CustomerAdmin)
 admin.site.register(Ticket, TicketAdmin)
@@ -204,3 +213,7 @@ admin.site.register(Stop, StopAdmin)
 admin.site.register(Service, ServiceAdmin)
 admin.site.register(Travel, TravelAdmin)
 admin.site.register(PartnerSearch, PartnerSearchAdmin)
+admin.site.register(SMSNotification, SMSNotificationAdmin)
+admin.site.register(SMSAnnouncement, SMSAnnouncementAdmin)
+
+admin.site.register(TimeSlot)

@@ -6,7 +6,8 @@ from .views import TransportationTicketPrintView, TransportationTicketValidation
 from .views import TransportationOrderInvoice, TransportationOrderInvoicePrintView 
 from .views import DriverView, DriverDailyService, DriverDailyServicePrintView
 from .views import ServiceTimeTablePrintView, ServiceTimeTableView, line_prices_pdf
-from .views import travels_csv, stops_csv
+from .views import travels_csv, stops_csv, ProfessionnalLoginView, ProfessionnalAccessView
+from .views import SMSNotificationSubscription, SMSAnnouncementView
 
 
 urlpatterns = [
@@ -20,9 +21,16 @@ urlpatterns = [
     url(r'^ticket/(?P<num>[\w-]+)/$', TransportationTicket.as_view(), name='ticket'),
     url(r'^ticket/(?P<num>[\w-]+)/pdf/$', TransportationTicketPrintView.as_view(), name='ticket-pdf'),
     url(r'^ticket/(?P<num>[\w-]+)/validate/$', TransportationTicketValidation.as_view(), name='ticket-validation'),
-    url(r'^driver/$', DriverView.as_view(), name='driver'),
-    url(r'^driver/service/pdf/$', DriverDailyServicePrintView.as_view(), name='driver-daily-service-pdf'),
+    
+    url(r'^sms/subscribe/$', SMSNotificationSubscription.as_view(), name='sms-subscription'),
 
+    url(r'^pro/$', ProfessionnalAccessView.as_view(), name='pro-access'),
+    url(r'^pro/login/$', ProfessionnalLoginView.as_view(), name='login-pro'),
+    url(r'^pro/driver/$', DriverView.as_view(), name='driver'),
+    url(r'^pro/driver/service/pdf/$', DriverDailyServicePrintView.as_view(), name='driver-daily-service-pdf'),
+    url(r'^pro/sms/announcement/$', SMSAnnouncementView.as_view(), name='sms-announcement'),
+    
+    
     url(r'^travels\.csv$', travels_csv, name='travels-csv'),
     url(r'^stops\.csv$', stops_csv, name='stops-csv'),
 ]
