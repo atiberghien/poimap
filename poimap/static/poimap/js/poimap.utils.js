@@ -99,15 +99,30 @@ function fetchArea(map, url){
 }
 
 function createPOIMarker(poi) {
-    return marker = L.geoJSON(poi, {
+    return L.geoJSON(poi, {
         onEachFeature: function (feature, layer) {
-            layer.setIcon(L.BeautifyIcon.icon({
-                icon: feature.properties.type.icon,
-                iconShape: 'circle',
-                backgroundColor: 'blue',
-                borderColor: 'blue',
-                textColor: 'white'
-            }));
+            if(feature.properties.type.icon_file_url){
+                layer.setIcon(L.icon({
+                    iconUrl: feature.properties.type.icon_file_url,
+                    popupAnchor:  [15, -50]
+                }));
+            } else if(feature.properties.type.icon){
+                layer.setIcon(L.BeautifyIcon.icon({
+                    icon: feature.properties.type.icon,
+                    iconShape: 'circle',
+                    backgroundColor: 'blue',
+                    borderColor: 'blue',
+                    textColor: 'white'
+                }));
+            } else {
+                layer.setIcon(L.BeautifyIcon.icon({
+                    icon: "map-marker",
+                    iconShape: 'circle',
+                    backgroundColor: 'blue',
+                    borderColor: 'blue',
+                    textColor: 'white'
+                }));
+            }
             layer.bindPopup(feature.properties.marker_popup, {'className':'custom-poimap-popup' });
             layer.on("click", function(){
                 $(document).trigger("poimap:marker-clicked", [feature, layer]);

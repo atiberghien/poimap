@@ -48,9 +48,11 @@
         });
         $(document).on("poimap:fetch-secondary-data", function(e){
             var hash = window.location.hash;
-            $('html, body').animate({
-                scrollTop: $(hash).offset().top- $("nav").height() - 10
-            }, 2000);
+            if(hash){
+                $('html, body').animate({
+                    scrollTop: $(hash).offset().top- $("nav").height() - 10
+                }, 2000);
+            }
         });
 
         $(document).on("poimap:marker-clicked", function(e, feature, layer) {
