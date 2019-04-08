@@ -637,16 +637,18 @@ class TransportationPartnerView(View):
             arrival_stop = Stop.objects.get(slug=arrival_stop_slug)
             travel_date = request.GET.get("dateAller", tomorrow)  # 2018-07-04_00_00_00
             travel_date = datetime.strptime(travel_date, "%Y-%m-%d")
-            source = request.GET.get("utm_source", "external")
-            
-            PartnerSearch.objects.create(
-                departure_stop=departure_stop,
-                arrival_stop=arrival_stop,
-                travel_date=travel_date,
-                partner=source,
-                info=request.META.get("HTTP_REFERER", "direct")
-            )
-            request.session["utm_source"] = source
+            source = request.GET.get("utm_source", "")
+            referer = request.META.get("HTTP_REFERER", "")
+
+            if source or referer: 
+                PartnerSearch.objects.create(
+                    departure_stop=departure_stop,
+                    arrival_stop=arrival_stop,
+                    travel_date=travel_date,
+                    partner=source or "external",
+                    info=referer or "direct"
+                )
+            request.session["utm_source"] = source or "external"
         except:
             return redirect("/")
         
