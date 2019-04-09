@@ -29,15 +29,47 @@ class CustomerCreationForm(forms.ModelForm):
                 code='email_mismatch',
             )
         return email2
+    
+    def clean_phone(self):
+        phone = self.cleaned_data.get("phone")
+        if SMSNotification.objects.filter(phone=phone).exists():
+            raise forms.ValidationError(
+                self.error_messages['phone_already_exists'],
+                code='phone_already_exists',
+            )
+        if len(phone) != 10 or phone[0:2] not in ['06', '07']:
+            raise forms.ValidationError(
+                self.error_messages['phone_wrong_format'],
+                code='phone_wrong_format',
+            )
+        return "+33"+phone[1:]
 
     def save(self, commit=True):
         try:
             customer = Customer.objects.get(email=self.cleaned_data["email1"])
+            customer.first_name = self.cleaned_data["first_name"]
+            customer.last_name = self.cleaned_data["last_name"]
+            customer.phone = self.cleaned_data["phone"]
+            customer.sms_notif = self.cleaned_data["sms_notif"]
+            customer.terms = self.cleaned_data["terms"]
+            customer.privacy = self.cleaned_data["privacy"]
+            customer.optin = self.cleaned_data["optin"]
+
+            if not customer.sms_notif:
+                try:
+                    SMSNotification.objects.get(phone=customer.phone).delete()
+                except:
+                    pass
+
         except Customer.DoesNotExist:
             customer = super(CustomerCreationForm, self).save(commit=False)
             customer.email = self.cleaned_data["email1"]
-            if commit:
-                customer.save() 
+            if customer.sms_notif:
+                SMSNotification.objects.get_or_create(phone=customer.phone)
+            
+        if commit:
+            customer.save()
+        
         return customer
 
 
@@ -79,7 +111,6 @@ class SMSNotificationSubscriptionForm(forms.ModelForm):
 
     def clean_phone(self):
         phone = self.cleaned_data.get("phone")
-        email2 = self.cleaned_data.get("email2")
         if SMSNotification.objects.filter(phone=phone).exists():
             raise forms.ValidationError(
                 self.error_messages['phone_already_exists'],
