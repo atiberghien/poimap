@@ -104,6 +104,7 @@ function createPOIMarker(poi) {
             if(feature.properties.type.icon_file_url){
                 layer.setIcon(L.icon({
                     iconUrl: feature.properties.type.icon_file_url,
+                    iconSize:  [28, 28],
                     popupAnchor:  [15, -50]
                 }));
             } else if(feature.properties.type.icon){
