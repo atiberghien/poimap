@@ -43,3 +43,7 @@ class CustomItineraryFormPlugin(CMSPlugin):
         null=True,
         on_delete=models.SET_NULL,
     )
+    important_step_types = models.ManyToManyField(POIType, verbose_name=u"Types de étapes importantes")
+
+    def copy_relations(self, oldinstance):
+            self.important_step_types = oldinstance.important_step_types.all()
