@@ -142,7 +142,7 @@ class POIAdmin(LeafletGeoAdmin):
 
     list_display = ('id', 'name', 'type', "related_path", 'distance', "starred", 'convert_actions')
     list_editable = ('name', 'type', "related_path", "starred")
-    list_filter = ('type',)
+    list_filter = ('starred', 'type',)
     search_fields = ('name', 'slug')
     inlines = [POIMediaInline]
     form = POIAdminForm
