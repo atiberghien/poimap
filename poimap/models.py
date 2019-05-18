@@ -91,6 +91,7 @@ class POI(PolymorphicModel):
     city = models.CharField(max_length=300, blank=True, null=True)
     country = CountryField(default="FR")
     geom = gismodels.GeometryField(dim=3)
+    altitude = models.FloatField(default=0.0)
 
     starred = models.BooleanField(default=False)
 
