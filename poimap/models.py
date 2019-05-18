@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.db import models
 from django.db.models.signals import post_save
-from django.db.models import Avg
+from django.db.models import Avg, Count
 from django.contrib.auth.models import User
 from django.contrib.gis.db import models as gismodels
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -61,10 +61,10 @@ class POIType(models.Model):
     color = models.CharField(max_length=30, null=True, blank=True)
 
     def get_typed_poi_count(self):
-        return self.poi_set.count()
+        return self.all_poi.count()
 
     def __unicode__(self):
-        return "%s (%s)" % (self.label, self.get_typed_poi_count())
+        return u"%s (%s)" % (self.label, self.get_typed_poi_count())
 
 def TYPE_SLUG_CHOICES():
     return [(t.slug, t.slug) for t in POIType.objects.all().order_by('slug')]
@@ -115,13 +115,22 @@ class POI(PolymorphicModel):
         return self.ratings.count()
 
     def __unicode__(self):
-        return "%s - %s" % (self.name, self.type.label)
+        if self.type:
+            return u"%s - %s" % (self.name, self.type.label)
+        else:
+            return u"%s" % self.name
 
     class Meta:
         verbose_name = verbose_name_plural = "POI"
         ordering = ['distance', 'name']
 
 
+@receiver(post_save, sender=POI)
+def fill_main_type(sender, instance, created, **kwargs):
+    if not instance.type:
+        POI.objects.filter(id=instance.id).update(type=instance.types.annotate(nb_poi=Count('all_poi')).order_by('nb_poi').first())
+    elif not instance.types.count():
+        instance.types.add(install.type)
 
 @receiver(post_save, sender=POI)
 def compute_distance(sender, instance, created, **kwargs):
