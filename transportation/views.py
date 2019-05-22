@@ -14,6 +14,8 @@ from django.views.generic import RedirectView, View, FormView, CreateView
 from django.views.generic.edit import ModelFormMixin
 from django.contrib.auth.views import LoginView
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.clickjacking import xframe_options_exempt
+
 from django.urls import reverse_lazy, reverse
 
 from dal import autocomplete
@@ -617,7 +619,7 @@ class ServiceTimeTableView(TemplateView):
 class  ServiceTimeTablePrintView(PDFRenderingMixin, ServiceTimeTableView):
     pass
 
-
+@method_decorator(xframe_options_exempt, name='dispatch')
 class PartnerWidgetView(TemplateView):
     template_name = "transportation/widget.html"
 
