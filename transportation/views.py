@@ -640,7 +640,12 @@ class TransportationPartnerView(View):
             source = request.GET.get("utm_source", "")
             referer = request.META.get("HTTP_REFERER", "")
 
-            if source or referer: 
+            
+            
+            if travel_date.date() < today:
+                return redirect("/")
+            
+            elif source or referer: 
                 PartnerSearch.objects.create(
                     departure_stop=departure_stop,
                     arrival_stop=arrival_stop,
