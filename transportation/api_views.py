@@ -25,6 +25,10 @@ class StopListView(generics.ListAPIView):
     queryset = Stop.objects.all()
     serializer_class = StopSerializer
 
+class StopRetrieveView(generics.RetrieveAPIView):
+    queryset = Stop.objects.all()
+    serializer_class = StopSerializer
+
 
 class LineListView(generics.ListAPIView):
     queryset = Line.objects.all()

@@ -7,7 +7,7 @@ from .views import TransportationOrderInvoice, TransportationOrderInvoicePrintVi
 from .views import DriverView, DriverDailyService, DriverDailyServicePrintView
 from .views import ServiceTimeTablePrintView, ServiceTimeTableView, line_prices_pdf
 from .views import travels_csv, stops_csv, ProfessionnalLoginView, ProfessionnalAccessView
-from .views import SMSNotificationSubscription, SMSAnnouncementView
+from .views import SMSNotificationSubscription, SMSAnnouncementView, PartnerWidgetView
 
 
 urlpatterns = [
@@ -30,6 +30,7 @@ urlpatterns = [
     url(r'^pro/driver/service/pdf/$', DriverDailyServicePrintView.as_view(), name='driver-daily-service-pdf'),
     url(r'^pro/sms/announcement/$', SMSAnnouncementView.as_view(), name='sms-announcement'),
     
+    url(r'^search/widget/$', PartnerWidgetView.as_view(), name='partner-widget'),
     
     url(r'^travels\.csv$', travels_csv, name='travels-csv'),
     url(r'^stops\.csv$', stops_csv, name='stops-csv'),

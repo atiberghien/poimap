@@ -618,6 +618,15 @@ class  ServiceTimeTablePrintView(PDFRenderingMixin, ServiceTimeTableView):
     pass
 
 
+class PartnerWidgetView(TemplateView):
+    template_name = "transportation/widget.html"
+
+    def get_context_data(self):
+        context = TemplateView.get_context_data(self)
+        context["search_form"] = SearchServiceForm()
+        return context
+
+
 class TransportationPartnerView(View):
 
     def get(self, request, *args, **kwargs):
