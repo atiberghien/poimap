@@ -130,7 +130,7 @@ def fill_main_type(sender, instance, created, **kwargs):
     if not instance.type:
         POI.objects.filter(id=instance.id).update(type=instance.types.annotate(nb_poi=Count('all_poi')).order_by('nb_poi').first())
     elif not instance.types.count():
-        instance.types.add(install.type)
+        instance.types.add(instance.type)
 
 @receiver(post_save, sender=POI)
 def compute_distance(sender, instance, created, **kwargs):
