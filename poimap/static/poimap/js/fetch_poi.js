@@ -25,9 +25,10 @@ function fetchPOI(map, url, options) {
     - poiTypeSlugs : to filter according specific POITypes
     - hideControl : to hide layer control
     */
+
     var options = options == undefined ? {} : options;
     var pathPk = options.hasOwnProperty('pathPk') ? options.pathPk : null;
-    var poiTypeSlugs = options.hasOwnProperty('poiTypeSlugs') ? options.poiTypeSlugs.join(',') : null;
+    var poiTypeSlugs = options.hasOwnProperty('poiTypeSlugs') ? options.poiTypeSlugs : null;
     var hideControl = options.hasOwnProperty('hideControl') ? options.hideControl : null;
 
     var bboxCoords = resizeBbox([startPoint.getLatLng().lng,

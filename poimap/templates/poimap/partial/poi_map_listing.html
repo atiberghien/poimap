@@ -20,10 +20,8 @@
 <script src="{% static 'beautifymarker/leaflet-beautify-marker-icon.js' %}" charset="utf-8"></script>
 <script src="{% static '@turf/turf/turf.min.js' %}" charset="utf-8"></script>
 <script src="{% static 'poimap/js/global_vars.js' %}" charset="utf-8"></script>
-<script type="text/javascript">
-{% include "poimap/scripts/fetch_poi.js"  with poi_type_slugs=poi_type_slugs remove_control=instance.hide_control %}
-</script>
 <script src="{% static 'poimap/js/poimap.utils.js' %}" charset="utf-8"></script>
+<script src="{% static 'poimap/js/fetch_poi.js' %}" charset="utf-8"></script>
 <script type="text/javascript">
         function main_map_init(map, options) {
             fetchArea(map, "{% url 'api-area' instance.area_display.slug %}").done(function(){
@@ -45,7 +43,10 @@
 
             {% if not start_point and not end_point %}
             $(document).on("poimap:fetch-data", function(evt, area){
-                fetchPOI(map).done(function(){
+                fetchPOI(map, "{% url 'api-poi-list' %}", {
+                    poiTypeSlugs : "{{poi_type_slugs|join:','}}",
+                    hideControl : {% if instance.hide_control %}true{% else %}false{% endif %},
+                }).done(function(){
                     path = computePath(map, fullPath, path)
                     $(document).on("poimap:itinerary-bounds-change", function (evt, startPoiId, endPoiId) {
                         startPoint = allPOI[startPoiId][1]
