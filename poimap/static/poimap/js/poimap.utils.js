@@ -100,34 +100,48 @@ function fetchArea(map, url){
 
 function createPOIMarker(poi) {
     return L.geoJSON(poi, {
-        onEachFeature: function (feature, layer) {
-            if(feature.properties.type.icon_file_url){
+        pointToLayer: function(geoJsonPoint, latlng) {
+            
+            var color = geoJsonPoint.properties.type.color ? geoJsonPoint.properties.type.color : 'blue';   
+            var layer = L.marker(latlng, {draggable: false});
+            if(geoJsonPoint.properties.type.icon_file_url){
                 layer.setIcon(L.icon({
-                    iconUrl: feature.properties.type.icon_file_url,
+                    iconUrl: geoJsonPoint.properties.type.icon_file_url,
                     iconSize:  [28, 28],
                     popupAnchor:  [15, -50]
                 }));
-            } else if(feature.properties.type.icon){
+            } 
+            else if(geoJsonPoint.properties.type.icon){
                 layer.setIcon(L.BeautifyIcon.icon({
-                    icon: feature.properties.type.icon,
+                    icon: geoJsonPoint.properties.type.icon,
                     iconShape: 'circle',
-                    backgroundColor: 'blue',
-                    borderColor: 'blue',
+                    backgroundColor: color,
+                    borderColor: color,
                     textColor: 'white'
                 }));
             } else {
                 layer.setIcon(L.BeautifyIcon.icon({
-                    icon: "map-marker",
-                    iconShape: 'circle',
-                    backgroundColor: 'blue',
-                    borderColor: 'blue',
-                    textColor: 'white'
+                    iconShape: 'doughnut',
+                    borderWidth: 5,
+                    borderColor: color
                 }));
             }
-            layer.bindPopup(feature.properties.marker_popup, {'className':'custom-poimap-popup' });
+            layer.bindPopup(geoJsonPoint.properties.marker_popup, {'className':'custom-poimap-popup' })
+            return layer
+        }, 
+        onEachFeature: function (feature, layer) {
+            var color = feature.properties.type.color ? feature.properties.type.color : 'black';
+            if(typedPOILayers.hasOwnProperty(`<span style='color:${color}'>${feature.properties.type.label}</span>`)){
+                typedPOILayers[`<span style='color:${color}'>${feature.properties.type.label}</span>`].addLayer(layer)
+            }
+            else {
+                typedPOILayers[`<span style='color:${color}'>${feature.properties.type.label}</span>`] = L.layerGroup([layer])
+            }
+
             layer.on("click", function(){
                 $(document).trigger("poimap:marker-clicked", [feature, layer]);
-            })
+            });
+
             allPOI[feature.id] = [feature, layer];
             $(document).trigger("poimap:marker-added", [feature]);
         }
