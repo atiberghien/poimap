@@ -57,7 +57,7 @@ class POISerializer(GeoFeatureModelSerializer):
     class Meta:
         model = POI
         geo_field = "geom"
-        fields = ('id', 'name', 'slug', 'description', 'distance', 'type', 'coords', "city", "marker_popup", "medias", "url", "api_url", 'rating_score', 'vote_count')
+        fields = ['id', 'name', 'slug', 'description', 'distance', 'type', 'coords', "city", "marker_popup", "medias", "url", "api_url", 'rating_score', 'vote_count']
 
 class TypedPOISerializer(ModelSerializer):
 
