@@ -11,7 +11,9 @@ from .models import TimeSlot, Stop, Customer, Service, SMSNotification
 class CustomerCreationForm(forms.ModelForm):
 
     error_messages = {
-        'email_mismatch': _("The two password fields didn't match."),
+        'email_mismatch': _("Les deux emails ne correspondent pas."),
+        'phone_already_exists': _(u"Numéro déjà enregistré"),
+        'phone_wrong_format' : _(u"Mauvais format de numéro de téléphone")
     }
     email1 = forms.CharField(label=_("Email"), widget=forms.EmailInput)
     email2 = forms.CharField(label=_("Email confirmation"), widget=forms.EmailInput)
