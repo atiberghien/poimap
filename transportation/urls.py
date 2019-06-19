@@ -7,7 +7,7 @@ from .views import TransportationOrderInvoice, TransportationOrderInvoicePrintVi
 from .views import DriverView, DriverDailyService, DriverDailyServicePrintView
 from .views import ServiceTimeTablePrintView, ServiceTimeTableView, line_prices_pdf
 from .views import travels_csv, stops_csv, ProfessionnalLoginView, ProfessionnalAccessView
-from .views import SMSNotificationSubscription, SMSAnnouncementView, PartnerWidgetView
+from .views import SMSNotificationSubscription, SMSNotificationUnsubscription, SMSAnnouncementView, PartnerWidgetView
 
 
 urlpatterns = [
