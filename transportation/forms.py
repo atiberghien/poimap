@@ -128,3 +128,20 @@ class SMSNotificationSubscriptionForm(forms.ModelForm):
     class Meta:
         model = SMSNotification
         fields = ('phone', )
+
+class SMSNotificationUnsubscriptionForm(forms.Form):
+    phone = forms.CharField(label='Phone', max_length=255)
+
+    def clean_phone(self):
+        phone = self.cleaned_data.get("phone")
+        if SMSNotification.objects.filter(phone=phone).exists():
+            raise forms.ValidationError(
+                self.error_messages['phone_already_exists'],
+                code='phone_already_exists',
+            )
+        if len(phone) != 10 or phone[0:2] not in ['06', '07']:
+            raise forms.ValidationError(
+                self.error_messages['phone_wrong_format'],
+                code='phone_wrong_format',
+            )
+        return "+33"+phone[1:]

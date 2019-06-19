@@ -23,6 +23,7 @@ urlpatterns = [
     url(r'^ticket/(?P<num>[\w-]+)/validate/$', TransportationTicketValidation.as_view(), name='ticket-validation'),
     
     url(r'^sms/subscribe/$', SMSNotificationSubscription.as_view(), name='sms-subscription'),
+    url(r'^sms/unsubscribe/$', SMSNotificationUnsubscription.as_view(), name='sms-unsubscription'),
 
     url(r'^pro/$', ProfessionnalAccessView.as_view(), name='pro-access'),
     url(r'^pro/login/$', ProfessionnalLoginView.as_view(), name='login-pro'),

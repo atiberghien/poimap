@@ -29,7 +29,7 @@ from poimap.models import Area
 from .models import Line, Stop, Route, Service, Customer, Ticket, Order, RouteStop
 from .models import Bus, Order, Connection, PartnerSearch, Travel, SMSNotification, SMSAnnouncement
 from .api_views import compute_timetable
-from .forms import SearchServiceForm, CustomerCreationForm, SMSNotificationSubscriptionForm
+from .forms import SearchServiceForm, CustomerCreationForm, SMSNotificationSubscriptionForm, SMSNotificationUnsubscriptionForm
 from .signals import sms_notif_created, ticket_sms_notif_needed
 
 import json
@@ -554,6 +554,22 @@ class SMSNotificationSubscription(CreateView):
     template_name = "transportation/sms_subscription_form.html"
     form_class = SMSNotificationSubscriptionForm
     success_url = reverse_lazy('sms-subscription')
+
+    def get_context_data(self, **kwargs):
+        context = CreateView.get_context_data(self, **kwargs)
+        context["unsubscribe_form"] = SMSNotificationUnsubscriptionForm()
+        return context
+
+@method_decorator(csrf_exempt, name='dispatch')
+class SMSNotificationUnsubscription(FormView):
+    template_name = "transportation/sms_subscription_form.html"
+    form_class = SMSNotificationUnsubscriptionForm
+    success_url = reverse_lazy('sms-subscription')
+
+    def form_valid(self, form):
+        print form.cleaned_data["phone"]
+        SMSNotification.objects.filter(phone=form.cleaned_data["phone"]).delete()
+        return FormView.form_valid(self, form)
 
 class SMSAnnouncementView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     login_url = reverse_lazy('login-pro')
