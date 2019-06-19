@@ -197,7 +197,7 @@ class PartnerSearchAdmin(admin.ModelAdmin):
 
 
 class SMSNotificationAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('phone', 'future_sms')
 
 
 class SMSAnnouncementAdmin(admin.ModelAdmin):
