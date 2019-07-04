@@ -9,6 +9,7 @@ from django.contrib.gis.measure import D
 from django.views.generic import DetailView
 from django.shortcuts import redirect, get_object_or_404
 from rest_framework import generics
+from rest_framework.pagination import PageNumberPagination
 from django.contrib.gis.geos import Polygon
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -94,8 +95,20 @@ class POIView(generics.RetrieveAPIView):
     queryset = POI.objects.all()
     serializer_class = POISerializer
 
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 1000
+
+    def get_paginated_response(self, data):
+        response = super(StandardResultsSetPagination, self).get_paginated_response(data)
+        response.data['num_pages'] = self.page.paginator.num_pages
+        return response
+    
 class POIList(generics.ListAPIView):
     serializer_class = POISerializer
+    pagination_class = StandardResultsSetPagination
+
 
     def get_queryset(self):
         queryset = POI.objects.all()
