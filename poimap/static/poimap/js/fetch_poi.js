@@ -2,7 +2,7 @@ function fetchDataSource(map, url, poiFactoryCallback){
     return $.getJSON(url).done(function(data){
 
         if(data.hasOwnProperty('num_pages')){
-            poiFactoryCallback(data.features).addTo(map);
+            poiFactoryCallback(data.results.features).addTo(map);
             for (let index = 2; index <= data.num_pages; index++) {
                 $.ajax({
                     dataType: "json",
@@ -13,7 +13,7 @@ function fetchDataSource(map, url, poiFactoryCallback){
                 });
             }
         } else {
-            poiFactoryCallback(data.features).addTo(map);
+            poiFactoryCallback(data.results.features).addTo(map);
         }
     });
 }
