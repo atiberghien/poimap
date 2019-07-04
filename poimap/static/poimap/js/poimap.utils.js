@@ -163,7 +163,6 @@ function computePath(map, fullPath, currentPath){
     var length = turf.length(sliced);
     $("#distance").text(length.toFixed(2));
 
-    fetchPOI(map);
     $(document).trigger("poimap:update-elevation-chart", [sliced.geometry.coordinates])
 
     return tempPath
