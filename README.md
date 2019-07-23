@@ -16,7 +16,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_gis',
     'treebeard',
-    'fontawesome',
+    'fontawesome_5',
     'leaflet',
     'easy_thumbnails',
     "compressor",

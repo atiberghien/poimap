@@ -14,7 +14,7 @@ from treebeard.mp_tree import MP_Node
 from polymorphic.models import PolymorphicModel
 from filer.fields.image import FilerImageField
 from autoslug import AutoSlugField
-from fontawesome.fields import IconField
+from fontawesome_5.fields import IconField
 from ckeditor.fields import RichTextField
 
 from shapely.geometry import LineString, Point

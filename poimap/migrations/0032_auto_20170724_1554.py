@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 from django.db import migrations
-import fontawesome.fields
+import fontawesome_5
 
 
 class Migration(migrations.Migration):
@@ -16,6 +16,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='poitype',
             name='icon',
-            field=fontawesome.fields.IconField(blank=True, max_length=60),
+            field=fontawesome_5.fields.IconField(blank=True, max_length=60),
         ),
     ]
