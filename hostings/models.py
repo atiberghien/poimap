@@ -54,7 +54,7 @@ class Hostings(POI):
         return '%s' % (self.name)
 
 class OpeningDate(models.Model):
-    hosting = models.ForeignKey(Hostings)
+    hosting = models.ForeignKey(Hostings, on_delete=models.CASCADE)
     start_date = models.DateField()
     end_date = models.DateField()
     monday = models.BooleanField(default=False)
@@ -71,7 +71,7 @@ class OpeningDate(models.Model):
 
 
 class Contact(models.Model):
-    hosting = models.ForeignKey(Hostings)
+    hosting = models.ForeignKey(Hostings, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
     mobile_phone = models.CharField(max_length=10, blank=True)
@@ -89,7 +89,7 @@ class SleepingType(models.Model):       # type de couchage
 
 
 class Sleeping(models.Model):
-    hosting = models.ForeignKey(Hostings)
+    hosting = models.ForeignKey(Hostings, on_delete=models.CASCADE)
     sleeping_type = models.ForeignKey(SleepingType)
     name = models.CharField(max_length=30)      # nom ou numero du couchage
     places = models.FloatField(null=True, blank=True)

@@ -26,7 +26,7 @@ class ImportationTrace(models.Model):
     original_id = models.CharField(max_length=255, unique=True)
     created_at = models.DateTimeField(null=True, blank=True)
     updated_at = models.DateTimeField(null=True, blank=True)
-    content_type = models.ForeignKey(ContentType, null=True, on_delete=models.CASCADE)
+    content_type = models.ForeignKey(ContentType, null=True, on_delete=models.SET_NULL)
     object_id = models.PositiveIntegerField(null=True)
     content_object = GenericForeignKey('content_type', 'object_id')
 
@@ -80,7 +80,7 @@ class SpecificPOITypeTemplate(models.Model):
 
 class POI(PolymorphicModel):
     name = models.CharField(max_length=500)
-    related_path = models.ForeignKey(Path, null=True, blank=True)
+    related_path = models.ForeignKey(Path, null=True, blank=True, on_delete=models.SET_NULL)
     slug = AutoSlugField(populate_from="name", always_update=True)
     description = RichTextField(blank=True, null=True)
     type = models.ForeignKey(POIType, blank=True, null=True, on_delete=models.SET_NULL)
@@ -97,7 +97,7 @@ class POI(PolymorphicModel):
 
     distance = models.PositiveIntegerField(default=0, blank=True, null=True)
 
-    extra_data = JSONField(default=list([dict({})]), blank=True, null=True)
+    extra_data = JSONField(default=list, blank=True, null=True)
 
     @property
     def coords(self):
@@ -159,8 +159,8 @@ def compute_distance(sender, instance, created, **kwargs):
     sender.objects.filter(id=instance.id).update(distance=distance)
 
 class POIRating(models.Model):
-    poi = models.ForeignKey(POI, related_name='ratings')
-    user = models.ForeignKey(User, null=True, blank=True)
+    poi = models.ForeignKey(POI, related_name='ratings', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
     score = models.FloatField()
     created_at = models.DateTimeField(auto_now_add=True)
     comment = models.TextField(blank=True)
@@ -170,8 +170,8 @@ class POIRating(models.Model):
         ordering = ['-created_at',]
 
 class POIMedia(models.Model):
-    poi = models.ForeignKey(POI, related_name='medias')
-    file = FilerImageField(null=True, blank=True)
+    poi = models.ForeignKey(POI, related_name='medias', on_delete=models.CASCADE)
+    file = FilerImageField(null=True, blank=True, on_delete=models.CASCADE)
     order = models.PositiveIntegerField(default=0, blank=False, null=False)
 
     class Meta:

@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 from django.db import models
 from django.db.models.signals import post_save, post_delete
 from django.shortcuts import reverse
-from django.contrib.postgres.fields import JSONField
 from django.dispatch import receiver
 from autoslug import AutoSlugField
 from filer.fields.file import FilerFileField
@@ -154,12 +153,12 @@ class Bus(models.Model):
     name = models.CharField(max_length=64)
     slug = AutoSlugField(populate_from='name', always_update=True, unique=True)
     license_plate = models.CharField(max_length=20, null=True, blank=True)
-    blueprint = FilerFileField(null=True, blank=True)
+    blueprint = FilerFileField(null=True, blank=True, on_delete=models.CASCADE)
     nb_seats = models.PositiveIntegerField(default=0)
     services = models.ManyToManyField(Service)
-    picture = FilerImageField(null=True, blank=True, related_name="+")
+    picture = FilerImageField(null=True, blank=True, related_name="+", on_delete=models.CASCADE)
     cover = FilerImageField(null=True, blank=True, related_name="+")
-    gallery = FilerFolderField(null=True, blank=True, related_name="+")
+    gallery = FilerFolderField(null=True, blank=True, related_name="+", on_delete=models.CASCADE)
     index_eco = models.PositiveIntegerField(default=0)
     description = RichTextField(blank=True, null=True)
     equipments = RichTextField(blank=True, null=True, config_name='only_bullet_point')

@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 class Weather(models.Model):
     poi = models.OneToOneField(POI, on_delete=models.CASCADE)
     updated_at = models.DateTimeField(auto_now=True)
-    data = JSONField(null=True, blank=True)
+    data = JSONField(default=list, null=True, blank=True)
 
     def fetch_data(self):
         if hasattr(settings, 'OWM_API_KEY'):
