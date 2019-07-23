@@ -654,6 +654,7 @@ class TransportationPartnerView(View):
         departure_stop = None
         arrival_stop = None
         travel_date = None
+        return_date = None
         source = ""
 
         today = date.today()
@@ -664,9 +665,15 @@ class TransportationPartnerView(View):
             arrival_stop = Stop.objects.get(slug=arrival_stop_slug)
             travel_date = request.GET.get("dateAller", tomorrow)  # 2018-07-04_00_00_00
             travel_date = datetime.strptime(travel_date, "%Y-%m-%d")
+
+            return_date = request.GET.get("dateRetour", None)  # 2018-07-04_00_00_00
+            if return_date:
+                travel_date = datetime.strptime(return_date, "%Y-%m-%d")
+            
+            nb_passengers = request.GET.get("nbVoyageurs", 1)
+
             source = request.GET.get("utm_source", "")
             referer = request.META.get("HTTP_REFERER", "")
-
             
             
             if travel_date.date() < today:
@@ -684,12 +691,17 @@ class TransportationPartnerView(View):
         except:
             return redirect("/")
         
-        form = SearchServiceForm(initial={
+        form_initial = {
             "departure" : departure_stop,
             "arrival" : arrival_stop,
             "departure_date" : travel_date,
+            "nb_passengers" : nb_passengers,
             "source" : source
-        })
+        }
+        if return_date:
+            form_initial["arrival_date"] = return_date
+
+        form = SearchServiceForm(initial=form_initial)
 
         return render(request, 'transportation/partner.html', {"search_form" : form})
 
