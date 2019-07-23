@@ -40,7 +40,6 @@ class POIListingPlugin(CMSPluginBase):
             tolerance = 5.0 #km
 
             related_poi = POI.objects.filter(starred=False, geom__within=bbox)
-            print "related_poi 1", related_poi.count()
 
             min_distance = related_poi.first().distance / 1000
             max_distance = related_poi.last().distance / 1000

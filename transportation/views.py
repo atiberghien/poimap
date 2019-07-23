@@ -567,7 +567,6 @@ class SMSNotificationUnsubscription(FormView):
     success_url = reverse_lazy('sms-subscription')
 
     def form_valid(self, form):
-        print form.cleaned_data["phone"]
         SMSNotification.objects.filter(phone=form.cleaned_data["phone"]).delete()
         return FormView.form_valid(self, form)
 

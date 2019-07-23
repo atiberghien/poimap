@@ -17,7 +17,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         if options["import"] and options["export"]:
-            print "Only once of these arguments at a time : --import or --export"
+            print("Only once of these arguments at a time : --import or --export")
             return
         if options["import"]:
             TimeSlot.objects.all().update(hour=None)
@@ -48,5 +48,5 @@ class Command(BaseCommand):
             #                                  service.name.encode('utf-8'),
             #                                  service.frequency_label.encode('utf-8')])
         else:
-            print "Missing argument --import or --export"
+            print("Missing argument --import or --export")
             return
