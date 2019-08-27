@@ -168,6 +168,8 @@ def api_itinerary(request):
                                 timetable.append(end_timeslot)
                             i+=1
 
+                        if timetable and not timetable[0].is_next_day:
+                            timetables.append(timetable)
             timetables = filter(has_all_stop, timetables)
             timetables = filter(increasing_hours, timetables)
             timetables.sort(key=timetable_sort_func)
