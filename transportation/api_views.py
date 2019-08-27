@@ -14,7 +14,8 @@ from networkx.algorithms.shortest_paths.generic import all_shortest_paths
 
 from .serializers import StopSerializer, LineSerializer
 from .models import Stop, Line, Route, Service, Travel, Ticket, Connection
-from .utils import has_all_stop, get_route_length, get_total_time, increasing_hours, timetable_sort_func, get_max_wait, get_travel_price
+from .utils import has_all_stop, get_route_length, get_total_time, increasing_hours
+from .utils import timetable_sort_func, get_max_wait, get_travel_price
 
 import pandas as pd
 import networkx as nx
@@ -170,6 +171,11 @@ def api_itinerary(request):
 
                         if timetable and not timetable[0].is_next_day:
                             timetables.append(timetable)
+            
+            def correct_travel(timetable):
+                return source == timetable[0].stop.slug and target == timetable[-1].stop.slug
+            
+            timetables = filter(correct_travel, timetables)
             timetables = filter(has_all_stop, timetables)
             timetables = filter(increasing_hours, timetables)
             timetables.sort(key=timetable_sort_func)
