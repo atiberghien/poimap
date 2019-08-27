@@ -344,7 +344,7 @@ class TransportationCheckout(FormView):
                         arrival_stop=Stop.objects.get(id=travel["return"]["timeslots"][-1]["stop_id"]),
                         departure_hour=datetime.strptime(travel["return"]["timeslots"][0]["hour"], "%H:%M").time(),
                         arrival_hour=datetime.strptime(travel["return"]["timeslots"][-1]["hour"], "%H:%M").time(),
-                        date=datetime.strptime(travel["return"]['departure_date'], "%d/%m/%y"),
+                        date=datetime.strptime(travel["return"]['arrival_date'], "%d/%m/%y"), #FIXME: must be departure date
                         price=travel["return"]['travel_unit_price'],
                     )
                     for service in travel["return"]["services"]:
