@@ -162,10 +162,11 @@ def api_itinerary(request):
                         for service in service_combinaison:
                             start_timeslot = service.timeslots.get(stop__slug=path[i])
                             end_timeslot = service.timeslots.get(stop__slug=path[i+1])
-                            timetable.append(start_timeslot)
-                            timetable.append(end_timeslot)
+                            
+                            if start_timeslot.order < end_timeslot.order:
+                                timetable.append(start_timeslot)
+                                timetable.append(end_timeslot)
                             i+=1
-                        timetables.append(timetable)
 
             timetables = filter(has_all_stop, timetables)
             timetables = filter(increasing_hours, timetables)
