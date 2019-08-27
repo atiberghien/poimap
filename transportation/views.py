@@ -124,9 +124,13 @@ class TransportationItinerary(View):
 
 
     def post(self, request, *args, **kwargs):
-        context = {}
-        form_data = request.POST
-        context["direction"] = 1
+        
+        context = {
+            'direction' : 1
+        }
+        form_data = request.POST.copy()
+        form_data["select_return"] = request.POST.get('select_return', 'False')
+
         if "go" in request.POST:
             go = json.loads(request.POST.get('go'))
             if "return" in request.POST or not go["arrival_date"]:
@@ -160,6 +164,7 @@ class TransportationItinerary(View):
                 "arrival_date" : go["arrival_date"],
                 "departure_date" : go["departure_date"],
                 "nb_passengers" : go["traveler_count"],
+                "select_return" : go['select_return'],
             }
             context.update({
                 "go" : json.dumps(go).replace("'", "\\'"),
@@ -238,6 +243,7 @@ class TransportationCartSaveTravellers(View):
                 travels[travel_id][way]["travellers"][traveller_id]["seats"][service_slug] = value
             else:
                 travels[travel_id][way]["travellers"][traveller_id][fieldname] = value
+            
             request.session["travels"] = travels
         return HttpResponse()
 
@@ -665,15 +671,16 @@ class TransportationPartnerView(View):
             travel_date = request.GET.get("dateAller", tomorrow)  # 2018-07-04_00_00_00
             travel_date = datetime.strptime(travel_date, "%Y-%m-%d")
 
+            select_return = request.GET.get("select_return", False)
             return_date = request.GET.get("dateRetour", None)  # 2018-07-04_00_00_00
-            if return_date:
-                travel_date = datetime.strptime(return_date, "%Y-%m-%d")
+            
+            if select_return and return_date:
+                return_date = datetime.strptime(return_date, "%Y-%m-%d")
             
             nb_passengers = request.GET.get("nbVoyageurs", 1)
 
             source = request.GET.get("utm_source", "")
             referer = request.META.get("HTTP_REFERER", "")
-            
             
             if travel_date.date() < today:
                 return redirect("/")
@@ -695,9 +702,10 @@ class TransportationPartnerView(View):
             "arrival" : arrival_stop,
             "departure_date" : travel_date,
             "nb_passengers" : nb_passengers,
-            "source" : source
+            "source" : source,
+            "select_return" : select_return
         }
-        if return_date:
+        if select_return and return_date:
             form_initial["arrival_date"] = return_date
 
         form = SearchServiceForm(initial=form_initial)

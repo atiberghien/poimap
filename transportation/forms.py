@@ -102,6 +102,7 @@ class SearchServiceForm(forms.Form):
     departure_date = forms.DateField()
     arrival_date = forms.DateField(required=False)
     source = forms.CharField(widget=forms.HiddenInput(), initial="internal", required=False)
+    select_return = forms.CharField(widget=forms.HiddenInput(), initial='False', required=True)
 
 
 class SMSNotificationSubscriptionForm(forms.ModelForm):
