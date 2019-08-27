@@ -211,12 +211,18 @@ class Ticket(models.Model):
 
     is_validated = models.BooleanField(default=False)
 
+    class Meta:
+        ordering = ('date', 'departure_hour')
+
 class Connection(models.Model):
     ticket = models.ForeignKey(Ticket)
     service = models.ForeignKey(Service)
     from_stop = models.ForeignKey(Stop, related_name="+")
     to_stop = models.ForeignKey(Stop, related_name="+")
     seat = models.IntegerField(null=True, blank=True)
+
+    class Meta:
+        ordering = ('id',)
 
 
 class PartnerSearch(models.Model):
