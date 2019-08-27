@@ -195,23 +195,36 @@ def api_itinerary(request):
                     timetable_data["travel_unit_price"] = get_travel_price(timetable)
                     timetable_data["timeslots"] = []
                 current_service_name = None
+                
+                timeslot_date = travel_date
+                extra_days = 0
                 for timeslot in timetable:
+                    
+                    if timeslot.is_next_day:
+                        timeslot_date += timedelta(days=1)
+                        extra_days += 1
+                    
                     timeslot_data = {
                         "stop_id" : timeslot.stop.id,
                         "stop_name" : timeslot.stop.name,
-                        "hour" : datetime.combine(date.today(), timeslot.hour).strftime("%H:%M")
+                        "date" : timeslot_date.date(),
+                        "hour" : datetime.combine(date.today(), timeslot.hour).strftime("%H:%M"),
+                        "direction" : timeslot.service.route.name,
                     }
-                    if timeslot.service.name != current_service_name:
+                    
+                    if timeslot.service.name != current_service_name or extra_days > 1:
                         timeslot_data["service_name"] = timeslot.service.name
                         timeslot_data["service_slug"] = timeslot.service.slug
                         current_service_name = timeslot.service.name
 
                     timetable_data["timeslots"].append(timeslot_data)
-                result["timetables"].append(timetable_data)
+                if extra_days == 0:
+                    #FIXME : don't take into account travel during more than 1 days
+                    result["timetables"].append(timetable_data)
 
-        except:
+        except Exception as e:
             result["success"] = "KO"
-            result["msg"] = "ALGO_ERROR"
+            result["reason"] = "ALGO_ERROR"
     else:
         result["success"] = "KO"
         result["msg"] = "MISSING_INPUT_DATA"
