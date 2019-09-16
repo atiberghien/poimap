@@ -89,7 +89,7 @@ class PathAdmin(LeafletGeoAdminMixin, TreeAdmin):
 
 class POIAdminForm(CleanZDimensionMixin, forms.ModelForm):
     description = forms.CharField(widget=CKEditorWidget())
-    types = forms.ModelMultipleChoiceField(queryset=POIType.objects.all(), widget=FilteredSelectMultiple("Types", is_stacked=False))
+    types = forms.ModelMultipleChoiceField(queryset=POIType.objects.all(), widget=FilteredSelectMultiple("Types", is_stacked=False), required=False)
     
     class Media:
         if "grappelli" in settings.INSTALLED_APPS:
