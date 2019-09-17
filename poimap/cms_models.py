@@ -2,7 +2,9 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from cms.models import CMSPlugin, Page
-from .models import Area, Path, POIType
+from .models import Area, Path, POIType, POI
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
 
 POI_LISTING_TEMPLATES = (
     ('poimap/partial/poi_map_listing.html', 'Map'),
@@ -46,4 +48,7 @@ class CustomItineraryFormPlugin(CMSPlugin):
     important_step_types = models.ManyToManyField(POIType, verbose_name=u"Types de étapes importantes")
 
     def copy_relations(self, oldinstance):
-            self.important_step_types = oldinstance.important_step_types.all()
+        self.important_step_types = oldinstance.important_step_types.all()
+
+class POIDetailPluginModel(CMSPlugin):
+    poi = models.ForeignKey(POI, on_delete=models.CASCADE)

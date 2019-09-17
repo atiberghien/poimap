@@ -1,0 +1,29 @@
+{% load leaflet_tags static sekizai_tags %}
+
+{% addtoblock 'css' %}
+{% leaflet_css %}
+{% endaddtoblock %}
+
+{% addtoblock 'css' %}
+<link rel="stylesheet" href="{% static 'beautifymarker/leaflet-beautify-marker-icon.css' %}">
+{% endaddtoblock %}
+
+<div id="map" class="h-100 w-100 d-inline-block"></div>
+
+{% addtoblock 'js' %}
+{% leaflet_js %}
+{% endaddtoblock %}
+
+{% with point=instance.poi.geom %}
+{% addtoblock 'js' %}
+<script>
+$(document).ready(function(){
+    var point = ["{{ point.y }}".replace(',', '.'), "{{ point.x }}".replace(',', '.')];
+    var map = L.map('map').setView(point, 13);
+    L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png').addTo(map);
+    marker = L.marker(point).addTo(map)
+    marker.bindPopup("Sictom des Bassins du Haut Tarn")
+})
+</script>
+{% endaddtoblock %}
+{% endwith %}
