@@ -162,6 +162,8 @@ class Bus(models.Model):
     index_eco = models.PositiveIntegerField(default=0)
     description = RichTextField(blank=True, null=True)
     equipments = RichTextField(blank=True, null=True, config_name='only_bullet_point')
+    confort = RichTextField(blank=True, null=True, config_name='only_bullet_point')
+    security = RichTextField(blank=True, null=True, config_name='only_bullet_point')
 
     def get_absolute_url(self):
         return reverse("transportation-fleet-vehicule", args=[self.slug])
