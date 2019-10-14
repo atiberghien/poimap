@@ -4,6 +4,7 @@ from cms.plugin_base import CMSPluginBase
 from cms.models.pluginmodel import CMSPlugin
 from cms.plugin_pool import plugin_pool
 from .cms_models import POIListing, POIFilters, CustomItineraryFormPlugin, POI_LISTING_TEMPLATES
+from .cms_models import POIDetailPluginModel
 from .forms import CustomItineraryForm
 
 from django.conf import settings
@@ -127,3 +128,8 @@ class CustomItineraryFormPlugin(CMSPluginBase):
             'important_step_type_ids' : ",".join([str(i) for i in instance.important_step_types.values_list('id', flat=True)])
         })
         return context
+
+@plugin_pool.register_plugin
+class POIDetailPlugin(CMSPluginBase):
+    model = POIDetailPluginModel
+    render_template = "poimap/partial/poi_detail_map.html"

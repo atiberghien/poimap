@@ -40,6 +40,9 @@ class Area(models.Model):
     def __unicode__(self):
         return self.name
 
+    def __str__(self):
+        return self.name
+
 
 class Path(MP_Node):
     name = models.CharField(max_length=500)
@@ -48,6 +51,9 @@ class Path(MP_Node):
     geom = gismodels.LineStringField(dim=3)
 
     def __unicode__(self):
+        return self.name
+
+    def __str__(self):
         return self.name
 
 
@@ -64,6 +70,9 @@ class POIType(models.Model):
         return self.all_poi.count()
 
     def __unicode__(self):
+        return u"%s (%s)" % (self.label, self.get_typed_poi_count())
+
+    def __str__(self):
         return u"%s (%s)" % (self.label, self.get_typed_poi_count())
 
 def TYPE_SLUG_CHOICES():
@@ -115,6 +124,12 @@ class POI(PolymorphicModel):
         return self.ratings.count()
 
     def __unicode__(self):
+        if self.type:
+            return u"%s - %s" % (self.name, self.type.label)
+        else:
+            return u"%s" % self.name
+
+    def __str__(self):
         if self.type:
             return u"%s - %s" % (self.name, self.type.label)
         else:
