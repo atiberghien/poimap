@@ -218,9 +218,9 @@ def api_itinerary(request):
                         current_service_name = timeslot.service.name
 
                     timetable_data["timeslots"].append(timeslot_data)
-                if extra_days == 0:
-                    #FIXME : don't take into account travel during more than 1 days
-                    result["timetables"].append(timetable_data)
+
+                timetable_data["extra_days"] = extra_days
+                result["timetables"].append(timetable_data)
 
         except Exception as e:
             result["success"] = "KO"

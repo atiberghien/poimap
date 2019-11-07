@@ -130,6 +130,7 @@ class TransportationItinerary(View):
         }
         form_data = request.POST.copy()
         form_data["select_return"] = request.POST.get('select_return', 'False')
+        extra_days = int(request.POST.get('extra_days', 0))
 
         if "go" in request.POST:
             go = json.loads(request.POST.get('go'))
@@ -161,7 +162,7 @@ class TransportationItinerary(View):
                 "arrival" : go["timeslots"][-1]["stop_id"],
                 "departure_hour" : go["timeslots"][0]["hour"],
                 "arrival_hour" : go["timeslots"][-1]["hour"],
-                "arrival_date" : go["arrival_date"],
+                "arrival_date" : (datetime.strptime(go["arrival_date"], '%d/%m/%y') + timedelta(days=extra_days)).strftime('%d/%m/%y'),
                 "departure_date" : go["departure_date"],
                 "nb_passengers" : go["traveler_count"],
                 "select_return" : go['select_return'],
