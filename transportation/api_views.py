@@ -112,18 +112,26 @@ def api_itinerary(request):
     travel_date = request.GET.get("travel_date", None)
     traveler_count = request.GET.get("traveler_count", 1)
     from_time = request.GET.get("from_time", None)
-    if from_time:
-        from_time = datetime.strptime(from_time, "%H:%M").time()
     go_date = request.GET.get("go_date", None)
-    if go_date:
-        go_date = datetime.strptime(go_date, "%d/%m/%y").date()
-    
     result = {
         "success" : "OK",
         "timetables" : []
     }
     if source and target and travel_date:
-        travel_date = datetime.strptime(travel_date, "%d/%m/%y").replace(tzinfo=tzutc())
+        try:
+            travel_date = datetime.strptime(travel_date, "%d/%m/%y").replace(tzinfo=tzutc())
+            Stop.objects.get(slug=source)
+            Stop.objects.get(slug=target)
+            if from_time:
+                from_time = datetime.strptime(from_time, "%H:%M").time()
+            if go_date:
+                go_date = datetime.strptime(go_date, "%d/%m/%y").date()        
+        except:
+            return Response({
+                'sucess' : "KO",
+                'msg' : "PARAM_ERROR"
+            }) 
+        
         routes = Route.objects.all()
         g = nx.DiGraph()
         edges = {}
