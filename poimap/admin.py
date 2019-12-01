@@ -170,7 +170,7 @@ class POIAdmin(LeafletGeoAdmin):
 
 
 class POITypeAdmin(admin.ModelAdmin):
-    list_display = ('label', 'icon', 'icon_file', 'color', 'get_typed_poi_count')
+    list_display = ('label', 'slug', 'icon', 'icon_file', 'color', 'get_typed_poi_count')
     list_editable = ('icon', )
     class Meta:
         model = POIType
