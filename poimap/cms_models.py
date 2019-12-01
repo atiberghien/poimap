@@ -21,7 +21,7 @@ class POIListing(CMSPlugin):
     hide_control = models.BooleanField(default=True)
 
     def copy_relations(self, oldinstance):
-        self.type_display = oldinstance.type_display.all()
+        self.type_display.set(oldinstance.type_display.all())
 
 
 
