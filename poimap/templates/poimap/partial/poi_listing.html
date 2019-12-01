@@ -25,6 +25,7 @@
                 description: $(poi.properties.description).text().substring(0, 250),
                 distance : poi.properties.distance / 1000,
                 url : poi.properties.url,
+                extra_data : poi.properties.extra_data,
                 vote_count : poi.properties.vote_count ? pluralize('vote', poi.properties.vote_count, true) : "0 vote",
             };
             if(poi.properties.medias.length > 0){
