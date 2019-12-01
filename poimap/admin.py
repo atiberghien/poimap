@@ -13,7 +13,7 @@ from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from adminsortable2.admin import SortableInlineAdminMixin
-
+from django.utils.safestring import mark_safe
 from ckeditor.widgets import CKEditorWidget
 from leaflet.admin import LeafletGeoAdmin, LeafletGeoAdminMixin
 from treebeard.admin import TreeAdmin
@@ -132,11 +132,14 @@ class POIAdmin(LeafletGeoAdmin):
             links = u'<a href="%s">Voir %s associés</a>' % (url, obj.polymorphic_ctype.model_class()._meta.verbose_name.title())
         else:
             #obj is just a POI
+            links += "Convertir en "
+            link_list = []
             for child_model in POI.__subclasses__():
-                links += '<a href="%s">Convertir en %s</a>' % (reverse("convert-poi", args=[obj.id, child_model._meta.model_name]),
-                                                          child_model._meta.verbose_name.title())
+                link_list.append('<a href="%s">%s</a>' % (reverse("convert-poi", args=[obj.id, child_model._meta.model_name]),
+                                                          child_model._meta.verbose_name.title()))
+            links += ", ".join(link_list)
 
-        return links
+        return mark_safe(links)
     convert_actions.allow_tags = True
     convert_actions.short_description = ""
 
