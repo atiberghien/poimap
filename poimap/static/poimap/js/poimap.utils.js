@@ -62,6 +62,60 @@ var typedPOILayerControl = null
 var secondaryPathLayers = null;
 var secondaryPathLayerControl = null
 
+function clearAll(map){
+    for (let [id, poi] of Object.entries(allPOI)) {
+        map.removeLayer(poi[1])   
+    }
+    allPOI = {};
+    clearLayersAndControls();
+    
+}
+
+function hideAll(map, poiList){
+    let cpt = 0
+    for(let [feature, marker] of poiList){
+        if(map.hasLayer(marker)) {
+            cpt++;
+            map.removeLayer(marker);
+        }
+    }
+    console.log(`Hide ${cpt} marker`);
+}
+
+function removeAll(map, poiList){
+    let cpt = 0
+    for(let [feature, marker] of poiList){
+        if(map.hasLayer(marker) && allPOI.hasOwnProperty(feature.id)) {
+            cpt++;
+            map.removeLayer(marker);
+            delete allPOI[feature.id];
+        }
+    }
+    console.log(`Remove ${cpt} marker`);
+}
+
+function showAll(map, poiList){
+    let cpt = 0
+    for(let [feature, marker] of poiList){
+        if(!map.hasLayer(marker)) {
+            cpt++;
+            marker.addTo(map);
+        }
+    }
+    console.log(`Show ${cpt} marker`);
+    
+}
+
+function getPOIByTypeSlugs(map, typeSlugs){
+    let poiList = Object.values(allPOI).filter(function(poi){
+        let [feature, marker] = poi;
+        return typeSlugs.includes(feature.properties.type.slug); //&& map.getBounds().contains(marker.getLatLng());
+    });
+    console.log(`Select ${poiList.length} of ${typeSlugs}`);
+    
+    return poiList;
+}
+
 function clearLayersAndControls(map){
     if(len(typedPOILayers)){
         for (var key in typedPOILayers) {
@@ -141,7 +195,6 @@ function createPOIMarker(poi) {
             layer.on("click", function(){
                 $(document).trigger("poimap:marker-clicked", [feature, layer]);
             });
-
             allPOI[feature.id] = [feature, layer];
             $(document).trigger("poimap:marker-added", [feature]);
         }
