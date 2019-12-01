@@ -1,9 +1,9 @@
 {%load leaflet_tags sekizai_tags static %}
 
-{% leaflet_map "main" callback="main_map_init"  settings_overrides=map_settings%}
+<div id="mapid"></div>
 
 {% addtoblock 'css' %}
-{% leaflet_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" />
 <link rel="stylesheet" href="{% static 'beautifymarker/leaflet-beautify-marker-icon.css' %}">
 <style media="screen">
     .leaflet-container {
@@ -16,14 +16,20 @@
 </style>
 {% endaddtoblock %}
 {% addtoblock 'js' %}
-{% leaflet_js %}
+<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
 <script src="{% static 'beautifymarker/leaflet-beautify-marker-icon.js' %}" charset="utf-8"></script>
 <script src="{% static '@turf/turf/turf.min.js' %}" charset="utf-8"></script>
 <script src="{% static 'poimap/js/global_vars.js' %}" charset="utf-8"></script>
 <script src="{% static 'poimap/js/poimap.utils.js' %}" charset="utf-8"></script>
 <script src="{% static 'poimap/js/fetch_poi.js' %}" charset="utf-8"></script>
 <script type="text/javascript">
-        function main_map_init(map, options) {
+        $(document).ready(function () {
+            map = L.map('mapid').setView([51.505, -0.09], 10);
+            L.tileLayer('//{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
+                maxZoom: 20,
+                maxNativeZoom: 20,
+            }).addTo(map);
+
             fetchArea(map, "{% url 'api-area' instance.area_display.slug %}").done(function(){
                 $.getJSON("{% url 'api-area-paths' instance.area_display.slug %}").done(function(paths){
                     $.each(paths.features, function(index, path_){
@@ -70,6 +76,6 @@
                     }
                 });
             });
-        }
+        })
 </script>
 {% endaddtoblock %}
