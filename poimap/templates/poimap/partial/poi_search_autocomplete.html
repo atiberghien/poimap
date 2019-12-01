@@ -1,0 +1,40 @@
+{% load sekizai_tags %}
+<div class="input-group md-form form-sm form-1 pl-0 my-3">
+    <div class="input-group-prepend">
+        <span class="input-group-text" 
+              id="poi-search-field">
+              <i class="fas fa-search text-white" aria-hidden="true"></i>
+        </span>
+    </div>
+    <input class="form-control my-0 py-1 basicAutoComplete" 
+           type="text" 
+           autocomplete="off"
+           placeholder="Ville ou code postal" aria-label="Search">
+</div>
+
+{% addtoblock 'js' %}
+<script src="https://cdn.jsdelivr.net/gh/xcash/bootstrap-autocomplete@v2.3.0/dist/latest/bootstrap-autocomplete.min.js"></script>
+<script>
+	$(document).ready(function(){
+		$('.basicAutoComplete').autoComplete({
+			resolverSettings: {
+				url: "{% url 'api-poi-list' %}?poi_type_slugs=ville"
+			},
+			noResultsText : "Aucun résultat",
+			events: {
+        		searchPost: function (resultFromServer) {
+					return resultFromServer.results.features.map(function(e){
+						return {
+							coords : e.properties.coords,
+							text : e.properties.name
+						}
+					});	
+        		}
+			},
+		});
+		$('.basicAutoComplete').on("autocomplete.select", function(evt, item){
+			$(document).trigger("poi-search-autocomplete-selected", [item]);
+        })
+    });
+</script>
+{% endaddtoblock %}

@@ -133,3 +133,8 @@ class CustomItineraryFormPlugin(CMSPluginBase):
 class POIDetailPlugin(CMSPluginBase):
     model = POIDetailPluginModel
     render_template = "poimap/partial/poi_detail_map.html"
+
+
+@plugin_pool.register_plugin
+class POISearchAutocompletePlugin(CMSPluginBase):
+    render_template = "poimap/partial/poi_search_autocomplete.html"

@@ -109,28 +109,31 @@ class POIList(generics.ListAPIView):
     serializer_class = POISerializer
     pagination_class = StandardResultsSetPagination
 
-
     def get_queryset(self):
         queryset = POI.objects.all()
 
         poi_type_slugs = self.request.query_params.get('poi_type_slugs', None)
+        path_pk = self.request.query_params.get('path_pk', None)
+        bbox_param = self.request.query_params.get('bbox', None)
+        q = self.request.query_params.get('q', None)
+
         if poi_type_slugs:
             poi_type_slugs = poi_type_slugs.split(",")
             queryset = queryset.filter(types__slug__in=poi_type_slugs)
-        path_pk = self.request.query_params.get('path_pk', None)
+        if q:
+            queryset = queryset.filter(name__icontains=q)
+        
         if path_pk:
             path = get_object_or_404(Path, id=path_pk)
             queryset = queryset.filter(geom__distance_lte=(path.geom, D(km=2)))
-        else:
-            bbox_param = self.request.query_params.get('bbox', None)
-            if bbox_param:
-                bbox_param = [float(x) for x in bbox_param.split(',')]
-                xmin = bbox_param[0]
-                ymin = bbox_param[1]
-                xmax = bbox_param[2]
-                ymax = bbox_param[3]
-                bbox = Polygon.from_bbox((xmin, ymin, xmax, ymax))
-                queryset = queryset.filter(geom__contained=bbox)
+        elif bbox_param:
+            bbox_param = [float(x) for x in bbox_param.split(',')]
+            xmin = bbox_param[0]
+            ymin = bbox_param[1]
+            xmax = bbox_param[2]
+            ymax = bbox_param[3]
+            bbox = Polygon.from_bbox((xmin, ymin, xmax, ymax))
+            queryset = queryset.filter(geom__contained=bbox)
         
 
         return queryset
