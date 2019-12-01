@@ -123,6 +123,9 @@ class POI(PolymorphicModel):
     def vote_count(self):
         return self.ratings.count()
 
+    def get_extra_data(self):
+        return self.extra_data
+
     def __unicode__(self):
         if self.type:
             return u"%s - %s" % (self.name, self.type.label)

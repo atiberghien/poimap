@@ -47,6 +47,7 @@ class POISerializer(GeoFeatureModelSerializer):
     url = HyperlinkedIdentityField(view_name='poi-detail', lookup_field="slug", read_only=True)
     rating_score = SerializerMethodField()
     vote_count = SerializerMethodField()
+    extra_data = SerializerMethodField()
 
     def get_rating_score(self, obj):
         return obj.rating_score
@@ -60,10 +61,13 @@ class POISerializer(GeoFeatureModelSerializer):
     def get_medias(self, obj):
         return obj.medias.values_list('file__file', flat=True)
 
+    def get_extra_data(self, obj):
+        return obj.get_real_instance().get_extra_data()
+
     class Meta:
         model = POI
         geo_field = "geom"
-        fields = ['id', 'name', 'slug', 'description', 'distance', 'type', 'coords', "city", "marker_popup", "medias", "url", "api_url", 'rating_score', 'vote_count']
+        fields = ['id', 'name', 'slug', 'description', 'distance', 'type', 'coords', "city", "marker_popup", "medias", "url", "api_url", 'rating_score', 'vote_count', 'extra_data']
 
 class TypedPOISerializer(ModelSerializer):
 
