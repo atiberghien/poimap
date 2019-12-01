@@ -6,7 +6,7 @@ function fetchDataSource(map, url, poiFactoryCallback){
             for (let index = 2; index <= data.num_pages; index++) {
                 $.ajax({
                     dataType: "json",
-                    async: false,
+                    // async: false,
                     url: url+"&page="+index,
                 }).done(function(data){
                     poiFactoryCallback(data.results.features).addTo(map);
