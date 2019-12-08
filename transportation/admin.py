@@ -30,17 +30,39 @@ class TimeSlotInlineAdmin(admin.TabularInline):
 
 
 class ServiceAdmin(admin.ModelAdmin):
-    def bus_list(self, obj):
+    def bus_ok(self, obj):
         bus_list = obj.bus_set.all().values_list('name', 'license_plate')
         bus_list = ", ".join(["%s (%s)" % (name, plate) for name, plate in bus_list])
-        return bus_list
-    bus_list.short_description = "Bus"
+        return "OK" if len(bus_list) != 0 else "KO"
+    bus_ok.short_description = "Bus OK"
 
-    list_display = ('slug', 'name', 'is_active', 'is_temporary', 'route', 'bus_list')
+    list_display = ('slug', 'name', 'is_active', 'is_temporary', 'frequency', 'from_date', 'to_date', 'route', 'bus_ok')
     search_fields = ('name',)
-    list_editable = ('name', 'is_active', 'is_temporary')
+    list_editable = ('is_active', 'is_temporary', 'from_date', 'to_date')
     list_filter = ('route',)
     ordering = ("name",)
+
+    fieldsets = (
+        (None, {
+            'fields': (
+                ('name', 'route'),
+                ('is_active', 'is_temporary')
+            )
+        }),
+        ("Période", {
+            'fields': (
+                ('from_date', 'to_date'),
+                ('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday', 'days_off')
+            )
+        }),
+        # (None, {
+        #     'fields': (
+        #         ('frequency_label',),
+        #         ('recurrences',),
+        #         ('notes',),
+        #     )
+        # }),
+    )
     
     inlines = [
         TimeSlotInlineAdmin

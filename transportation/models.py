@@ -9,13 +9,16 @@ from filer.fields.file import FilerFileField
 from filer.fields.image import FilerImageField
 from filer.fields.folder import FilerFolderField
 from ckeditor.fields import RichTextField
-from dateutil import rrule
 from dateutil.parser import parse
+from dateutil import rrule
 from dateutil.rrule import rrulestr
 from django.contrib.postgres.fields import ArrayField
-
+from dateutil.tz import tzutc
 
 from poimap.models import POI, Path
+from facilities.models import WorkingPeriod, DayOff
+from datetime import datetime
+from dateutil.rrule import rrule, rruleset, WEEKLY, MO, TU, WE, TH, FR, SA, SU
 
 class CustomPermissions(models.Model):
 
@@ -86,36 +89,85 @@ class Stop(POI):
         ordering = ('name',)
 
 
-class Service(models.Model):
+class Service(WorkingPeriod):
     name = models.CharField(max_length=64)
     slug = AutoSlugField(populate_from='name', always_update=True, unique=True)
     route = models.ForeignKey(Route, related_name="services")
+
     frequency_label = models.CharField(max_length=10)
     recurrences = models.TextField(null=True, blank=True)
     notes = models.TextField(null=True, blank=True)
 
-    is_active = models.BooleanField(default=True)
-    is_temporary = models.BooleanField(default=False)
+    is_active = models.BooleanField(verbose_name="Active ?", default=True)
+    is_temporary = models.BooleanField(verbose_name="Temp ?", default=False)
 
-    @property
+    # @property
+    # def rruleset(self):
+    #     res = rrule.rruleset()
+    #     rule_str = [r.strip("\n\r\t ").replace(" ", "") for r in self.recurrences.split("|")]
+    #     for r in rule_str:
+    #         if r:
+    #             if "RRULE" in r:
+    #                 rule = rrulestr(r)
+    #                 res.rrule(rule)
+    #             elif "EXRULE" in r:
+    #                 rule = rrulestr(r)
+    #                 res.exrule(rule)
+    #             elif "EXDATE" in r:
+    #                 d = r.split(":")[1]
+    #                 res.exdate(parse(d))
+    #             elif "RDATE" in r:
+    #                 d = r.split(":")[1]
+    #                 res.rdate(parse(d))
+    #     return res
+
+    @property 
     def rruleset(self):
-        res = rrule.rruleset()
-        rule_str = [r.strip("\n\r\t ").replace(" ", "") for r in self.recurrences.split("|")]
-        for r in rule_str:
-            if r:
-                if "RRULE" in r:
-                    rule = rrulestr(r)
-                    res.rrule(rule)
-                elif "EXRULE" in r:
-                    rule = rrulestr(r)
-                    res.exrule(rule)
-                elif "EXDATE" in r:
-                    d = r.split(":")[1]
-                    res.exdate(parse(d))
-                elif "RDATE" in r:
-                    d = r.split(":")[1]
-                    res.rdate(parse(d))
-        return res
+        weekdays = []
+        if self.monday:
+            weekdays.append(MO)
+        if self.tuesday: 
+            weekdays.append(TU)
+        if self.wednesday: 
+            weekdays.append(WE)
+        if self.thursday: 
+            weekdays.append(TH)
+        if self.friday: 
+            weekdays.append(FR)
+        if self.saturday: 
+            weekdays.append(SA) 
+        if self.sunday:    
+            weekdays.append(SU) 
+
+        rset = rruleset()
+        dfrom = datetime.combine(self.from_date, datetime.min.time()).replace(tzinfo=tzutc())
+        dto = datetime.combine(self.to_date, datetime.max.time()).replace(tzinfo=tzutc())
+        
+        rset.rrule(rrule(WEEKLY, dtstart=dfrom, until=dto, byweekday=weekdays))
+        
+        today = datetime.today()
+        for d in DayOff.objects.filter(date__year=today.year):
+            date = datetime.combine(d.date, datetime.min.time()).replace(tzinfo=tzutc())
+            
+            if self.days_off:
+                rset.rdate(date)
+            else:
+                rset.exdate(date)
+        
+        return rset
+    
+    @property
+    def frequency(self):
+        return "".join([
+            'L' if self.monday else '-',
+            'M' if self.tuesday else '-',   
+            'M' if self.wednesday else '-',   
+            'J' if self.thursday else '-',   
+            'V' if self.friday else '-',   
+            'S' if self.saturday else '-',   
+            'D' if self.sunday else '-',   
+            'F' if self.days_off else '-'  
+        ])
 
     def __unicode__(self):
         return "%s - %s - %s" % (self.name, self.route.line.name, self.route.name)
