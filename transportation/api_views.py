@@ -113,6 +113,9 @@ def api_itinerary(request):
     traveler_count = request.GET.get("traveler_count", 1)
     from_time = request.GET.get("from_time", None)
     go_date = request.GET.get("go_date", None)
+
+    now = datetime.now().replace(tzinfo=tzutc())
+
     result = {
         "success" : "OK",
         "timetables" : []
@@ -124,6 +127,8 @@ def api_itinerary(request):
             Stop.objects.get(slug=target)
             if from_time:
                 from_time = datetime.strptime(from_time, "%H:%M").time()
+            else:
+                from_time = now.time()
             if go_date:
                 go_date = datetime.strptime(go_date, "%d/%m/%y").date()        
         except:
@@ -190,6 +195,9 @@ def api_itinerary(request):
 
 
             for timetable in timetables:
+                if from_time and from_time > timetable[0].hour and travel_date.date() == now.date():
+                    #Only return travel after current (or requested) hour
+                    continue
                 if go_date and from_time:
                     if travel_date.date() == go_date and from_time > timetable[0].hour:
                         continue

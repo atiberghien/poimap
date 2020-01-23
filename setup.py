@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(name='poimap',
-      version='3.2.0',
+      version='3.2.1',
       description='Manage POI on a map',
       url='https://github.com/atiberghien/poimap',
       author='Alban Tiberghien',
@@ -10,7 +10,7 @@ setup(name='poimap',
       packages=find_packages(),
       include_package_data=True,
       install_requires=[
-           'Django<2.2', ## for django-cms 3.6
+           'Django<3', ## for django-cms 3.6
            'psycopg2-binary<2.8', #due to https://github.com/divio/django-cms/issues/6666
            "django-compressor",
            "django-sekizai",
