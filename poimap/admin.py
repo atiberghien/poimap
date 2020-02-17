@@ -55,6 +55,7 @@ class AreaAdmin(LeafletGeoAdmin):
             js = (
                 'poimap/js/path_admin_form.js',
                 '@mapbox/togeojson/togeojson.js',
+                'admin/js/jquery.init.js',
             )
 
 
@@ -85,6 +86,7 @@ class PathAdmin(LeafletGeoAdminMixin, TreeAdmin):
         js = (
             'poimap/js/path_admin_form.js',
             '@mapbox/togeojson/togeojson.js',
+            'admin/js/jquery.init.js',
         )
 
 class POIAdminForm(CleanZDimensionMixin, forms.ModelForm):
@@ -98,6 +100,7 @@ class POIAdminForm(CleanZDimensionMixin, forms.ModelForm):
             }
             js = (
                 'poimap/js/grp_poi_admin_form.js',
+                'admin/js/jquery.init.js',
             )
         else:
             css = {
@@ -105,6 +108,7 @@ class POIAdminForm(CleanZDimensionMixin, forms.ModelForm):
             }
             js = (
                 'poimap/js/poi_admin_form.js',
+                'admin/js/jquery.init.js',
             )
 
     class Meta:
