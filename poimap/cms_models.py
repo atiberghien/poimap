@@ -29,7 +29,7 @@ class POIFilters(CMSPlugin):
     type_filters = models.ManyToManyField(POIType, verbose_name=u"Type de POI à filter")
 
     def copy_relations(self, oldinstance):
-        self.type_filters = oldinstance.type_filters.all()
+        self.type_filters.set(oldinstance.type_filters.all())
 
 
 class CustomItineraryFormPlugin(CMSPlugin):
@@ -48,7 +48,13 @@ class CustomItineraryFormPlugin(CMSPlugin):
     important_step_types = models.ManyToManyField(POIType, verbose_name=u"Types de étapes importantes")
 
     def copy_relations(self, oldinstance):
-        self.important_step_types = oldinstance.important_step_types.all()
+        self.important_step_types.set(oldinstance.important_step_types.all())
 
 class POIDetailPluginModel(CMSPlugin):
     poi = models.ForeignKey(POI, on_delete=models.CASCADE)
+
+class POISearchAutocompletePluginModel(CMSPlugin):
+    search_types = models.ManyToManyField(POIType, verbose_name=u"Types de POI recherchés")
+
+    def copy_relations(self, oldinstance):
+        self.search_types.set(oldinstance.search_types.all())

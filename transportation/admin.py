@@ -55,13 +55,13 @@ class ServiceAdmin(admin.ModelAdmin):
                 ('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday', 'days_off')
             )
         }),
-        # (None, {
-        #     'fields': (
-        #         ('frequency_label',),
-        #         ('recurrences',),
-        #         ('notes',),
-        #     )
-        # }),
+        (None, {
+            'fields': (
+                # ('frequency_label',),
+                # ('recurrences',),
+                ('notes',),
+            )
+        }),
     )
     
     inlines = [

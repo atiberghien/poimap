@@ -4,7 +4,7 @@ from cms.plugin_base import CMSPluginBase
 from cms.models.pluginmodel import CMSPlugin
 from cms.plugin_pool import plugin_pool
 from .cms_models import POIListing, POIFilters, CustomItineraryFormPlugin, POI_LISTING_TEMPLATES
-from .cms_models import POIDetailPluginModel
+from .cms_models import POIDetailPluginModel, POISearchAutocompletePluginModel
 from .forms import CustomItineraryForm
 
 from django.conf import settings
@@ -137,4 +137,12 @@ class POIDetailPlugin(CMSPluginBase):
 
 @plugin_pool.register_plugin
 class POISearchAutocompletePlugin(CMSPluginBase):
+    model = POISearchAutocompletePluginModel
     render_template = "poimap/partial/poi_search_autocomplete.html"
+
+    def render(self, context, instance, placeholder):
+        context = super(POISearchAutocompletePlugin, self).render(context, instance, placeholder)
+        context.update({
+            "search_types" : ",".join([t for t in instance.search_types.values_list('slug', flat=True)])
+        })
+        return context

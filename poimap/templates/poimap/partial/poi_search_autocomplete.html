@@ -18,15 +18,20 @@
 	$(document).ready(function(){
 		$('.basicAutoComplete').autoComplete({
 			resolverSettings: {
-				url: "{% url 'api-poi-list' %}?poi_type_slugs=ville"
+				url: "{% url 'api-poi-list' %}?poi_type_slugs={{search_types}}"
 			},
 			noResultsText : "Aucun résultat",
 			events: {
         		searchPost: function (resultFromServer) {
 					return resultFromServer.results.features.map(function(e){
+						let poiName = e.properties.name
+						
+						if(e.properties.extra_data.nearest_city){
+							poiName += ` (${e.properties.extra_data.nearest_city})`
+						}
 						return {
 							coords : e.properties.coords,
-							text : e.properties.name
+							text : poiName
 						}
 					});	
         		}
