@@ -226,6 +226,7 @@ def api_itinerary(request):
                         "date" : timeslot_date.date(),
                         "hour" : datetime.combine(date.today(), timeslot.hour).strftime("%H:%M"),
                         "direction" : timeslot.service.route.name,
+                        "extra_days" : extra_days,
                     }
                     
                     if timeslot.service.name != current_service_name or extra_days > 1:
