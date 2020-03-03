@@ -171,7 +171,8 @@ function createPOIMarker(poi) {
                     iconShape: 'circle',
                     backgroundColor: color,
                     borderColor: color,
-                    textColor: 'white'
+                    textColor: 'white',
+                    popupAnchor:  [1, -1]
                 }));
             } else {
                 layer.setIcon(L.BeautifyIcon.icon({
