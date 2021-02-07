@@ -39,6 +39,8 @@ class Line(models.Model):
 
     prices = FilerFileField(null=True, blank=True)
 
+    carbon_footprint = models.CharField(max_length=40, default="0")
+
     def get_bus(self):
         bus_list = []
         for route in self.routes.all():

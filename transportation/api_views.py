@@ -209,12 +209,16 @@ def api_itinerary(request):
                     timetable_data["connexion_count"] = len(timetable)/2 - 1
                     timetable_data["traveler_count"] = traveler_count
                     timetable_data["travel_unit_price"] = get_travel_price(timetable)
+                    timetable_data["carbon_footprint"] = None
                     timetable_data["timeslots"] = []
+                    
                 current_service_name = None
                 
                 timeslot_date = travel_date
                 extra_days = 0
                 for timeslot in timetable:
+                    if(not timetable_data["carbon_footprint"]):
+                        timetable_data["carbon_footprint"] = timeslot.service.route.line.carbon_footprint
                     
                     if timeslot.is_next_day:
                         timeslot_date += timedelta(days=1)
