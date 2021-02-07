@@ -10,7 +10,7 @@ from django.contrib.admin import SimpleListFilter
 from leaflet.admin import LeafletGeoAdmin
 from poimap.admin import POIAdminForm, POIMediaInline
 
-from .models import TimeSlot, Stop, Service, Line, RouteStop, Route, Travel, Bus
+from .models import TimeSlot, Stop, Service, Line, RouteStop, Route, Travel, Bus, ServiceWorkingPeriod
 from .models import Customer, Order, Ticket, Connection, PartnerSearch, SMSNotification, SMSAnnouncement
 from .forms import StopForm
 import types
@@ -28,6 +28,10 @@ class TimeSlotInlineAdmin(admin.TabularInline):
     def has_add_permission(self, request):
         return False
 
+class ServiceWorkingPeriod(admin.TabularInline):
+    model = ServiceWorkingPeriod
+    fields = ('include', 'from_date', 'to_date', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday', 'days_off')
+
 
 class ServiceAdmin(admin.ModelAdmin):
     def bus_ok(self, obj):
@@ -36,7 +40,7 @@ class ServiceAdmin(admin.ModelAdmin):
         return "OK" if len(bus_list) != 0 else "KO"
     bus_ok.short_description = "Bus OK"
 
-    list_display = ('slug', 'name', 'is_active', 'is_temporary', 'frequency', 'from_date', 'to_date', 'route', 'bus_ok')
+    list_display = ('slug', 'name', 'is_active', 'is_temporary', 'frequency_label', 'from_date', 'to_date', 'route', 'bus_ok')
     search_fields = ('name',)
     list_editable = ('is_active', 'is_temporary', 'from_date', 'to_date')
     list_filter = ('route',)
@@ -46,13 +50,8 @@ class ServiceAdmin(admin.ModelAdmin):
         (None, {
             'fields': (
                 ('name', 'route'),
-                ('is_active', 'is_temporary')
-            )
-        }),
-        ("Période", {
-            'fields': (
-                ('from_date', 'to_date'),
-                ('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday', 'days_off')
+                ('is_active', 'is_temporary'),
+                ('frequency_label',)
             )
         }),
         (None, {
@@ -62,10 +61,18 @@ class ServiceAdmin(admin.ModelAdmin):
                 ('notes',),
             )
         }),
+        ("Période", {
+            'fields': (
+                ('include'),
+                ('from_date', 'to_date'),
+                ('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday', 'days_off')
+            )
+        }),
     )
     
     inlines = [
-        TimeSlotInlineAdmin
+        ServiceWorkingPeriod,
+        TimeSlotInlineAdmin,
     ]
 
 class StopAdminForm(POIAdminForm):

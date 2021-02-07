@@ -101,79 +101,38 @@ class Service(WorkingPeriod):
     is_active = models.BooleanField(verbose_name="Active ?", default=True)
     is_temporary = models.BooleanField(verbose_name="Temp ?", default=False)
 
-    # @property
-    # def rruleset(self):
-    #     res = rrule.rruleset()
-    #     rule_str = [r.strip("\n\r\t ").replace(" ", "") for r in self.recurrences.split("|")]
-    #     for r in rule_str:
-    #         if r:
-    #             if "RRULE" in r:
-    #                 rule = rrulestr(r)
-    #                 res.rrule(rule)
-    #             elif "EXRULE" in r:
-    #                 rule = rrulestr(r)
-    #                 res.exrule(rule)
-    #             elif "EXDATE" in r:
-    #                 d = r.split(":")[1]
-    #                 res.exdate(parse(d))
-    #             elif "RDATE" in r:
-    #                 d = r.split(":")[1]
-    #                 res.rdate(parse(d))
-    #     return res
-
-    @property 
+    @property
     def rruleset(self):
-        weekdays = []
-        if self.monday:
-            weekdays.append(MO)
-        if self.tuesday: 
-            weekdays.append(TU)
-        if self.wednesday: 
-            weekdays.append(WE)
-        if self.thursday: 
-            weekdays.append(TH)
-        if self.friday: 
-            weekdays.append(FR)
-        if self.saturday: 
-            weekdays.append(SA) 
-        if self.sunday:    
-            weekdays.append(SU) 
-
-        rset = rruleset()
-        dfrom = datetime.combine(self.from_date, datetime.min.time()).replace(tzinfo=tzutc())
-        dto = datetime.combine(self.to_date, datetime.max.time()).replace(tzinfo=tzutc())
-        
-        rset.rrule(rrule(WEEKLY, dtstart=dfrom, until=dto, byweekday=weekdays))
-        
-        today = datetime.today()
-        for d in DayOff.objects.filter(date__year=today.year):
-            date = datetime.combine(d.date, datetime.min.time()).replace(tzinfo=tzutc())
-            
-            if self.days_off:
-                rset.rdate(date)
-            else:
-                rset.exdate(date)
-        
+        rset =  WorkingPeriod.rruleset(self)
+        for extra_period in self.extra_periods.all():
+            for d in extra_period.rruleset():
+                if extra_period.include:
+                    rset.rdate(d)
+                else:
+                    rset.exdate(d)
         return rset
     
-    @property
-    def frequency(self):
-        return "".join([
-            'L' if self.monday else '-',
-            'M' if self.tuesday else '-',   
-            'M' if self.wednesday else '-',   
-            'J' if self.thursday else '-',   
-            'V' if self.friday else '-',   
-            'S' if self.saturday else '-',   
-            'D' if self.sunday else '-',   
-            'F' if self.days_off else '-'  
-        ])
+    # @property
+    # def frequency(self):
+    #     return "".join([
+    #         'L' if self.monday else '-',
+    #         'M' if self.tuesday else '-',   
+    #         'M' if self.wednesday else '-',   
+    #         'J' if self.thursday else '-',   
+    #         'V' if self.friday else '-',   
+    #         'S' if self.saturday else '-',   
+    #         'D' if self.sunday else '-',   
+    #         'F' if self.days_off else '-'  
+    #     ])
 
     def __unicode__(self):
         return "%s - %s - %s" % (self.name, self.route.line.name, self.route.name)
 
     class Meta:
         ordering = ('name',)
+
+class ServiceWorkingPeriod(WorkingPeriod):
+    service = models.ForeignKey(Service, related_name="extra_periods")
 
 class TimeSlot(models.Model):
     hour = models.TimeField(null=True, blank=True)
