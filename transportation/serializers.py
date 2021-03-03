@@ -43,4 +43,4 @@ class LineSerializer(ModelSerializer):
 
     class Meta:
         model = Line
-        fields = ("id", "name", "slug", "connection_info" ,"routes", 'buses')
+        fields = ("id", "name", "number", "slug", "connection_info" ,"routes", 'buses')

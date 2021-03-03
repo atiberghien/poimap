@@ -33,6 +33,8 @@ class CustomPermissions(models.Model):
 
 class Line(models.Model):
     name = models.CharField(max_length=150)
+    number = models.CharField(max_length=10, default="")
+    
     slug = AutoSlugField(populate_from='name', always_update=True)
 
     connection_info = RichTextField(null=True, blank=True)

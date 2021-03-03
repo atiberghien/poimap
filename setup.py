@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(name='poimap',
-      version='3.2.6',
+      version='3.2.7',
       description='Manage POI on a map',
       url='https://github.com/atiberghien/poimap',
       author='Alban Tiberghien',
@@ -10,8 +10,8 @@ setup(name='poimap',
       packages=find_packages(),
       include_package_data=True,
       install_requires=[
-           'Django<3', ## for django-cms 3.6
-           'psycopg2-binary<2.8', #due to https://github.com/divio/django-cms/issues/6666
+           'Django', ## for django-cms 3.6
+           'psycopg2-binary', #due to https://github.com/divio/django-cms/issues/6666
            "django-compressor",
            "django-sekizai",
            "django-fontawesome-5",
@@ -20,7 +20,7 @@ setup(name='poimap',
            'djangorestframework',
            'djangorestframework-gis',
            'django-treebeard',
-           'django-polymorphic<2.1', #for django-filer 1.5
+           'django-polymorphic', #for django-filer 1.5
            'django-polymorphic-tree',
            'easy-thumbnails',
            'django-leaflet',
