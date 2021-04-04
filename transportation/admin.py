@@ -21,6 +21,7 @@ class TimeSlotInlineAdmin(admin.TabularInline):
     form = StopForm
     fields = ('stop', "hour", "is_next_day")
     readonly_fields = ('stop',)
+    min_num = 0
     extra = 0
     can_delete = False
     ordering = ("order",)

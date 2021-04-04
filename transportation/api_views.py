@@ -54,7 +54,7 @@ def compute_timetable(route_id, freq_re=None, date=None):
 
     if date:
         service_ids = []
-        for service in services.filter(recurrences__isnull=False):
+        for service in services: # keep temporary
             dt = datetime.strptime(date, "%d/%m/%Y").replace(tzinfo=tzutc())
             if dt in service.rruleset:
                 service_ids.append(service.id)
