@@ -32,16 +32,16 @@ class CustomPermissions(models.Model):
         )
 
 class Line(models.Model):
-    name = models.CharField(max_length=150)
-    number = models.CharField(max_length=10, default="")
+    name = models.CharField(max_length=150, verbose_name="nom")
+    number = models.CharField(max_length=10, default="", verbose_name="numéro")
     
     slug = AutoSlugField(populate_from='name', always_update=True)
 
-    connection_info = RichTextField(null=True, blank=True)
+    connection_info = RichTextField(null=True, blank=True, verbose_name="correspondance")
 
-    prices = FilerFileField(null=True, blank=True)
+    prices = FilerFileField(null=True, blank=True, verbose_name="grilles tarifaires")
 
-    carbon_footprint = models.CharField(max_length=40, default="0")
+    carbon_footprint = models.CharField(max_length=40, default="0", verbose_name="émission carbone")
 
     def get_bus(self):
         bus_list = []
@@ -52,6 +52,9 @@ class Line(models.Model):
                     
     def __unicode__(self):
         return "%s " % self.name
+    
+    class Meta:
+        verbose_name = "ligne"
 
 class Route(models.Model):
     DIRECTION_CHOICES = (
@@ -200,6 +203,7 @@ class Customer(models.Model):
 
     class Meta:
         ordering = ("last_name", "first_name", "email")
+        verbose_name = "client"
 
 
 class Order(models.Model):
@@ -259,11 +263,15 @@ class SMSNotification(models.Model):
     future_sms = ArrayField(models.CharField(max_length=200), null=True, blank=True)
 
 class SMSAnnouncement(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="créé le")
     service = models.ForeignKey(Service)
-    departure_datetime = models.DateTimeField()
-    notification_datetime = models.DateTimeField()
+    departure_datetime = models.DateTimeField(verbose_name="date/heure de départ")
+    notification_datetime = models.DateTimeField(verbose_name="date/heure de la notification")
     message = models.TextField()
+
+    class Meta:
+        verbose_name = "annonce SMS"
+        verbose_name_plural = "annonces SMS"
 
 @receiver(post_save, sender=Service)
 def autocreate_timeslot_for_service(sender, instance, created, **kwargs):

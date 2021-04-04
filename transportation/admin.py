@@ -230,7 +230,7 @@ class SMSNotificationAdmin(admin.ModelAdmin):
 
 
 class SMSAnnouncementAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('service', 'notification_datetime')
 
 admin.site.register(Customer, CustomerAdmin)
 admin.site.register(Ticket, TicketAdmin)
