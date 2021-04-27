@@ -63,7 +63,7 @@ def compute_timetable(route_id, freq_re=None, date=None):
         else:
             services = []
     elif freq_re:
-        services = services.filter(frequency_label__regex=freq_re)
+        services = services.filter(frequency_label__regex=freq_re, is_temporary=False)
     else:
         services = services.filter(is_temporary=False)
     
@@ -164,10 +164,11 @@ def api_itinerary(request):
                     for route_id in connection:
                         route = Route.objects.get(id=route_id)
                         available_route_services = []
-                        for service in route.services.all():
+                        for service in route.services.filter(is_active=True):
                             if travel_date is None or travel_date in service.rruleset:
                                 available_route_services.append(service)
                         all_services.append(available_route_services)
+                    
                     service_combinaisons = itertools.product(*all_services)
 
                     for service_combinaison in service_combinaisons:
