@@ -6,7 +6,6 @@ from django.contrib.auth.models import User
 from django.contrib.gis.db import models as gismodels
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.postgres.fields import JSONField
 from django.dispatch import receiver
 from django.utils.functional import lazy
 from django_countries.fields import CountryField
@@ -106,7 +105,7 @@ class POI(PolymorphicModel):
 
     distance = models.PositiveIntegerField(default=0, blank=True, null=True)
 
-    extra_data = JSONField(default=list, blank=True, null=True)
+    extra_data = models.JSONField(default=list, blank=True, null=True)
 
     @property
     def coords(self):
