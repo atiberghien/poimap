@@ -31,7 +31,7 @@ class CustomerCreationForm(forms.ModelForm):
                 code='email_mismatch',
             )
         return email2
-    
+
     def clean_phone(self):
         phone = self.cleaned_data.get("phone")
         if SMSNotification.objects.filter(phone=phone).exists():
@@ -68,10 +68,10 @@ class CustomerCreationForm(forms.ModelForm):
             customer.email = self.cleaned_data["email1"]
             if customer.sms_notif:
                 SMSNotification.objects.get_or_create(phone=customer.phone)
-            
+
         if commit:
             customer.save()
-        
+
         return customer
 
 
@@ -87,14 +87,14 @@ class StopForm(forms.ModelForm):
 class SearchServiceForm(forms.Form):
     departure = forms.ModelChoiceField(
         queryset=Stop.objects.all(),
-        widget=autocomplete.ModelSelect2(url='stop-autocomplete', attrs={'data-theme': "bootstrap4", 'data-placeholder' : u"  Ville de départ"})
+        widget=autocomplete.ModelSelect2(url='stop-autocomplete', attrs={'data-theme': "bootstrap5", 'data-placeholder' : u"  Ville de départ"})
     )
     arrival = forms.ModelChoiceField(
         queryset=Stop.objects.all(),
         widget=autocomplete.ModelSelect2(url='stop-autocomplete',
                                          forward=('departure',),
                                          attrs={
-                                            'data-theme': "bootstrap4",
+                                            'data-theme': "bootstrap5",
                                             'data-placeholder' : u"  Ville d'arrivée"
                                          })
     )
@@ -125,7 +125,7 @@ class SMSNotificationSubscriptionForm(forms.ModelForm):
                 code='phone_wrong_format',
             )
         return "+33"+phone[1:]
-    
+
     class Meta:
         model = SMSNotification
         fields = ('phone', )

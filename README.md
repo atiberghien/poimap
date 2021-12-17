@@ -20,7 +20,7 @@ INSTALLED_APPS = [
     'leaflet',
     'easy_thumbnails',
     "compressor",
-    'bootstrap4',
+    'bootstrap5',
     'ckeditor',
     'poimap',
     ...

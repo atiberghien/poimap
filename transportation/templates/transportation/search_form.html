@@ -1,4 +1,4 @@
-{% load cms_tags static sekizai_tags bootstrap4%}
+{% load cms_tags static sekizai_tags bootstrap5%}
 <form action="{% page_url 'reserver' %}" method="post">
     {% csrf_token %}
     <div class="row">
@@ -28,19 +28,19 @@
     </div>
     {% addtoblock 'css'%}
     {{ search_form.media.css }}
-    <link rel="stylesheet" href="{% static 'select2-bootstrap4-theme/dist/select2-bootstrap4.min.css'%}">
+    <link rel="stylesheet" href="{% static 'select2-bootstrap5-theme/dist/select2-bootstrap5.min.css'%}">
     <link rel="stylesheet" href="{% static 'bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css'%}">
     <style media="screen">
-        .select2-container--bootstrap4 .select2-selection--single {
+        .select2-container--bootstrap5 .select2-selection--single {
             height: calc(2.7rem + 2px);
             line-height: 1.5;
             padding: .4rem 0.125rem 0.75rem 0.375rem;
         }
-        .select2-container--bootstrap4 .select2-selection {
+        .select2-container--bootstrap5 .select2-selection {
             color: #495057;
             font-size: 1.25rem;
         }
-        .select2-container--bootstrap4 .select2-selection--single .select2-selection__placeholder {
+        .select2-container--bootstrap5 .select2-selection--single .select2-selection__placeholder {
             color: #495057;
         }
     </style>
