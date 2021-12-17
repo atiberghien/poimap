@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(name='poimap',
-      version='3.3.1',
+      version='3.4.0',
       description='Manage POI on a map',
       url='https://github.com/atiberghien/poimap',
       author='Alban Tiberghien',
@@ -28,7 +28,7 @@ setup(name='poimap',
            'django-ckeditor',
            'django-ckeditor-filer',
            'django-filter',
-           'django-bootstrap4',
+           'django-bootstrap-v5',
            'django-admin-sortable2',
            'pyowm',
            'django-easy-select2',
