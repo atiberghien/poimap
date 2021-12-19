@@ -31,7 +31,7 @@ class Weather(models.Model):
                 owm_data["temperature_k"] = w.get_temperature(unit="kelvin")
                 self.data = json.dumps(owm_data)
                 self.save()
-            except: 
+            except:
                 pass
 
     def get_data(self):
@@ -53,4 +53,4 @@ class WeatherCMSPlugin(CMSPlugin):
     weathers = models.ManyToManyField(Weather)
 
     def copy_relations(self, oldinstance):
-        self.weathers = oldinstance.weathers.all()
+        self.weathers.set(oldinstance.weathers.all())
